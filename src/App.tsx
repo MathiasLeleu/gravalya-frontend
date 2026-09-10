@@ -5,6 +5,7 @@ import Header from './components/Header/Header'
 import Footer from './components/Footer'
 
 import Home from './pages/Home'
+import AllProducts from './pages/AllProducts'
 import Product from './pages/Product'
 import Auth from './pages/Auth'
 import Cart from './pages/Cart'
@@ -26,6 +27,7 @@ function App() {
 
             <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/produits" element={<AllProducts />} />
                 <Route path="/produits/:id" element={<Product />} />
                 <Route path="/connexion" element={<Auth />} />
                 <Route path="/panier" element={<Cart />} />
