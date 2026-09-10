@@ -1,0 +1,500 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* ========================================
+   BOX SIZING
+======================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+header {
+  position: relative;
+  z-index: 1000;
+
+  width: 100%;
+  height: 160px;
+
+  margin: 0 0 20px 0;
+  padding: 0;
+
+  border: none;
+
+  /* Couleur à remplacer avec ta pipette */
+  background-color: #f4ebe4;
+}
+
+
+/* ========================================
+   LOGO MOBILE
+======================================== */
+
+.header-logo {
+  position: absolute;
+
+  top: 0;
+  left: 50%;
+
+  width: 160px;
+  height: 160px;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: visible;
+
+  transform: translateX(-50%);
+}
+
+.header-logo img {
+  display: block;
+
+  width: 160px;
+  height: 160px;
+
+  margin: 0;
+  padding: 0;
+
+  object-fit: contain;
+
+}
+
+
+/* ========================================
+   BANNIÈRE
+======================================== */
+
+.header-banner {
+  display: none;
+}
+
+.header-banner img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+
+/* ========================================
+   PANIER
+======================================== */
+
+.header-cart {
+  position: absolute;
+  top: 50%;
+  right: 75px;
+
+  margin: 0;
+
+  transform: translateY(-50%);
+
+  text-decoration: none;
+  font-weight: 500;
+}
+
+
+/* ========================================
+   PANIER MOBILE
+   DANS LE MENU BURGER
+======================================== */
+
+.header-cart-mobile {
+  display: none;
+}
+
+
+/* ========================================
+   BOUTON BURGER
+======================================== */
+
+.header-burger {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: none;
+  background: none;
+
+  cursor: pointer;
+
+  font-size: 24px;
+
+  transform: translateY(-50%);
+}
+
+
+/* ========================================
+   OVERLAY
+======================================== */
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 999;
+
+  background: rgba(0, 0, 0, 0.35);
+}
+
+
+/* ========================================
+   MENU MOBILE
+======================================== */
+
+header nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+
+  z-index: 1001;
+
+  display: none;
+  flex-direction: column;
+
+  /* Menu plus étroit */
+  width: min(70vw, 190px);
+
+  height: 100dvh;
+
+  padding: 24px;
+
+  background: white;
+
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
+
+  overflow-y: auto;
+}
+
+header nav.menu-open {
+  display: flex;
+}
+
+
+/* ========================================
+   BOUTON FERMER
+======================================== */
+
+header nav > button {
+  align-self: flex-end;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  margin-bottom: 40px;
+  padding: 0;
+
+  border: none;
+  background: none;
+
+  cursor: pointer;
+
+  font-size: 24px;
+}
+
+
+/* ========================================
+   LIENS DU MENU
+======================================== */
+
+header nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 48px;
+
+  padding: 8px 4px;
+
+  text-decoration: none;
+
+  font-size: 18px;
+  font-weight: 500;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+header nav a:hover {
+  transform: translateX(4px);
+}
+
+header nav a.active {
+  font-weight: 700;
+}
+
+
+/* ========================================
+   "PAS CONNECTÉ ?"
+======================================== */
+
+header nav span {
+  margin-top: 12px;
+  margin-bottom: 4px;
+
+  padding: 8px 4px 0;
+
+  text-align: center;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* ========================================
+   SÉPARATEURS DU MENU
+======================================== */
+
+header nav hr {
+  width: 100%;
+
+  margin: 20px 0;
+
+  border: 0;
+  border-top: 1px solid;
+}
+
+
+/* ========================================
+   FOCUS
+======================================== */
+
+header a:focus-visible,
+header button:focus-visible {
+  outline: 2px solid;
+  outline-offset: 4px;
+}
+
+
+/* ========================================
+   PETITS MOBILES
+   < 435px
+======================================== */
+
+@media (max-width: 434px) {
+
+  .header-cart {
+    display: none;
+  }
+
+  .header-cart-mobile {
+    display: flex;
+    align-items: center;
+
+    min-height: 48px;
+
+    padding: 8px 4px;
+
+    text-decoration: none;
+
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+
+/* ========================================
+   TABLETTE
+   435px → 767px
+======================================== */
+
+@media (min-width: 435px) and (max-width: 767px) {
+
+  .header-cart {
+    display: flex;
+  }
+
+  .header-cart-mobile {
+    display: none;
+  }
+}
+
+
+/* ========================================
+   TABLETTE / DESKTOP
+======================================== */
+
+@media (min-width: 768px) {
+
+  header {
+    height: auto;
+
+    padding: 0;
+
+    margin-bottom: 0;
+  }
+
+  .header-logo {
+    display: none;
+  }
+
+  .header-banner {
+    display: block;
+
+    width: 100%;
+    height: auto;
+  }
+
+  .header-banner img {
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    object-fit: cover;
+  }
+
+
+  /* ======================================
+     PANIER DESKTOP
+  ====================================== */
+
+  .header-cart {
+    position: absolute;
+
+    top: 30px;
+    right: 30px;
+
+    margin: 0;
+
+    z-index: 1004;
+
+    transform: none;
+  }
+
+
+  /* ======================================
+     BURGER
+  ====================================== */
+
+  .header-burger {
+    display: none;
+  }
+
+
+  /* ======================================
+     OVERLAY
+  ====================================== */
+
+  .menu-overlay {
+    display: none;
+  }
+
+
+  /* ======================================
+     NAVIGATION DESKTOP
+  ====================================== */
+
+  header nav {
+    position: absolute;
+
+    top: 30px;
+    left: 30px;
+
+    z-index: 1003;
+
+    display: flex !important;
+
+    flex-direction: row;
+    align-items: center;
+
+    width: auto;
+    height: auto;
+
+    margin: 0;
+    padding: 0;
+
+    background: none;
+
+    box-shadow: none;
+
+    overflow: visible;
+  }
+
+
+  /* ======================================
+     BOUTON FERMER
+  ====================================== */
+
+  header nav > button {
+    display: none;
+  }
+
+
+  /* ======================================
+     LIENS
+  ====================================== */
+
+  header nav a {
+    min-height: auto;
+
+    margin-left: 28px;
+    padding: 8px 0;
+
+    font-size: 16px;
+  }
+
+  header nav a:hover {
+    transform: none;
+  }
+
+
+  /* ======================================
+     TEXTE CONNEXION
+  ====================================== */
+
+  header nav span {
+    display: none;
+  }
+
+
+  /* ======================================
+     SÉPARATEUR
+  ====================================== */
+
+  header nav hr {
+    display: none;
+  }
+
+
+  /* ======================================
+     PANIER DU MENU MOBILE
+  ====================================== */
+
+  .header-cart-mobile {
+    display: none;
+  }
+}
