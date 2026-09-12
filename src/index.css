@@ -19,7 +19,7 @@ footer {
   justify-content: center;
   gap: 8px 20px;
 
-  margin-bottom: 12px;
+  margin-bottom: 12x;
 }
 
 .footer-links a {
@@ -40,6 +40,28 @@ footer {
   font-size: 13px;
   opacity: 0.75;
 }
+
+.footer-socials {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.footer-socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-socials svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
 
 @media (min-width: 768px) {
   .footer-links {
