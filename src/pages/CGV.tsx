@@ -4,7 +4,7 @@ export default function CGV() {
     return (
         <main className="cgv-page">
             <div className="cgv-background">
-                <h1 className="cgv-title">Conditions Générales de Vente</h1>
+                <h1 className="page-main-title">Conditions Générales de Vente</h1>
                 
                 <div className="cgv-section">
                     <p className="cgv-default-text"> Dernière mise à jour : {new Date().toLocaleDateString('fr-FR') }</p>
