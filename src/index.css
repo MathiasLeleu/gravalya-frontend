@@ -1,4 +1,417 @@
 /* ========================================
+   GLOBAL
+======================================== */
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+}
+
+/* ========================================
+   APP
+======================================== */
+
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-content {
+    flex: 1;
+}
+
+/* ========================================
+   PRIVACY POLICY
+======================================== */
+
+.privacy-page {
+    width: 100%;
+    padding: 40px 20px 80px;
+}
+
+.privacy-background {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/*
+   TITLE
+ */
+
+.page-main-title {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+/*
+   MAIN CONTENT
+ */
+
+.privacy-section {
+    width: 100%;
+}
+
+.privacy-default-text {
+    margin-bottom: 35px;
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.privacy-section-content {
+    margin-bottom: 35px;
+}
+
+.privacy-section-title {
+    margin: 0 0 15px;
+    font-size: 1.35rem;
+}
+
+.privacy-section-content p {
+    margin: 0 0 12px;
+    line-height: 1.7;
+}
+
+.privacy-section-content ul {
+    margin: 10px 0 0;
+    padding-left: 25px;
+}
+
+.privacy-section-content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* 
+   RESPONSIVE
+*/
+
+@media (max-width: 768px) {
+    .privacy-page {
+        padding: 25px 15px 60px;
+    }
+
+    .privacy-background {
+        padding: 25px 20px;
+    }
+
+    .page-main-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .privacy-section-title {
+        font-size: 1.2rem;
+    }
+
+    .privacy-section-content p,
+    .privacy-section-content li {
+        font-size: 0.95rem;
+    }
+}
+
+/* ========================================
+   LEGAL NOTICE
+======================================== */
+
+.legal-information-page {
+    width: 100%;
+    padding: 40px 20px 80px;
+}
+
+.default-box-design {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/*
+   TITLE
+*/
+
+.main-title {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+/*
+   CONTENT
+*/
+
+.legal-content {
+    width: 100%;
+}
+
+.default-text {
+    margin-bottom: 35px;
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/*
+   SECTIONS
+*/
+
+.legal-section {
+    margin-bottom: 35px;
+}
+
+.legal-section-title {
+    margin: 0 0 15px;
+    font-size: 1.35rem;
+}
+
+.legal-section-content p {
+    margin: 0 0 12px;
+    line-height: 1.7;
+}
+
+.legal-section-content h3 {
+    margin: 25px 0 12px;
+    font-size: 1.1rem;
+}
+
+.legal-section-content h3:first-child {
+    margin-top: 0;
+}
+
+.legal-section-content ul {
+    margin: 10px 0 0;
+    padding-left: 25px;
+}
+
+.legal-section-content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/*
+   RESPONSIVE
+*/
+
+@media (max-width: 768px) {
+    .legal-information-page {
+        padding: 25px 15px 60px;
+    }
+
+    .default-box-design {
+        padding: 25px 20px;
+    }
+
+    .main-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .legal-section-title {
+        font-size: 1.2rem;
+    }
+
+    .legal-section-content h3 {
+        font-size: 1.05rem;
+    }
+
+    .legal-section-content p,
+    .legal-section-content li {
+        font-size: 0.95rem;
+    }
+}
+
+/* ========================================
+   CGV
+======================================== */
+
+.cgv-page {
+    width: 100%;
+    padding: 40px 20px 80px;
+}
+
+/*
+   BACKGROUND
+*/
+
+.cgv-background {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/*
+   TITLE
+*/
+
+.page-main-title {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+/*
+   CONTENT
+*/
+
+.cgv-section {
+    width: 100%;
+}
+
+.cgv-default-text {
+    margin-bottom: 35px;
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/*
+   SECTIONS
+*/
+
+.cgv-section {
+    margin-bottom: 35px;
+}
+
+.cgv-section-title {
+    margin: 0 0 15px;
+    font-size: 1.35rem;
+}
+
+.cgv-section-content p {
+    margin: 0 0 12px;
+    line-height: 1.7;
+}
+
+.cgv-section-content ul {
+    margin: 10px 0 0;
+    padding-left: 25px;
+}
+
+.cgv-section-content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/*
+   RESPONSIVE
+*/
+
+@media (max-width: 768px) {
+    .cgv-page {
+        padding: 25px 15px 60px;
+    }
+
+    .cgv-background {
+        padding: 25px 20px;
+    }
+
+    .page-main-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .cgv-section-title {
+        font-size: 1.2rem;
+    }
+
+    .cgv-section-content p,
+    .cgv-section-content li {
+        font-size: 0.95rem;
+    }
+}
+
+/* ========================================
+   ABOUT
+======================================== */
+
+.about-page {
+    width: 100%;
+    padding: 40px 20px 80px;
+}
+
+/*
+   BACKGROUND
+*/
+
+.about-page > div {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/*
+   TITLE
+*/
+
+.page-main-title {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+/*
+   CONTENT
+*/
+
+.about-section {
+    width: 100%;
+}
+
+.about-section p {
+    margin: 0 0 20px;
+    line-height: 1.7;
+}
+
+.about-section p:first-child {
+    margin-bottom: 30px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/*
+   RESPONSIVE
+*/
+
+@media (max-width: 768px) {
+    .about-page {
+        padding: 25px 15px 60px;
+    }
+
+    .about-page > div {
+        padding: 25px 20px;
+    }
+
+    .page-main-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .about-section p {
+        font-size: 0.95rem;
+    }
+
+    .about-section p:first-child {
+        font-size: 1.1rem;
+    }
+}
+
+/* ========================================
    FOOTER 
 ======================================== */
 
@@ -18,8 +431,7 @@ footer {
   align-items: center;
   justify-content: center;
   gap: 8px 20px;
-
-  margin-bottom: 12x;
+  margin-bottom: 12px;
 }
 
 .footer-links a {

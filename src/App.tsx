@@ -1,4 +1,5 @@
 import './App.css'
+import './index.css'
 import { Routes, Route } from 'react-router-dom'
 
 import Header from './components/Header/Header'
@@ -23,28 +24,33 @@ import LegalNotice from './pages/LegalNotice'
 function App() {
     return (
         <>
-            <Header />
+            <div className="app">
+                <Header />
+                <main className="app-content">
 
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/produits" element={<AllProducts />} />
-                <Route path="/produits/:id" element={<Product />} />
-                <Route path="/connexion" element={<Auth />} />
-                <Route path="/panier" element={<Cart />} />
-                <Route path="/commande" element={<Checkout />} />
-                <Route path="/commande/confirmation" element={<OrderConfirmation />} />
-                <Route path="/profil" element={<Profile />} />
-                <Route path="/mes-commandes" element={<MyOrders />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/cgv" element={<CGV />} />
-                <Route path="/a-propos" element={<About />} />
-                <Route path="/politique-de-confidentialite" element={<Privacy />} />
-                <Route path="/mentions-legales" element={<LegalNotice />} />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/produits" element={<AllProducts />} />
+                        <Route path="/produits/:id" element={<Product />} />
+                        <Route path="/connexion" element={<Auth />} />
+                        <Route path="/panier" element={<Cart />} />
+                        <Route path="/commande" element={<Checkout />} />
+                        <Route path="/commande/confirmation" element={<OrderConfirmation />} />
+                        <Route path="/profil" element={<Profile />} />
+                        <Route path="/mes-commandes" element={<MyOrders />} />
+                        <Route path="/admin" element={<Admin />} />
+                        <Route path="/cgv" element={<CGV />} />
+                        <Route path="/a-propos" element={<About />} />
+                        <Route path="/politique-de-confidentialite" element={<Privacy />} />
+                        <Route path="/mentions-legales" element={<LegalNotice />} />
 
-                <Route path="*" element={<NotFound />} />  
-            </Routes>
+                        <Route path="*" element={<NotFound />} />  
+                    </Routes>
 
-            <Footer />
+                </main>
+
+                <Footer />
+            </div>
         </>
     )
 }
