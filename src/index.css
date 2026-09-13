@@ -26,6 +26,126 @@ body {
     flex: 1;
 }
 
+ /* ========================================
+    NOT FOUND
+ ======================================== */
+
+.not-found-page {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+.not-found-page .bouton-classe {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+/*
+   IMAGE
+*/
+
+.not-found-page {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.not-found-page picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.not-found-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    object-fit: cover;
+}
+
+/*
+   BUTTON
+*/
+
+.not-found-button {
+    position: absolute;
+    left: 50%;
+    bottom: 40px;
+
+    transform: translateX(-50%);
+
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+    color: #000000;
+
+    font-size: 16px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.not-found-button:hover {
+    opacity: 0.85;
+}
+
+
+/*
+   MOBILE
+*/
+
+@media (max-width: 767px) {
+
+    .not-found-button {
+        bottom: 8%;
+        
+        padding: 11px 20px;
+        font-size: 15px;
+    }
+
+}
+
+
+/*
+   TABLETTE
+*/
+
+@media (min-width: 768px) and (max-width: 1199px) {
+
+    .not-found-button {
+        bottom: 5%;
+    }
+
+}
+
+
+/*
+   DESKTOP
+*/
+
+@media (min-width: 1200px) {
+
+    .not-found-button {
+        bottom: 40px;
+    }
+
+}
+
 /* ========================================
    PRIVACY POLICY
 ======================================== */
