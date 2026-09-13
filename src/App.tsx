@@ -38,7 +38,7 @@ function App() {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/cgv" element={<CGV />} />
                 <Route path="/a-propos" element={<About />} />
-                <Route path="/confidentialite" element={<Privacy />} />
+                <Route path="/politique-de-confidentialite" element={<Privacy />} />
                 <Route path="/mentions-legales" element={<LegalNotice />} />
 
                 <Route path="*" element={<NotFound />} />  
