@@ -1,21 +1,8 @@
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-
 /* ========================================
    HEADER
 ======================================== */
 
-header {
+.header {
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -28,7 +15,7 @@ header {
 
   border: none;
 
-  background-color: #f4ebe4;
+  background-color: var(--main-color);
 }
 
 
@@ -157,7 +144,7 @@ header {
    PANNEAU LATÉRAL
 ======================================== */
 
-header nav:not(.gvl-desktop-nav) {
+.header nav:not(.gvl-desktop-nav) {
   position: fixed;
   top: 0;
   right: 0;
@@ -167,7 +154,7 @@ header nav:not(.gvl-desktop-nav) {
   display: none;
   flex-direction: column;
 
-  width: min(70vw, 190px);
+  width: min(70vw, 200px);
 
   height: 100dvh;
 
@@ -180,7 +167,7 @@ header nav:not(.gvl-desktop-nav) {
   overflow-y: auto;
 }
 
-header nav:not(.gvl-desktop-nav).menu-open {
+.header nav:not(.gvl-desktop-nav).menu-open {
   display: flex;
 }
 
@@ -189,7 +176,7 @@ header nav:not(.gvl-desktop-nav).menu-open {
    BOUTON FERMER
 ======================================== */
 
-header nav:not(.gvl-desktop-nav) > button {
+.header nav:not(.gvl-desktop-nav) > button {
   align-self: flex-end;
 
   display: flex;
@@ -215,7 +202,7 @@ header nav:not(.gvl-desktop-nav) > button {
    LIENS DU PANNEAU
 ======================================== */
 
-header nav:not(.gvl-desktop-nav) a {
+.header nav:not(.gvl-desktop-nav) a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,7 +213,7 @@ header nav:not(.gvl-desktop-nav) a {
 
   text-decoration: none;
 
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
 
   transition:
@@ -234,11 +221,11 @@ header nav:not(.gvl-desktop-nav) a {
     transform 0.2s ease;
 }
 
-header nav:not(.gvl-desktop-nav) a:hover {
+.header nav:not(.gvl-desktop-nav) a:hover {
   transform: translateX(4px);
 }
 
-header nav:not(.gvl-desktop-nav) a.active {
+.header nav:not(.gvl-desktop-nav) a.active {
   font-weight: 700;
 }
 
@@ -247,7 +234,7 @@ header nav:not(.gvl-desktop-nav) a.active {
    "PAS CONNECTÉ ?"
 ======================================== */
 
-header nav:not(.gvl-desktop-nav) span {
+.header nav:not(.gvl-desktop-nav) span {
   margin-top: 12px;
   margin-bottom: 4px;
 
@@ -255,7 +242,7 @@ header nav:not(.gvl-desktop-nav) span {
 
   text-align: center;
 
-  font-size: 14px;
+  font-size: 22px;
   font-weight: 600;
 }
 
@@ -264,7 +251,7 @@ header nav:not(.gvl-desktop-nav) span {
    SÉPARATEUR
 ======================================== */
 
-header nav:not(.gvl-desktop-nav) hr {
+.header nav:not(.gvl-desktop-nav) hr {
   width: 100%;
 
   margin: 20px 0;
@@ -278,8 +265,8 @@ header nav:not(.gvl-desktop-nav) hr {
    FOCUS
 ======================================== */
 
-header a:focus-visible,
-header button:focus-visible {
+.header a:focus-visible,
+.header button:focus-visible {
   outline: 2px solid;
   outline-offset: 4px;
 }
@@ -333,7 +320,7 @@ header button:focus-visible {
 
 @media (min-width: 768px) {
 
-  header {
+  .header {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -378,7 +365,7 @@ header button:focus-visible {
     color: inherit;
     text-decoration: none;
 
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 500;
   }
 

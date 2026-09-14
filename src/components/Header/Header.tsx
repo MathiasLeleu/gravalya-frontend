@@ -3,7 +3,7 @@ import { NavLink, Link } from "react-router-dom";
 import BurgerIcon from "./BurgerIcon";
 import CloseIcon from "./CloseIcon";
 import logo_principal from "../../assets/logo_principal.png";
-import "./header.css";
+import styles from "./header.module.css";
 
 type PanelView = "full" | "cart" | "account" | null;
 
@@ -52,14 +52,14 @@ export default function Header() {
     isActive ? "active" : undefined;
 
   return (
-    <header>
+    <header className={styles.header}>
       {/* Logo — inchangé, même taille sur mobile et desktop */}
-      <Link to="/" className="header-logo">
+      <Link to="/" className={styles["header-logo"]}>
         <img src={logo_principal} alt="Gravelya" />
       </Link>
 
       {/* Navigation desktop à gauche du logo */}
-      <nav className="gvl-desktop-nav" aria-label="Navigation desktop">
+      <nav className={styles["gvl-desktop-nav"]} aria-label="Navigation desktop">
         <NavLink to="/" className={navLinkClass}>
           Accueil
         </NavLink>
@@ -70,16 +70,16 @@ export default function Header() {
       </nav>
 
       {/* Panier mobile/tablette — inchangé */}
-      <Link to="/panier" className="header-cart">
+      <Link to="/panier" className={styles["header-cart"]}>
         Panier
       </Link>
 
       {/* Boutons desktop à droite du logo */}
-      <div className="gvl-desktop-actions">
+      <div className={styles["gvl-desktop-actions"]}>
         <button
           type="button"
           ref={cartBtnRef}
-          className="gvl-desktop-action-btn"
+          className={styles["gvl-desktop-action-btn"]}
           aria-expanded={panelView === "cart"}
           onClick={() => openPanel("cart", cartBtnRef)}
         >
@@ -89,7 +89,7 @@ export default function Header() {
         <button
           type="button"
           ref={accountBtnRef}
-          className="gvl-desktop-action-btn"
+          className={styles["gvl-desktop-action-btn"]}
           aria-expanded={panelView === "account"}
           onClick={() => openPanel("account", accountBtnRef)}
         >
@@ -104,14 +104,14 @@ export default function Header() {
         onClick={() => openPanel("full", burgerBtnRef)}
         aria-label="Ouvrir le menu"
         aria-expanded={panelView !== null}
-        className="header-burger"
+        className={styles["header-burger"]}
       >
         <BurgerIcon />
       </button>
 
       {panelView && (
         <div
-          className="menu-overlay"
+          className={styles["menu-overlay"]}
           onClick={closePanel}
           aria-hidden="true"
         />
@@ -120,7 +120,7 @@ export default function Header() {
       {/* Menu burger original : structure inchangée, contenu conditionné par panelView */}
       <nav
         aria-label="Menu principal"
-        className={panelView ? "menu-open" : ""}
+        className={panelView ? styles["menu-open"] : ""}
       >
         <button
           type="button"
@@ -147,7 +147,7 @@ export default function Header() {
 
             <Link
               to="/panier"
-              className="header-cart-mobile"
+              className={styles["header-cart-mobile"]}
               onClick={closePanel}
             >
               Panier

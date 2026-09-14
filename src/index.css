@@ -8,8 +8,21 @@ body,
     min-height: 100%;
 }
 
+html,
 body {
     margin: 0;
+    padding: 0;
+    font-size: 20px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --main-color: #f4ebe4;
 }
 
 /* ========================================
@@ -24,6 +37,157 @@ body {
 
 .app-content {
     flex: 1;
+}
+
+/* ========================================
+   HOME PAGE
+======================================== */
+
+.home-page {
+    width: 100%;
+    padding: 40px 20px 60px;
+}
+
+
+/*
+   PRESENTATION
+*/
+
+.home-page-presentation {
+    max-width: 900px;
+    margin: 30px auto 60px;
+
+    text-align: center;
+}
+
+.home-page-presentation .page-main-title {
+    margin: 0 0 20px;
+}
+
+.home-page-presentation p {
+    margin: 0 auto;
+
+    max-width: 700px;
+
+    line-height: 1.6;
+}
+
+.home-page-button {
+    display: inline-block;
+
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding: 12px 24px;
+
+    background-color: var(--main-color);
+    color: #000000;
+
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+
+/*
+   CATEGORIES
+*/
+
+.home-page-categories {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.home-page-categories h2 {
+    margin: 0 0 30px;
+
+    text-align: center;
+}
+
+.home-page-categories ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    gap: 67px;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+
+/*
+   CATEGORY
+*/
+
+.home-page-category {
+    width: 300px;
+    flex: 0 0 300px;
+}
+
+.home-page-category a {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+
+    overflow: hidden;
+
+    text-decoration: none;
+
+    border-radius: 8px;
+}
+
+
+/*
+   CATEGORY IMAGE
+*/
+
+.home-page-category img {
+    display: block;
+
+    width: 300px;
+    height: 225px;
+
+    object-fit: cover;
+}
+
+
+/*
+   CATEGORY TITLE
+*/
+
+.home-page-category h3 {
+    margin: 0;
+
+    padding: 15px;
+
+    text-align: center;
+
+    background-color: var(--main-color);
+}
+
+
+/*
+   TABLET / MOBILE
+*/
+
+@media (max-width: 767px) {
+
+    .home-page {
+        padding: 30px 15px 50px;
+    }
+
+    .home-page-presentation {
+        margin-top: 20px;
+        margin-bottom: 45px;
+    }
+
+    .home-page-categories ul {
+        gap: 20px;
+    }
+
 }
 
  /* ========================================
@@ -540,7 +704,7 @@ footer {
 
   padding: 24px 16px;
 
-  background-color: #f4ebe4;
+  background-color: var(--main-color);
 
   text-align: center;
 }
