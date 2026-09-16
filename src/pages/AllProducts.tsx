@@ -5,7 +5,7 @@ export default function AllProducts() {
         <main className="products-page">
 
             <header className="products-page-banner">
-                
+
                 <div className="products-page-banner-image"></div>
 
                 <h1 className="page-main-title">
@@ -23,7 +23,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -34,7 +34,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -45,7 +45,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -56,7 +56,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -67,7 +67,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -78,7 +78,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -89,7 +89,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -100,7 +100,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -111,7 +111,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -122,7 +122,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -133,7 +133,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -144,7 +144,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h2>Nom du produit</h2>
+                            <h3>Nom du produit</h3>
                         </Link>
                     </li>
 
