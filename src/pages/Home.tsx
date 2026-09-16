@@ -52,6 +52,27 @@ export default function Home() {
                             <h3>Nom de la catégorie</h3>
                         </a>
                     </li>
+
+                    <li className="home-page-category">
+                        <a href="/produits/categorie-1">
+                            <img src="http://localhost:3000/uploads/categories/audio/audio.png" alt="" />
+                            <h3>Nom de la catégorie</h3>
+                        </a>
+                    </li>
+
+                    <li className="home-page-category">
+                        <a href="/produits/categorie-2">
+                            <img src="http://localhost:3000/uploads/categories/gaming/gaming.png" alt="" />
+                            <h3>Nom de la catégorie</h3>
+                        </a>
+                    </li>
+
+                    <li className="home-page-category">
+                        <a href="/produits/categorie-3">
+                            <img src="http://localhost:3000/uploads/categories/informatique/informatique.png" alt="" />
+                            <h3>Nom de la catégorie</h3>
+                        </a>
+                    </li>
                 </ul>
             </section>
 
