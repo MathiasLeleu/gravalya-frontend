@@ -106,14 +106,11 @@ body {
     font-size: 20px;
 }
 
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
-
 :root {
     --main-color: #f4ebe4;
+
+    --main-font-title: 'Joti One', cursive;
+    --second-font-text: 'Jura', sans-serif;
 }
 
 /* ========================================
@@ -141,4 +138,32 @@ body {
     padding: 40px;
     background-color: #ffffff;
     border-radius: 10px;
+}
+
+/* ========================================
+   DEFAULT TITLE AND TEXT
+======================================== */
+
+/* main-title: h1 */
+.main-title {
+  font-size: 2rem;
+  font-family: var(--main-font-title);
+  text-align: center;
+}
+
+/* subtitle: h2 */
+.sub-title {
+  font-size: 1.7rem;
+  font-family: var(--main-font-title);
+}
+
+/* low title: h3 */
+.low-title {
+  font-size: 1.3rem;
+  font-family: var(--main-font-title);
+}
+
+.default-text {
+    font-size: 1rem;
+    font-family: var(--second-font-text);
 }

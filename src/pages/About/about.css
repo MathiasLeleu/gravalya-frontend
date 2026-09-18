@@ -16,32 +16,23 @@
 }
 
 /*
-   TITLE
-*/
-
-.page-main-title {
-    margin: 0 0 40px;
-    text-align: center;
-    font-size: 2.2rem;
-}
-
-/*
    CONTENT
 */
 
 .about-section {
     width: 100%;
+    text-align: center;
+    margin-top: 30px;
 }
 
 .about-section p {
     margin: 0 0 20px;
+    margin-top: 20px;
     line-height: 1.7;
 }
 
 .about-section p:first-child {
     margin-bottom: 30px;
-    font-size: 1.25rem;
-    font-weight: 600;
     text-align: center;
 }
 
@@ -56,18 +47,5 @@
 
     .about-page > div {
         padding: 25px 20px;
-    }
-
-    .page-main-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
-
-    .about-section p {
-        font-size: 0.95rem;
-    }
-
-    .about-section p:first-child {
-        font-size: 1.1rem;
     }
 }

@@ -19,8 +19,14 @@
     margin: 0 0 20px;
 }
 
+.home-page-presentation h1 {
+    margin-bottom: 5px;
+}
+
 .home-page-presentation p {
     margin: 0 auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
 
     max-width: 700px;
 
@@ -60,7 +66,7 @@
 }
 
 .home-page-categories ul {
-    display: flex;
+    display: grid;
 
     grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
 
@@ -123,6 +129,7 @@
     background-color: var(--main-color);
 }
 
+
 /*
    TRÈS PETITS MOBILES < 300px
 */
@@ -137,6 +144,7 @@
     }
 
 }
+
 
 /*
    TABLET / MOBILE

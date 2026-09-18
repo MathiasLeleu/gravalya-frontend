@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import "./allproducts.css"
 
 export default function AllProducts() {
     return (
@@ -8,7 +9,7 @@ export default function AllProducts() {
 
                 <div className="products-page-banner-image"></div>
 
-                <h1 className="page-main-title">
+                <h1 className="page-main-title main-title">
                     Gaming
                 </h1>
             </header>
@@ -23,7 +24,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -34,7 +35,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -45,7 +46,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -56,7 +57,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -67,7 +68,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -78,7 +79,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -89,7 +90,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -100,7 +101,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -111,7 +112,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -122,7 +123,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -133,7 +134,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 
@@ -144,7 +145,7 @@ export default function AllProducts() {
                                 alt="Nom du produit"
                             />
 
-                            <h3>Nom du produit</h3>
+                            <h3 className="low-title">Nom du produit</h3>
                         </Link>
                     </li>
 

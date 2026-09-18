@@ -12,16 +12,6 @@
 }
 
 /*
-   TITLE
-*/
-
-.main-title {
-    margin: 0 0 40px;
-    text-align: center;
-    font-size: 2.2rem;
-}
-
-/*
    CONTENT
 */
 
@@ -29,16 +19,16 @@
     width: 100%;
 }
 
-.default-text {
+/*
+   SECTIONS
+*/
+
+.legal-default-text {
     margin-bottom: 35px;
     color: #666;
     font-size: 0.9rem;
     text-align: center;
 }
-
-/*
-   SECTIONS
-*/
 
 .legal-section {
     margin-bottom: 35px;
@@ -84,23 +74,5 @@
 
     .default-box-design {
         padding: 25px 20px;
-    }
-
-    .main-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
-
-    .legal-section-title {
-        font-size: 1.2rem;
-    }
-
-    .legal-section-content h3 {
-        font-size: 1.05rem;
-    }
-
-    .legal-section-content p,
-    .legal-section-content li {
-        font-size: 0.95rem;
     }
 }
