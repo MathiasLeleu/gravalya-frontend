@@ -1,6 +1,8 @@
-import image404Desktop from "../assets/404desktop.png";
-import image404Tablet from "../assets/404tablette.png";
-import image404Mobile from "../assets/404mobile.png";
+import image404Desktop from "../../assets/404desktop.png";
+import image404Tablet from "../../assets/404tablette.png";
+import image404Mobile from "../../assets/404mobile.png";
+
+import "./notfound.css"
 
 export default function NotFound() {
     return (

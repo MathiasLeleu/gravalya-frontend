@@ -1,0 +1,106 @@
+.legal-information-page {
+    width: 100%;
+    padding: 40px 20px 80px;
+}
+
+.default-box-design {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/*
+   TITLE
+*/
+
+.main-title {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+/*
+   CONTENT
+*/
+
+.legal-content {
+    width: 100%;
+}
+
+.default-text {
+    margin-bottom: 35px;
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/*
+   SECTIONS
+*/
+
+.legal-section {
+    margin-bottom: 35px;
+}
+
+.legal-section-title {
+    margin: 0 0 15px;
+    font-size: 1.35rem;
+}
+
+.legal-section-content p {
+    margin: 0 0 12px;
+    line-height: 1.7;
+}
+
+.legal-section-content h3 {
+    margin: 25px 0 12px;
+    font-size: 1.1rem;
+}
+
+.legal-section-content h3:first-child {
+    margin-top: 0;
+}
+
+.legal-section-content ul {
+    margin: 10px 0 0;
+    padding-left: 25px;
+}
+
+.legal-section-content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/*
+   RESPONSIVE
+*/
+
+@media (max-width: 768px) {
+    .legal-information-page {
+        padding: 25px 15px 60px;
+    }
+
+    .default-box-design {
+        padding: 25px 20px;
+    }
+
+    .main-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .legal-section-title {
+        font-size: 1.2rem;
+    }
+
+    .legal-section-content h3 {
+        font-size: 1.05rem;
+    }
+
+    .legal-section-content p,
+    .legal-section-content li {
+        font-size: 0.95rem;
+    }
+}

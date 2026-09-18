@@ -1,4 +1,4 @@
-import "../index.css"
+import "./cgv.css"
 
 export default function CGV() {
     return (

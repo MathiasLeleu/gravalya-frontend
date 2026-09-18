@@ -1,3 +1,5 @@
+import "./privacy.css"
+
 export default function Privacy() {
     return (
         <main className="privacy-page">

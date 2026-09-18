@@ -1,4 +1,95 @@
 /* ========================================
+   RESET
+======================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    line-height: 1.5;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+}
+
+ul,
+ol {
+    margin: 0;
+    padding: 0;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+}
+
+textarea {
+    resize: vertical;
+}
+
+img,
+picture {
+    display: block;
+    max-width: 100%;
+}
+
+img {
+    height: auto;
+}
+
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ========================================
+   ACCESSIBILITY
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ========================================
    GLOBAL
 ======================================== */
 
@@ -39,565 +130,6 @@ body {
     flex: 1;
 }
 
-/* ========================================
-   HOME PAGE
-======================================== */
-
-.home-page {
-    width: 100%;
-    padding: 40px 20px 60px;
-}
-
-
-/*
-   PRESENTATION
-*/
-
-.home-page-presentation {
-    max-width: 900px;
-    margin: 30px auto 60px;
-
-    text-align: center;
-}
-
-.home-page-presentation .page-main-title {
-    margin: 0 0 20px;
-}
-
-.home-page-presentation p {
-    margin: 0 auto;
-
-    max-width: 700px;
-
-    line-height: 1.6;
-}
-
-.home-page-button {
-    display: inline-block;
-
-    margin-top: 30px;
-    margin-bottom: 30px;
-    padding: 12px 24px;
-
-    background-color: var(--main-color);
-    color: #000000;
-
-    text-decoration: none;
-    border-radius: 6px;
-}
-
-
-/*
-   CATEGORIES
-*/
-
-.home-page-categories {
-    width: 95%;
-    margin: 0 auto;
-
-    padding: 40px 20px;
-}
-
-.home-page-categories h2 {
-    margin: 0 0 30px;
-
-    text-align: center;
-}
-
-.home-page-categories ul {
-    display: flex;
-
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-
-    gap: 40px;
-
-    margin: 0;
-    padding: 0;
-
-    list-style: none;
-}
-
-
-/*
-   CATEGORY
-*/
-
-.home-page-category {
-    width: 100%;
-}
-
-.home-page-category a {
-    display: flex;
-    flex-direction: column;
-
-    width: 100%;
-
-    overflow: hidden;
-
-    text-decoration: none;
-
-    border-radius: 8px;
-}
-
-
-/*
-   CATEGORY IMAGE
-*/
-
-.home-page-category img {
-    display: block;
-
-    width: 100%;
-    aspect-ratio: 4 / 3;
-
-    object-fit: cover;
-}
-
-
-/*
-   CATEGORY TITLE
-*/
-
-.home-page-category h3 {
-    margin: 0;
-
-    padding: 15px;
-
-    text-align: center;
-
-    background-color: var(--main-color);
-}
-
-/*
-   TRÈS PETITS MOBILES < 300px
-*/
-
-@media (max-width: 300px) {
-
-    .home-page-category {
-        width: 90%;
-        max-width: none;
-        flex: 0 0 90%;
-        margin: 0 auto;
-    }
-
-}
-
-/*
-   TABLET / MOBILE
-*/
-
-@media (max-width: 767px) {
-
-    .home-page {
-        padding: 30px 15px 50px;
-    }
-
-    .home-page-presentation {
-        margin-top: 20px;
-        margin-bottom: 45px;
-    }
-
-    .home-page-categories ul {
-        gap: 20px;
-    }
-
-}
-
-/* ======================================== 
-   PRODUCTS PAGE 
-======================================== */ 
- 
-.products-page { 
-    width: 100%; 
-} 
- 
-/* 
-   BANNER 
-*/ 
- 
-.products-page-banner { 
-    position: relative; 
-    width: 100%; 
-    height: 150px; 
- 
-    overflow: hidden; 
-} 
-
-.products-page-banner-image {
-    width: 100%;
-    height: 100%;
-
-    background-image: url("http://localhost:3000/uploads/categories/audio/audiobanniere.png");
-    background-repeat: repeat-x;
-    background-position: center;
-    background-size: auto 150px;
-}
- 
-/* 
-   BANNER OVERLAY 
-*/ 
- 
-.products-page-banner::after { 
-    content: ""; 
- 
-    position: absolute; 
-    inset: 0; 
- 
-    background: rgba(0, 0, 0, 0.25); 
- 
-    pointer-events: none; 
-} 
- 
-.products-page-banner .page-main-title { 
-    position: absolute; 
- 
-    top: 50%; 
-    left: 50%; 
- 
-    z-index: 1; 
- 
-    transform: translate(-50%, -50%); 
- 
-    width: 100%; 
-    margin: 0; 
- 
-    color: #f4ebe4; 
- 
-    text-align: center; 
- 
-    text-shadow: 
-        2px 2px 0 #000000, 
-        -2px -2px 0 #000000, 
-        2px -2px 0 #000000, 
-        -2px 2px 0 #000000; 
-} 
- 
- 
-/* 
-   PRODUCTS 
-*/ 
- 
-.products-page-content { 
-    width: 95%; 
- 
-    margin: 0 auto; 
-    padding: 40px 20px; 
-} 
- 
-.products-page-content ul { 
-    display: grid; 
- 
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); 
- 
-    gap: 40px; 
- 
-    margin: 0; 
-    padding: 0; 
- 
-    list-style: none; 
-} 
- 
-.products-page-product a { 
-    display: block; 
- 
-    text-decoration: none; 
-    color: inherit;
-
-    border-radius: 8px;
-    overflow: hidden;
-} 
- 
-.products-page-product { 
-    overflow: hidden; 
- 
-    border-radius: 8px; 
-} 
- 
-.products-page-product img { 
-    display: block; 
- 
-    width: 100%; 
-    aspect-ratio: 4 / 3; 
- 
-    object-fit: cover; 
-} 
- 
-.products-page-product h3 {
-    margin: 0;
-
-    padding: 15px;
-
-    font-size: 20px;
-    text-align: center;
-
-    background-color: var(--main-color);
-} 
- 
- 
-/* 
-    TABLET / MOBILE 
-*/ 
-
-@media (max-width: 300px) {
-    .products-page-content {
-        width: 90%;
-        padding: 30px 0;
-    }
-
-    .products-page-content ul {
-        grid-template-columns: 1fr;
-    }
-
-    .products-page-product {
-        width: 90%;
-        margin: 0 auto;
-    }
-}
- 
-@media (max-width: 767px) { 
-    .products-page-content { 
-        width: 90%; 
-        padding: 30px 10px; 
-    } 
- 
-    .products-page-content ul { 
-        gap: 20px; 
-    }  
- 
-    .products-page-banner .page-main-title { 
-        font-size: 32px; 
-    } 
-} 
- 
-@media (max-width: 480px) { 
-    .products-page-content { 
-        width: 90%; 
-    } 
- 
-    .products-page-banner .page-main-title { 
-        font-size: 28px; 
-    } 
-}
-
- /* ========================================
-    NOT FOUND
- ======================================== */
-
-.not-found-page {
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 80px);
-    overflow: hidden;
-}
-
-.not-found-page .bouton-classe {
-    position: absolute;
-    bottom: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-}
-
-/*
-   IMAGE
-*/
-
-.not-found-page {
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 80px);
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-.not-found-page picture {
-    display: block;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.not-found-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    object-fit: cover;
-}
-
-/*
-   BUTTON
-*/
-
-.not-found-button {
-    position: absolute;
-    left: 50%;
-    bottom: 40px;
-
-    transform: translateX(-50%);
-
-    padding: 12px 24px;
-
-    border: none;
-    border-radius: 6px;
-
-    background-color: #ffffff;
-    color: #000000;
-
-    font-size: 16px;
-    font-weight: 500;
-
-    cursor: pointer;
-}
-
-.not-found-button:hover {
-    opacity: 0.85;
-}
-
-
-/*
-   MOBILE
-*/
-
-@media (max-width: 767px) {
-
-    .not-found-button {
-        bottom: 8%;
-        
-        padding: 11px 20px;
-        font-size: 15px;
-    }
-
-}
-
-
-/*
-   TABLETTE
-*/
-
-@media (min-width: 768px) and (max-width: 1199px) {
-
-    .not-found-button {
-        bottom: 5%;
-    }
-
-}
-
-
-/*
-   DESKTOP
-*/
-
-@media (min-width: 1200px) {
-
-    .not-found-button {
-        bottom: 40px;
-    }
-
-}
-
-/* ========================================
-   PRIVACY POLICY
-======================================== */
-
-.privacy-page {
-    width: 100%;
-    padding: 40px 20px 80px;
-}
-
-.privacy-background {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px;
-    background-color: #ffffff;
-    border-radius: 10px;
-}
-
-/*
-   TITLE
- */
-
-.page-main-title {
-    margin: 0 0 40px;
-    text-align: center;
-    font-size: 2.2rem;
-}
-
-/*
-   MAIN CONTENT
- */
-
-.privacy-section {
-    width: 100%;
-}
-
-.privacy-default-text {
-    margin-bottom: 35px;
-    color: #666;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-.privacy-section-content {
-    margin-bottom: 35px;
-}
-
-.privacy-section-title {
-    margin: 0 0 15px;
-    font-size: 1.35rem;
-}
-
-.privacy-section-content p {
-    margin: 0 0 12px;
-    line-height: 1.7;
-}
-
-.privacy-section-content ul {
-    margin: 10px 0 0;
-    padding-left: 25px;
-}
-
-.privacy-section-content li {
-    margin-bottom: 10px;
-    line-height: 1.6;
-}
-
-/* 
-   RESPONSIVE
-*/
-
-@media (max-width: 768px) {
-    .privacy-page {
-        padding: 25px 15px 60px;
-    }
-
-    .privacy-background {
-        padding: 25px 20px;
-    }
-
-    .page-main-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
-
-    .privacy-section-title {
-        font-size: 1.2rem;
-    }
-
-    .privacy-section-content p,
-    .privacy-section-content li {
-        font-size: 0.95rem;
-    }
-}
-
-/* ========================================
-   LEGAL NOTICE
-======================================== */
-
 .legal-information-page {
     width: 100%;
     padding: 40px 20px 80px;
@@ -609,348 +141,4 @@ body {
     padding: 40px;
     background-color: #ffffff;
     border-radius: 10px;
-}
-
-/*
-   TITLE
-*/
-
-.main-title {
-    margin: 0 0 40px;
-    text-align: center;
-    font-size: 2.2rem;
-}
-
-/*
-   CONTENT
-*/
-
-.legal-content {
-    width: 100%;
-}
-
-.default-text {
-    margin-bottom: 35px;
-    color: #666;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-/*
-   SECTIONS
-*/
-
-.legal-section {
-    margin-bottom: 35px;
-}
-
-.legal-section-title {
-    margin: 0 0 15px;
-    font-size: 1.35rem;
-}
-
-.legal-section-content p {
-    margin: 0 0 12px;
-    line-height: 1.7;
-}
-
-.legal-section-content h3 {
-    margin: 25px 0 12px;
-    font-size: 1.1rem;
-}
-
-.legal-section-content h3:first-child {
-    margin-top: 0;
-}
-
-.legal-section-content ul {
-    margin: 10px 0 0;
-    padding-left: 25px;
-}
-
-.legal-section-content li {
-    margin-bottom: 10px;
-    line-height: 1.6;
-}
-
-/*
-   RESPONSIVE
-*/
-
-@media (max-width: 768px) {
-    .legal-information-page {
-        padding: 25px 15px 60px;
-    }
-
-    .default-box-design {
-        padding: 25px 20px;
-    }
-
-    .main-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
-
-    .legal-section-title {
-        font-size: 1.2rem;
-    }
-
-    .legal-section-content h3 {
-        font-size: 1.05rem;
-    }
-
-    .legal-section-content p,
-    .legal-section-content li {
-        font-size: 0.95rem;
-    }
-}
-
-/* ========================================
-   CGV
-======================================== */
-
-.cgv-page {
-    width: 100%;
-    padding: 40px 20px 80px;
-}
-
-/*
-   BACKGROUND
-*/
-
-.cgv-background {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px;
-    background-color: #ffffff;
-    border-radius: 10px;
-}
-
-/*
-   TITLE
-*/
-
-.page-main-title {
-    margin: 0 0 40px;
-    text-align: center;
-    font-size: 2.2rem;
-}
-
-/*
-   CONTENT
-*/
-
-.cgv-section {
-    width: 100%;
-}
-
-.cgv-default-text {
-    margin-bottom: 35px;
-    color: #666;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-/*
-   SECTIONS
-*/
-
-.cgv-section {
-    margin-bottom: 35px;
-}
-
-.cgv-section-title {
-    margin: 0 0 15px;
-    font-size: 1.35rem;
-}
-
-.cgv-section-content p {
-    margin: 0 0 12px;
-    line-height: 1.7;
-}
-
-.cgv-section-content ul {
-    margin: 10px 0 0;
-    padding-left: 25px;
-}
-
-.cgv-section-content li {
-    margin-bottom: 10px;
-    line-height: 1.6;
-}
-
-/*
-   RESPONSIVE
-*/
-
-@media (max-width: 768px) {
-    .cgv-page {
-        padding: 25px 15px 60px;
-    }
-
-    .cgv-background {
-        padding: 25px 20px;
-    }
-
-    .page-main-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
-
-    .cgv-section-title {
-        font-size: 1.2rem;
-    }
-
-    .cgv-section-content p,
-    .cgv-section-content li {
-        font-size: 0.95rem;
-    }
-}
-
-/* ========================================
-   ABOUT
-======================================== */
-
-.about-page {
-    width: 100%;
-    padding: 40px 20px 80px;
-}
-
-/*
-   BACKGROUND
-*/
-
-.about-page > div {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px;
-    background-color: #ffffff;
-    border-radius: 10px;
-}
-
-/*
-   TITLE
-*/
-
-.page-main-title {
-    margin: 0 0 40px;
-    text-align: center;
-    font-size: 2.2rem;
-}
-
-/*
-   CONTENT
-*/
-
-.about-section {
-    width: 100%;
-}
-
-.about-section p {
-    margin: 0 0 20px;
-    line-height: 1.7;
-}
-
-.about-section p:first-child {
-    margin-bottom: 30px;
-    font-size: 1.25rem;
-    font-weight: 600;
-    text-align: center;
-}
-
-/*
-   RESPONSIVE
-*/
-
-@media (max-width: 768px) {
-    .about-page {
-        padding: 25px 15px 60px;
-    }
-
-    .about-page > div {
-        padding: 25px 20px;
-    }
-
-    .page-main-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
-
-    .about-section p {
-        font-size: 0.95rem;
-    }
-
-    .about-section p:first-child {
-        font-size: 1.1rem;
-    }
-}
-
-/* ========================================
-   FOOTER 
-======================================== */
-
-footer {
-  width: 100%;
-
-  padding: 24px 16px;
-
-  background-color: var(--main-color);
-
-  text-align: center;
-}
-
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 20px;
-  margin-bottom: 12px;
-}
-
-.footer-links a {
-  color: inherit;
-  text-decoration: none;
-
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.footer-links a:hover {
-  text-decoration: underline;
-}
-
-.footer-copyright {
-  margin: 0;
-
-  font-size: 13px;
-  opacity: 0.75;
-}
-
-.footer-socials {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.footer-socials a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.footer-socials svg {
-  width: 24px;
-  height: 24px;
-  fill: currentColor;
-}
-
-
-@media (min-width: 768px) {
-  .footer-links {
-    gap: 8px 32px;
-  }
 }

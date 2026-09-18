@@ -1,0 +1,73 @@
+.about-page {
+    width: 100%;
+    padding: 40px 20px 80px;
+}
+
+/*
+   BACKGROUND
+*/
+
+.about-page > div {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/*
+   TITLE
+*/
+
+.page-main-title {
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+/*
+   CONTENT
+*/
+
+.about-section {
+    width: 100%;
+}
+
+.about-section p {
+    margin: 0 0 20px;
+    line-height: 1.7;
+}
+
+.about-section p:first-child {
+    margin-bottom: 30px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/*
+   RESPONSIVE
+*/
+
+@media (max-width: 768px) {
+    .about-page {
+        padding: 25px 15px 60px;
+    }
+
+    .about-page > div {
+        padding: 25px 20px;
+    }
+
+    .page-main-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .about-section p {
+        font-size: 0.95rem;
+    }
+
+    .about-section p:first-child {
+        font-size: 1.1rem;
+    }
+}
