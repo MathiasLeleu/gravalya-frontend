@@ -1,9 +1,38 @@
 import "./product.css"
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export default function Product() {
     const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+    const [quantity, setQuantity] = useState(1)
+    
+    const images = [
+        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg",
+        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image2.jpg",
+        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image3.jpg",
+        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg",
+        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image3.jpg",
+        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image2.jpg",
+    ];
+    const [selectedImage, setSelectedImage] = useState(0)
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+    useEffect(() => {
+        if (!isLightboxOpen) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setIsLightboxOpen(false);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isLightboxOpen]);
 
     const scrollThumbnails = (direction: "left" | "right") => {
         if (!thumbnailsRef.current) return;
@@ -25,9 +54,9 @@ export default function Product() {
 
                 {/* IMAGE PRINCIPALE */}
 
-                <div className="product-main-image">
+                <div className="product-main-image" onClick={() => setIsLightboxOpen(true)}>
                     <img
-                        src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg"
+                        src={images[selectedImage]}
                         alt="Nom du produit"
                     />
                 </div>
@@ -48,65 +77,21 @@ export default function Product() {
 
                         <div className="product-thumbnails-list">
 
-                        <button
-                            type="button"
-                            className="product-thumbnail active"
-                        >
-                            <img
-                                src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image2.jpg"
-                                alt="Nom du produit - vue principale"
-                            />
-                        </button>
-
-                        <button
-                            type="button"
-                            className="product-thumbnail"
-                        >
-                            <img
-                                src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg"
-                                alt="Nom du produit - vue 2"
-                            />
-                        </button>
-
-                        <button
-                            type="button"
-                            className="product-thumbnail"
-                        >
-                            <img
-                                src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg"
-                                alt="Nom du produit - vue 3"
-                            />
-                        </button>
-
-                        <button
-                            type="button"
-                            className="product-thumbnail"
-                        >
-                            <img
-                                src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg"
-                                alt="Nom du produit - vue 4"
-                            />
-                        </button>
-
-                        <button
-                            type="button"
-                            className="product-thumbnail"
-                        >
-                            <img
-                                src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg"
-                                alt="Nom du produit - vue 5"
-                            />
-                        </button>
-
-                        <button
-                            type="button"
-                            className="product-thumbnail"
-                        >
-                            <img
-                                src="http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image2.jpg"
-                                alt="Nom du produit - vue 6"
-                            />
-                        </button>
+                            {images.map((image, index) => (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    className={`product-thumbnail ${
+                                        selectedImage === index ? "active" : ""
+                                    }`}
+                                    onClick={() => setSelectedImage(index)}
+                                >
+                                    <img
+                                        src={image}
+                                        alt={`Nom du produit - vue ${index + 1}`}
+                                    />
+                                </button>
+                            ))}
 
                         </div>
                         
@@ -164,17 +149,19 @@ export default function Product() {
                         <button
                             type="button"
                             className="product-quantity-button"
+                            onClick={() => setQuantity((current) => Math.max(1, current - 1))}
                         >
                             −
                         </button>
 
                         <span className="product-quantity-value">
-                            1
+                            {quantity}
                         </span>
 
                         <button
                             type="button"
                             className="product-quantity-button"
+                            onClick={() => setQuantity((current) => current + 1)}
                         >
                             +
                         </button>
@@ -191,6 +178,50 @@ export default function Product() {
                 </div>
 
             </section>
+
+            {isLightboxOpen && (
+                <div className="product-lightbox">
+
+                    <button
+                        type="button"
+                        className="product-lightbox-close"
+                        onClick={() => setIsLightboxOpen(false)}
+                    >
+                        ×
+                    </button>
+
+                    <button
+                        type="button"
+                        className="product-lightbox-arrow product-lightbox-arrow-left"
+                        onClick={() =>
+                            setSelectedImage((current) =>
+                                current === 0 ? images.length - 1 : current - 1
+                            )
+                        }
+                    >
+                        ←
+                    </button>
+
+                    <img
+                        className="product-lightbox-image"
+                        src={images[selectedImage]}
+                        alt={`Nom du produit - vue ${selectedImage + 1}`}
+                    />
+
+                    <button
+                        type="button"
+                        className="product-lightbox-arrow product-lightbox-arrow-right"
+                        onClick={() =>
+                            setSelectedImage((current) =>
+                                current === images.length - 1 ? 0 : current + 1
+                            )
+                        }
+                    >
+                        →
+                    </button>
+
+                </div>
+            )}
 
         </main>
     );
