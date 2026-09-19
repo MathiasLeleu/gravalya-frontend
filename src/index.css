@@ -167,3 +167,23 @@ body {
     font-size: 1rem;
     font-family: var(--second-font-text);
 }
+
+@media (max-width: 299px) {
+
+    .main-title {
+        font-size: 1.7rem;
+    }
+
+    .sub-title {
+        font-size: 1.4rem;
+    }
+
+    .low-title {
+        font-size: 1rem;
+    }
+
+    .default-text {
+        font-size: 0.7rem;
+    }
+
+}
