@@ -68,7 +68,8 @@
 .home-page-categories ul {
     display: grid;
 
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 320px));
+    justify-content: center;
 
     gap: 40px;
 
