@@ -1,6 +1,19 @@
 import "./product.css"
 
+import { useRef } from "react";
+
 export default function Product() {
+    const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+    const scrollThumbnails = (direction: "left" | "right") => {
+        if (!thumbnailsRef.current) return;
+
+        thumbnailsRef.current.scrollBy({
+            left: direction === "left" ? -110 : 110,
+            behavior: "smooth",
+        });
+    };
+
     return (
         <main className="product-page">
 
@@ -26,11 +39,14 @@ export default function Product() {
                     <button
                         type="button"
                         className="product-thumbnails-arrow product-thumbnails-arrow-left"
+                        onClick={() => scrollThumbnails("left")}
                     >
                         ←
                     </button>
 
-                    <div className="product-thumbnails">
+                    <div className="product-thumbnails"  ref={thumbnailsRef}>
+
+                        <div className="product-thumbnails-list">
 
                         <button
                             type="button"
@@ -92,11 +108,14 @@ export default function Product() {
                             />
                         </button>
 
+                        </div>
+                        
                     </div>
 
                     <button
                         type="button"
                         className="product-thumbnails-arrow product-thumbnails-arrow-right"
+                        onClick={() => scrollThumbnails("right")}
                     >
                         →
                     </button>

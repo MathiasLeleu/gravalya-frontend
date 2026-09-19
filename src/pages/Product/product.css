@@ -81,15 +81,20 @@
 ======================================== */
 
 .product-thumbnails {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-
     width: 100%;
 
     padding-bottom: 10px;
 
     overflow-x: auto;
+}
+
+.product-thumbnails-list {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+
+    width: max-content;
+    min-width: 100%;
 }
 
 
