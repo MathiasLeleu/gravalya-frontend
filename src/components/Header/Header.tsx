@@ -5,13 +5,16 @@ import CloseIcon from "./CloseIcon";
 import logo_principal from "../../assets/logo_principal.png";
 import styles from "./header.module.css";
 
-type PanelView = "full" | "cart" | "account" | null;
+import CartDrawer from "../CartDrawer/CartDrawer";
+
+type PanelView = "full" | "account" | null;
 
 export default function Header() {
   const [panelView, setPanelView] = useState<PanelView>(null);
 
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
   const burgerBtnRef = useRef<HTMLButtonElement>(null);
-  const cartBtnRef = useRef<HTMLButtonElement>(null);
   const accountBtnRef = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -48,6 +51,22 @@ export default function Header() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [panelView]);
 
+  useEffect(() => {
+  if (!isCartOpen) return;
+
+  const handleKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setIsCartOpen(false);
+    }
+  };
+
+  document.addEventListener("keydown", handleKey);
+
+  return () => {
+    document.removeEventListener("keydown", handleKey);
+  };
+  }, [isCartOpen]);
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "active" : undefined;
 
@@ -70,18 +89,17 @@ export default function Header() {
       </nav>
 
       {/* Panier mobile/tablette — inchangé */}
-      <Link to="/panier" className={styles["header-cart"]}>
+      <button type="button" className={styles["header-cart"]} onClick={() => setIsCartOpen(true)}>
         Panier
-      </Link>
+      </button>
 
       {/* Boutons desktop à droite du logo */}
       <div className={styles["gvl-desktop-actions"]}>
         <button
           type="button"
-          ref={cartBtnRef}
           className={styles["gvl-desktop-action-btn"]}
-          aria-expanded={panelView === "cart"}
-          onClick={() => openPanel("cart", cartBtnRef)}
+          aria-expanded={isCartOpen}
+          onClick={() => setIsCartOpen(true)}
         >
           Panier
         </button>
@@ -127,6 +145,7 @@ export default function Header() {
           ref={closeBtnRef}
           onClick={closePanel}
           aria-label="Fermer le menu"
+          className={styles["menu-close"]}
         >
           <CloseIcon />
         </button>
@@ -145,13 +164,15 @@ export default function Header() {
               Produits
             </NavLink>
 
-            <Link
-              to="/panier"
+            <button
               className={styles["header-cart-mobile"]}
-              onClick={closePanel}
+              onClick={() => {
+                closePanel();
+                setIsCartOpen(true);
+              }}
             >
               Panier
-            </Link>
+            </button>
 
             <hr />
 
@@ -173,12 +194,6 @@ export default function Header() {
               Créer un compte
             </NavLink>
           </>
-        )}
-
-        {panelView === "cart" && (
-          <Link to="/panier" onClick={closePanel}>
-            Voir mon panier
-          </Link>
         )}
 
         {panelView === "account" && (
@@ -203,6 +218,11 @@ export default function Header() {
           </>
         )}
       </nav>
+
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </header>
   );
 }

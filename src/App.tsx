@@ -9,7 +9,6 @@ import Home from './pages/Home/Home'
 import AllProducts from './pages/AllProducts/AllProducts'
 import Product from './pages/Product/Product'
 import Auth from './pages/Auth/Auth'
-import Cart from './pages/Cart/Cart'
 import Checkout from './pages/Checkout/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation/OrderConfirmation'
 import Profile from './pages/Profile/Profile'
@@ -33,7 +32,6 @@ function App() {
                         <Route path="/produits" element={<AllProducts />} />
                         <Route path="/produits/:id" element={<Product />} />
                         <Route path="/connexion" element={<Auth />} />
-                        <Route path="/panier" element={<Cart />} />
                         <Route path="/commande" element={<Checkout />} />
                         <Route path="/commande/confirmation" element={<OrderConfirmation />} />
                         <Route path="/profil" element={<Profile />} />

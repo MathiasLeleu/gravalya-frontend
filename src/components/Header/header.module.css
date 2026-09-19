@@ -176,7 +176,7 @@
    BOUTON FERMER
 ======================================== */
 
-.header nav:not(.gvl-desktop-nav) > button {
+.header nav:not(.gvl-desktop-nav) > .menu-close {
   align-self: flex-end;
 
   display: flex;
@@ -202,7 +202,7 @@
    LIENS DU PANNEAU
 ======================================== */
 
-.header nav:not(.gvl-desktop-nav) a {
+.header nav:not(.gvl-desktop-nav) a, .header nav:not(.gvl-desktop-nav) .header-cart-mobile {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -213,15 +213,21 @@
 
   text-decoration: none;
 
+  border: none;
+
+  background: none;
+
   font-size: 20px;
   font-weight: 500;
+
+  cursor: pointer;
 
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;
 }
 
-.header nav:not(.gvl-desktop-nav) a:hover {
+.header nav:not(.gvl-desktop-nav) a:hover, .header nav:not(.gvl-desktop-nav) .header-cart-mobile:hover {
   transform: translateX(4px);
 }
 
@@ -308,16 +314,6 @@
 
   .header-cart-mobile {
     display: flex;
-    align-items: center;
-
-    min-height: 48px;
-
-    padding: 8px 4px;
-
-    text-decoration: none;
-
-    font-size: 18px;
-    font-weight: 500;
   }
 }
 
