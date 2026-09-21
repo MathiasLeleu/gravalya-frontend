@@ -3,10 +3,11 @@ import "./checkout.css";
 
 export default function Checkout() {
   const [shippingMethod, setShippingMethod] = useState(
-    "lettre-suivie-domicile"
+    "chronopost-domicile"
   );
 
   const isRelayDelivery =
+    shippingMethod === "chronopost-relais" ||
     shippingMethod === "colissimo-relais" ||
     shippingMethod === "mondial-relay-relais";
 
@@ -265,34 +266,59 @@ export default function Checkout() {
 
             <div className="checkout-shipping-methods">
 
-              {/* LETTRE SUIVIE */}
+              {/* CHRONOPOST */}
 
               <div className="checkout-shipping-group">
 
                 <h3 className="low-title">
-                  Lettre suivie
+                  Chronopost
                 </h3>
 
-                <label className="checkout-shipping-option">
+                <div className="checkout-shipping-options-row">
 
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value="lettre-suivie-domicile"
-                    checked={
-                      shippingMethod === "lettre-suivie-domicile"
-                    }
-                    onChange={(event) =>
-                      setShippingMethod(event.target.value)
-                    }
-                  />
+                    <label className="checkout-shipping-option">
 
-                  <span className="checkout-shipping-option-content">
-                    <strong>Domicile</strong>
-                    <small>3,50 €</small>
-                  </span>
+                    <input
+                        type="radio"
+                        name="shippingMethod"
+                        value="chronopost-domicile"
+                        checked={
+                        shippingMethod === "chronopost-domicile"
+                        }
+                        onChange={(event) =>
+                        setShippingMethod(event.target.value)
+                        }
+                    />
 
-                </label>
+                    <span className="checkout-shipping-option-content">
+                        <strong>Domicile</strong>
+                        <small>3,50 €</small>
+                    </span>
+
+                    </label>
+
+                    <label className="checkout-shipping-option">
+
+                    <input
+                        type="radio"
+                        name="shippingMethod"
+                        value="chronopost-relais"
+                        checked={
+                        shippingMethod === "chronopost-relais"
+                        }
+                        onChange={(event) =>
+                        setShippingMethod(event.target.value)
+                        }
+                    />
+
+                    <span className="checkout-shipping-option-content">
+                        <strong>Point relais</strong>
+                        <small>6,50 €</small>
+                    </span>
+
+                    </label>
+                
+                </div>
 
               </div>
 
@@ -426,7 +452,7 @@ export default function Checkout() {
 
                   <div>
                     <strong>
-                      Mondial Relay - Pouldergat
+                      Point relais - Pouldergat
                     </strong>
 
                     <address>
