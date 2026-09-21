@@ -1,0 +1,567 @@
+/* ========================================
+   CHECKOUT PAGE
+======================================== */
+
+.checkout-page {
+  width: 95%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.checkout-page-header {
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.checkout-page-introduction {
+  margin-top: 15px;
+}
+
+
+/* ========================================
+   RÉCAPITULATIF MOBILE / TABLETTE
+======================================== */
+
+.checkout-mobile-summary {
+  display: none;
+}
+
+
+/* ========================================
+   CONTENU
+======================================== */
+
+.checkout-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+
+/* ========================================
+   SECTIONS FORMULAIRE
+======================================== */
+
+.checkout-section {
+  margin-bottom: 50px;
+}
+
+.checkout-section .sub-title {
+  margin-bottom: 25px;
+}
+
+
+/* ========================================
+   FORMULAIRE
+======================================== */
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.checkout-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.checkout-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkout-form-field label {
+  font-weight: 600;
+}
+
+.checkout-form-field input,
+.checkout-form-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font: inherit;
+}
+
+.checkout-form-field input:focus,
+.checkout-form-field select:focus {
+  outline: 2px solid var(--main-color);
+  outline-offset: 1px;
+}
+
+
+/* ========================================
+   MODES DE LIVRAISON
+======================================== */
+
+.checkout-shipping-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.checkout-shipping-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.checkout-shipping-group .low-title {
+  margin: 0;
+}
+
+.checkout-shipping-options-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.checkout-shipping-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 18px;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  background-color: #fff;
+
+  cursor: pointer;
+
+  transition: border-color 0.2s ease;
+}
+
+.checkout-shipping-option:hover {
+  border-color: #999;
+}
+
+.checkout-shipping-option input {
+  flex-shrink: 0;
+
+  width: 18px;
+  height: 18px;
+
+  cursor: pointer;
+}
+
+.checkout-shipping-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout-shipping-option-content strong {
+  font-size: 1rem;
+}
+
+.checkout-shipping-option-content small {
+  font-size: 0.9rem;
+}
+
+
+/* ========================================
+   POINT RELAIS
+======================================== */
+
+.checkout-relay-point {
+  margin-top: 35px;
+}
+
+.checkout-relay-point .low-title {
+  margin-bottom: 15px;
+}
+
+.checkout-relay-point-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  background-color: var(--main-color);
+}
+
+.checkout-relay-point-card address {
+  margin-top: 8px;
+
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.checkout-relay-point-button {
+  flex-shrink: 0;
+
+  padding: 10px 16px;
+
+  border: none;
+  border-radius: 6px;
+
+  background-color: #fff;
+  color: #000;
+
+  font: inherit;
+
+  cursor: pointer;
+}
+
+
+/* ========================================
+   PAIEMENT
+======================================== */
+
+.checkout-payment {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.checkout-payment .low-title {
+  margin: 0;
+}
+
+.checkout-payment-security {
+  margin: 0;
+
+  font-size: 0.9rem;
+}
+
+
+/* ========================================
+   RÉCAPITULATIF PRINCIPAL
+======================================== */
+
+.checkout-summary {
+  position: sticky;
+  top: 120px;
+
+  padding: 30px;
+
+  border-radius: 8px;
+
+  background-color: var(--main-color);
+}
+
+.checkout-summary .sub-title {
+  margin-bottom: 30px;
+}
+
+
+/* ========================================
+   PRODUITS DU RÉCAPITULATIF
+======================================== */
+
+.checkout-summary-products {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.checkout-summary-product {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.checkout-summary-product > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.checkout-summary-product span {
+  font-size: 0.9rem;
+}
+
+
+/* ========================================
+   TOTALS
+======================================== */
+
+.checkout-summary-totals {
+  margin-top: 30px;
+  padding-top: 20px;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.checkout-summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-bottom: 15px;
+}
+
+.checkout-summary-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-top: 20px;
+  padding-top: 20px;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+
+  font-size: 1.2rem;
+}
+
+
+/* ========================================
+   BOUTON COMMANDE
+======================================== */
+
+.checkout-submit-button {
+  width: 100%;
+
+  margin-top: 30px;
+  padding: 15px 20px;
+
+  border: none;
+  border-radius: 6px;
+
+  background-color: #fff;
+  color: #000;
+
+  font: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.checkout-submit-button:hover {
+  opacity: 0.85;
+}
+
+
+/* ========================================
+   TABLETTE
+======================================== */
+
+@media (max-width: 900px) {
+
+  .checkout-content {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-summary {
+    position: static;
+  }
+
+  .checkout-page-header {
+    margin-top: 60px;
+  }
+
+
+  /* ======================================
+     RÉCAPITULATIF FIXE
+  ====================================== */
+
+  .checkout-mobile-summary {
+    display: block;
+
+    position: fixed;
+
+    /*
+      Le header fait 160px sur tablette/mobile.
+      Le récapitulatif commence donc juste dessous.
+    */
+    top: 170px;
+
+    left: 2.5%;
+
+    width: 95%;
+
+    margin: 0;
+
+    border-radius: 8px;
+
+    background-color: var(--main-color);
+
+    overflow: hidden;
+
+    /*
+      Le header est à 1000.
+      Le récapitulatif reste donc derrière
+      si leurs zones se chevauchent.
+    */
+    z-index: 999;
+
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .checkout-mobile-summary summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 18px 20px;
+
+    cursor: pointer;
+
+    list-style: none;
+  }
+
+  .checkout-mobile-summary summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .checkout-mobile-summary summary::after {
+    content: "⌄";
+
+    font-size: 1.2rem;
+
+    transition: transform 0.2s ease;
+  }
+
+  .checkout-mobile-summary[open] summary::after {
+    transform: rotate(180deg);
+  }
+
+  .checkout-mobile-summary summary span {
+    font-weight: 600;
+  }
+
+  .checkout-mobile-summary summary strong {
+    margin-left: auto;
+
+    font-size: 1.05rem;
+  }
+
+
+  /* ======================================
+     CONTENU DU RÉCAPITULATIF
+  ====================================== */
+
+  .checkout-mobile-summary-content {
+    padding: 0 20px 20px;
+  }
+
+
+  /* ======================================
+     PRODUITS
+  ====================================== */
+
+  .checkout-mobile-summary-products {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    padding-top: 5px;
+  }
+
+  .checkout-mobile-summary-product {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .checkout-mobile-summary-product > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .checkout-mobile-summary-product span {
+    font-size: 0.9rem;
+  }
+
+
+  /* ======================================
+     TOTALS
+  ====================================== */
+
+  .checkout-mobile-summary-totals {
+    margin-top: 20px;
+    padding-top: 15px;
+
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .checkout-mobile-summary-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 10px;
+  }
+
+  .checkout-mobile-summary-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-top: 15px;
+    padding-top: 15px;
+
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+
+    font-size: 1.1rem;
+  }
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 600px) {
+
+  .checkout-page {
+    padding: 30px 10px;
+  }
+
+  .checkout-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-shipping-options-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-summary {
+    padding: 25px 20px;
+  }
+
+  .checkout-relay-point-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .checkout-relay-point-button {
+    width: 100%;
+  }
+}
+
+
+/* ========================================
+   TRÈS PETITS MOBILES < 300px
+======================================== */
+
+@media (max-width: 300px) {
+
+  /*
+    Sous 300px, le header fait 45vw.
+    Le récapitulatif suit donc automatiquement
+    cette hauteur.
+  */
+  .checkout-mobile-summary {
+    top: 45vw + 10px;
+  }
+}
