@@ -1,0 +1,279 @@
+/* ========================================
+   ADMIN CATEGORIES
+======================================== */
+
+.admin-categories-page {
+    width: 100%;
+}
+
+/* ========================================
+   ACTIONS
+======================================== */
+
+.admin-categories-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 30px;
+}
+
+.admin-categories-filters {
+    display: flex;
+    flex: 1;
+    gap: 15px;
+}
+
+.admin-categories-filters input,
+.admin-categories-filters select {
+    padding: 12px 15px;
+
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    background-color: white;
+
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.admin-categories-filters input {
+    flex: 1;
+}
+
+.admin-categories-filters select {
+    min-width: 200px;
+}
+
+.admin-add-button {
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: var(--main-color);
+
+    font-family: inherit;
+    font-size: 1rem;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: opacity 0.2s ease;
+}
+
+.admin-add-button:hover {
+    opacity: 0.75;
+}
+
+/* ========================================
+   CATEGORIES LIST
+======================================== */
+
+.admin-categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ========================================
+   CATEGORY CARD
+======================================== */
+
+.admin-category-card {
+    display: grid;
+    grid-template-columns: 100px 1fr auto auto;
+    align-items: center;
+    gap: 20px;
+
+    padding: 15px 20px;
+
+    border-radius: 8px;
+
+    background-color: #f8f8f8;
+}
+
+/* ========================================
+   IMAGE
+======================================== */
+
+.admin-category-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100px;
+    height: 75px;
+
+    border-radius: 8px;
+
+    background-color: #e5e5e5;
+
+    overflow: hidden;
+}
+
+.admin-category-image span {
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+/* ========================================
+   CATEGORY INFO
+======================================== */
+
+.admin-category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.admin-category-info h2 {
+    margin: 0;
+
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.admin-category-info p {
+    margin: 0;
+
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.admin-category-products {
+    margin-top: 5px;
+
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   STATUS
+======================================== */
+
+.admin-category-status {
+    min-width: 75px;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.admin-category-status.active {
+    background-color: #d4edda;
+}
+
+.admin-category-status.inactive {
+    background-color: #f8d7da;
+}
+
+/* ========================================
+   ACTION BUTTONS
+======================================== */
+
+.admin-category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.admin-edit-button,
+.admin-delete-button,
+.admin-activate-button {
+    padding: 8px 12px;
+
+    border: none;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 0.9rem;
+
+    cursor: pointer;
+
+    transition: opacity 0.2s ease;
+}
+
+.admin-edit-button {
+    background-color: var(--main-color);
+}
+
+.admin-delete-button {
+    background-color: #f8d7da;
+}
+
+.admin-activate-button {
+    background-color: #d4edda;
+}
+
+.admin-edit-button:hover,
+.admin-delete-button:hover,
+.admin-activate-button:hover {
+    opacity: 0.75;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 1000px) {
+
+    .admin-categories-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-add-button {
+        align-self: flex-start;
+    }
+
+    .admin-category-card {
+        grid-template-columns: 100px 1fr auto;
+    }
+
+    .admin-category-actions {
+        grid-column: 2 / -1;
+    }
+
+}
+
+@media (max-width: 650px) {
+
+    .admin-categories-filters {
+        flex-direction: column;
+    }
+
+    .admin-categories-filters select {
+        width: 100%;
+    }
+
+    .admin-category-card {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-category-image {
+        width: 100%;
+        height: 150px;
+    }
+
+    .admin-category-status {
+        align-self: flex-start;
+    }
+
+    .admin-category-actions {
+        display: flex;
+        width: 100%;
+    }
+
+    .admin-edit-button,
+    .admin-delete-button,
+    .admin-activate-button {
+        flex: 1;
+    }
+
+}
