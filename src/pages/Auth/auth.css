@@ -1,0 +1,144 @@
+.auth-page {
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 550px;
+    padding: 2rem 1.5rem;
+    background-color: #f4ebe4;
+    border-radius: 12px;
+}
+
+.auth-container .main-title {
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.auth-container > .default-text {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* FORMULAIRE */
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.auth-container form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.auth-container label {
+    font-weight: 600;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border: 1px solid #cfc3bb;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-container input:focus {
+    outline: none;
+    border-color: #8f7d70;
+    box-shadow: 0 0 0 2px rgba(143, 125, 112, 0.15);
+}
+
+.auth-container input::placeholder {
+    color: #8a817b;
+}
+
+/* MESSAGES */
+
+.auth-container form p {
+    margin: 0;
+    text-align: center;
+}
+
+.auth-container .auth-success {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #47734f;
+    text-align: center;
+    margin: 0.5rem 0;
+}
+
+.auth-container .auth-error {
+    color: #a33a3a;
+    text-align: center;
+}
+
+/* BOUTON */
+
+.auth-container button {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.9rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #8f7d70;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.auth-container button:hover {
+    opacity: 0.9;
+}
+
+.auth-container button:active {
+    transform: scale(0.98);
+}
+
+.auth-container button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* TABLETTE / DESKTOP */
+
+@media (min-width: 600px) {
+    .auth-page {
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-container {
+        padding: 2.5rem 3rem;
+    }
+}
+
+/* PETITS ÉCRANS */
+
+@media (max-width: 300px) {
+    .auth-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-container .main-title {
+        font-size: 1.7rem;
+    }
+
+    .auth-container input,
+    .auth-container button {
+        padding: 0.75rem;
+    }
+
+    .auth-container .auth-success {
+        font-size: 1.2rem;
+    }
+}
