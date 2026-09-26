@@ -12,3 +12,18 @@ export interface IRegisterResponse {
   email: string;
   role: "user" | "admin";
 }
+
+export interface ILoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface ILoginResponse {
+  token: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: "user" | "admin";
+  };
+}

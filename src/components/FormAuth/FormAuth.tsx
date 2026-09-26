@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { registerUser } from "../../api";
 
-export default function FormAuthentification() {
+export default function FormAuth() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");

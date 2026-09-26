@@ -2,6 +2,9 @@ import './App.css'
 import './index.css'
 import { Routes, Route } from 'react-router-dom'
 
+import RequireAuth from './components/ProtectedRoute/RequireAuth'
+import RequireAdmin from './components/ProtectedRoute/RequireAdmin'
+
 import Header from './components/Header/Header'
 import Footer from './components/Footer/Footer'
 
@@ -33,10 +36,17 @@ function App() {
                         <Route path="/produits/:id" element={<Product />} />
                         <Route path="/connexion" element={<Auth />} />
                         <Route path="/commande" element={<Checkout />} />
-                        <Route path="/commande/confirmation" element={<OrderConfirmation />} />
-                        <Route path="/profil" element={<Profile />} />
-                        <Route path="/mes-commandes" element={<MyOrders />} />
-                        <Route path="/admin" element={<Admin />} />
+
+                        <Route element={<RequireAuth />}>
+                            <Route path="/commande/confirmation" element={<OrderConfirmation />} />
+                            <Route path="/profil" element={<Profile />} />
+                            <Route path="/mes-commandes" element={<MyOrders />} />
+                        </Route>
+
+                        <Route element={<RequireAdmin />}>
+                            <Route path="/admin" element={<Admin />} />
+                        </Route>
+                        
                         <Route path="/cgv" element={<CGV />} />
                         <Route path="/a-propos" element={<About />} />
                         <Route path="/politique-de-confidentialite" element={<Privacy />} />
