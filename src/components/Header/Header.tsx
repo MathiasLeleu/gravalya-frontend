@@ -6,6 +6,7 @@ import logo_principal from "../../assets/logo_principal.png";
 import styles from "./header.module.css";
 
 import CartDrawer from "../CartDrawer/CartDrawer";
+import { useAuthStore } from "../../store";
 
 type PanelView = "full" | "account" | null;
 
@@ -13,6 +14,9 @@ export default function Header() {
   const [panelView, setPanelView] = useState<PanelView>(null);
 
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const burgerBtnRef = useRef<HTMLButtonElement>(null);
   const accountBtnRef = useRef<HTMLButtonElement>(null);
@@ -30,6 +34,11 @@ export default function Header() {
   const closePanel = () => {
     setPanelView(null);
     lastTriggerRef.current?.focus();
+  };
+
+  const handleLogout = () => {
+    logout();
+    closePanel();
   };
 
   useEffect(() => {
@@ -52,19 +61,19 @@ export default function Header() {
   }, [panelView]);
 
   useEffect(() => {
-  if (!isCartOpen) return;
+    if (!isCartOpen) return;
 
-  const handleKey = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsCartOpen(false);
-    }
-  };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsCartOpen(false);
+      }
+    };
 
-  document.addEventListener("keydown", handleKey);
+    document.addEventListener("keydown", handleKey);
 
-  return () => {
-    document.removeEventListener("keydown", handleKey);
-  };
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+    };
   }, [isCartOpen]);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -78,7 +87,10 @@ export default function Header() {
       </Link>
 
       {/* Navigation desktop à gauche du logo */}
-      <nav className={styles["gvl-desktop-nav"]} aria-label="Navigation desktop">
+      <nav
+        className={styles["gvl-desktop-nav"]}
+        aria-label="Navigation desktop"
+      >
         <NavLink to="/" className={navLinkClass}>
           Accueil
         </NavLink>
@@ -89,7 +101,11 @@ export default function Header() {
       </nav>
 
       {/* Panier mobile/tablette — inchangé */}
-      <button type="button" className={styles["header-cart"]} onClick={() => setIsCartOpen(true)}>
+      <button
+        type="button"
+        className={styles["header-cart"]}
+        onClick={() => setIsCartOpen(true)}
+      >
         Panier
       </button>
 
@@ -111,7 +127,7 @@ export default function Header() {
           aria-expanded={panelView === "account"}
           onClick={() => openPanel("account", accountBtnRef)}
         >
-          Pas connecté ?
+          {user ? user.firstName : "Pas connecté ?"}
         </button>
       </div>
 
@@ -135,7 +151,7 @@ export default function Header() {
         />
       )}
 
-      {/* Menu burger original : structure inchangée, contenu conditionné par panelView */}
+      {/* Menu burger */}
       <nav
         aria-label="Menu principal"
         className={panelView ? styles["menu-open"] : ""}
@@ -176,45 +192,127 @@ export default function Header() {
 
             <hr />
 
-            <span>Pas connecté ?</span>
+            {user ? (
+              <>
+                <span>Bonjour {user.firstName}</span>
 
-            <NavLink
-              to="/connexion"
-              className={navLinkClass}
-              onClick={closePanel}
-            >
-              Se connecter
-            </NavLink>
+                <NavLink
+                  to="/profil"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Mon profil
+                </NavLink>
 
-            <NavLink
-              to="/connexion"
-              className={navLinkClass}
-              onClick={closePanel}
-            >
-              Créer un compte
-            </NavLink>
+                <NavLink
+                  to="/mes-commandes"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Mes commandes
+                </NavLink>
+
+                {user.role === "admin" && (
+                  <NavLink
+                    to="/admin"
+                    className={navLinkClass}
+                    onClick={closePanel}
+                  >
+                    Administration
+                  </NavLink>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                >
+                  Se déconnecter
+                </button>
+              </>
+            ) : (
+              <>
+                <span>Pas connecté ?</span>
+
+                <NavLink
+                  to="/connexion"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Se connecter
+                </NavLink>
+
+                <NavLink
+                  to="/connexion"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Créer un compte
+                </NavLink>
+              </>
+            )}
           </>
         )}
 
         {panelView === "account" && (
           <>
-            <span>Pas connecté ?</span>
+            {user ? (
+              <>
+                <span>Bonjour {user.firstName}</span>
 
-            <NavLink
-              to="/connexion"
-              className={navLinkClass}
-              onClick={closePanel}
-            >
-              Se connecter
-            </NavLink>
+                <NavLink
+                  to="/profil"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Mon profil
+                </NavLink>
 
-            <NavLink
-              to="/connexion"
-              className={navLinkClass}
-              onClick={closePanel}
-            >
-              Créer un compte
-            </NavLink>
+                <NavLink
+                  to="/mes-commandes"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Mes commandes
+                </NavLink>
+
+                {user.role === "admin" && (
+                  <NavLink
+                    to="/admin"
+                    className={navLinkClass}
+                    onClick={closePanel}
+                  >
+                    Administration
+                  </NavLink>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                >
+                  Se déconnecter
+                </button>
+              </>
+            ) : (
+              <>
+                <span>Pas connecté ?</span>
+
+                <NavLink
+                  to="/connexion"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Se connecter
+                </NavLink>
+
+                <NavLink
+                  to="/connexion"
+                  className={navLinkClass}
+                  onClick={closePanel}
+                >
+                  Créer un compte
+                </NavLink>
+              </>
+            )}
           </>
         )}
       </nav>
