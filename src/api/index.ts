@@ -1,7 +1,17 @@
-import type { IRegisterPayload, IRegisterResponse } from "../@types";
-import type { ILoginPayload, ILoginResponse } from "../@types";
+import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse } from "../@types";
+
+import { useAuthStore } from "../store";
 
 const baseUrl = import.meta.env.VITE_API_URL;
+
+function getAuthHeaders() {
+  const token = useAuthStore.getState().token;
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
 
 export async function registerUser(
   payload: IRegisterPayload
@@ -41,6 +51,23 @@ export async function loginUser(
   if (!response.ok) {
     throw new Error(
       data.message || "Impossible de se connecter."
+    );
+  }
+
+  return data;
+}
+
+export async function getMe(): Promise<IMeResponse> {
+  const response = await fetch(`${baseUrl}/me`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer votre profil."
     );
   }
 

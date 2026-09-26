@@ -33,8 +33,6 @@ export default function FormLogin() {
 
       login(data);
 
-      console.log(data);
-
       setSuccess("Connexion réussie.");
 
       setEmail("");

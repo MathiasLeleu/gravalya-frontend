@@ -27,3 +27,13 @@ export interface ILoginResponse {
     role: "user" | "admin";
   };
 }
+
+export interface IMeResponse {
+  user: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: "user" | "admin";
+  };
+}
