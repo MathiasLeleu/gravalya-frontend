@@ -33,6 +33,7 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/produits" element={<AllProducts />} />
+                        <Route path="/produits/categorie/:slug" element={<AllProducts />} />
                         <Route path="/produits/:id" element={<Product />} />
                         <Route path="/connexion" element={<Auth />} />
                         <Route path="/commande" element={<Checkout />} />

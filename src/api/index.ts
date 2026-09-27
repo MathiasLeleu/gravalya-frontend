@@ -1,4 +1,4 @@
-import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse } from "../@types";
+import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, ICategory } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -68,6 +68,20 @@ export async function getMe(): Promise<IMeResponse> {
   if (!response.ok) {
     throw new Error(
       data.message || "Impossible de récupérer votre profil."
+    );
+  }
+
+  return data;
+}
+
+export async function getCategories(): Promise<ICategory[]> {
+  const response = await fetch(`${baseUrl}/categories`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les catégories."
     );
   }
 

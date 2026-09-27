@@ -37,3 +37,12 @@ export interface IMeResponse {
     role: "user" | "admin";
   };
 }
+
+export interface ICategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  bannerUrl: string;
+}

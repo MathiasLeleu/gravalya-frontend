@@ -1,80 +1,40 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import SearchSortBar, { filterAndSort, type SortValue } from "../../components/SearchSortBar/SearchSortBar"
 import "./home.css"
- 
-interface Category {
-    id: number
-    slug: string
-    name: string
-    image: string
-}
- 
-// À remplacer par tes vraies catégories (API)
-const CATEGORIES: Category[] = [
-    {
-        id: 1,
-        slug: "categorie-1",
-        name: "Audio",
-        image: "http://localhost:3000/uploads/categories/audio/audio.png",
-    },
-    {
-        id: 2,
-        slug: "categorie-2",
-        name: "Gaming",
-        image: "http://localhost:3000/uploads/categories/gaming/gaming.png",
-    },
-    {
-        id: 3,
-        slug: "categorie-3",
-        name: "Informatique",
-        image: "http://localhost:3000/uploads/categories/informatique/informatique.png",
-    },
-    {
-        id: 4,
-        slug: "categorie-1",
-        name: "Audio",
-        image: "http://localhost:3000/uploads/categories/audio/audio.png",
-    },
-    {
-        id: 5,
-        slug: "categorie-2",
-        name: "Gaming",
-        image: "http://localhost:3000/uploads/categories/gaming/gaming.png",
-    },
-    {
-        id: 6,
-        slug: "categorie-3",
-        name: "Informatique",
-        image: "http://localhost:3000/uploads/categories/informatique/informatique.png",
-    },
-    {
-        id: 7,
-        slug: "categorie-1",
-        name: "Audio",
-        image: "http://localhost:3000/uploads/categories/audio/audio.png",
-    },
-    {
-        id: 8,
-        slug: "categorie-2",
-        name: "Gaming",
-        image: "http://localhost:3000/uploads/categories/gaming/gaming.png",
-    },
-    {
-        id: 9,
-        slug: "categorie-3",
-        name: "Informatique",
-        image: "http://localhost:3000/uploads/categories/informatique/informatique.png",
-    },
-]
+
+import { getCategories } from "../../api"
+import type { ICategory } from "../../@types"
  
 export default function Home() {
     const [search, setSearch] = useState<string>("")
     const [sort, setSort] = useState<SortValue>("default")
+    const [categories, setCategories] = useState<ICategory[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        async function loadCategories() {
+            try {
+                const data = await getCategories()
+                setCategories(data)
+            } catch (error) {
+                setError(
+                    error instanceof Error
+                        ? error.message
+                        : "Impossible de récupérer les catégories."
+                )
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadCategories()
+    }, [])
  
     const visibleCategories = useMemo(
-        () => filterAndSort(CATEGORIES, search, sort),
-        [search, sort]
+        () => filterAndSort(categories, search, sort),
+        [categories, search, sort]
     )
     return (
         <main className="home-page">
@@ -117,7 +77,11 @@ export default function Home() {
                     placeholder="Rechercher une catégorie…"
                 />
  
-                {visibleCategories.length === 0 ? (
+                {isLoading ? (
+                    <p role="status">Chargement des catégories...</p>
+                ) : error ? (
+                    <p role="alert">{error}</p>
+                ) : visibleCategories.length === 0 ? (
                     <p className="no-results" role="status">
                         Aucune catégorie ne correspond à « {search} ».
                     </p>
@@ -125,14 +89,18 @@ export default function Home() {
                     <ul role="list">
                         {visibleCategories.map((category) => (
                             <li key={category.id} className="home-page-category">
-                                <Link to={`/produits/${category.slug}`}>
-                                    <img src={category.image} alt="" />
+                                <Link to={`/produits/categorie/${category.slug}`}>
+                                    <img
+                                        src={`${import.meta.env.VITE_API_URL}${category.imageUrl}`}
+                                        alt={category.name}
+                                    />
                                     <h3 className="low-title">{category.name}</h3>
                                 </Link>
                             </li>
                         ))}
                     </ul>
                 )}
+
             </section>
 
         </main>
