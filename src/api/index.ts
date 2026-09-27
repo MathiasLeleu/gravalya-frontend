@@ -98,3 +98,14 @@ export async function getProducts(): Promise<IProduct[]> {
 
     return data;
 }
+
+export async function getProductById(id: number): Promise<IProduct> {
+    const response = await fetch(`${baseUrl}/products/${id}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Impossible de récupérer le produit.");
+    }
+
+    return data;
+}

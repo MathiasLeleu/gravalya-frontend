@@ -1,22 +1,43 @@
 import "./product.css"
 
 import { useRef, useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+
+import type { IProduct } from "../../@types";
+import { getProductById } from "../../api";
 
 export default function Product() {
+
+    const { id } = useParams();
+
+    const [product, setProduct] = useState<IProduct | null>(null);
+    const [error, setError] = useState("");
+
     const thumbnailsRef = useRef<HTMLDivElement>(null);
 
     const [quantity, setQuantity] = useState(1)
     
-    const images = [
-        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg",
-        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image2.jpg",
-        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image3.jpg",
-        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image1.jpg",
-        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image3.jpg",
-        "http://localhost:3000/uploads/products/tableaubois/paysagejaponais/image2.jpg",
-    ];
     const [selectedImage, setSelectedImage] = useState(0)
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+    useEffect(() => {
+    if (!id) return;
+
+    const loadProduct = async () => {
+        try {
+            const data = await getProductById(Number(id));
+            setProduct(data);
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de récupérer le produit."
+            );
+        }
+    };
+
+    loadProduct();
+    }, [id]);
 
     useEffect(() => {
         if (!isLightboxOpen) return;
@@ -43,6 +64,16 @@ export default function Product() {
         });
     };
 
+    if (error) {
+        return <p>{error}</p>;
+    }
+
+    if (!product) {
+        return <p>Chargement du produit...</p>;
+    }
+
+    const images = product.pictures;
+
     return (
         <main className="product-page">
 
@@ -56,8 +87,8 @@ export default function Product() {
 
                 <div className="product-main-image" onClick={() => setIsLightboxOpen(true)}>
                     <img
-                        src={images[selectedImage]}
-                        alt="Nom du produit"
+                        src={`${import.meta.env.VITE_API_URL}${images[selectedImage].url}`}
+                        alt={images[selectedImage].alt}
                     />
                 </div>
 
@@ -87,8 +118,8 @@ export default function Product() {
                                     onClick={() => setSelectedImage(index)}
                                 >
                                     <img
-                                        src={image}
-                                        alt={`Nom du produit - vue ${index + 1}`}
+                                        src={`${import.meta.env.VITE_API_URL}${image.url}`}
+                                        alt={image.alt}
                                     />
                                 </button>
                             ))}
@@ -117,26 +148,15 @@ export default function Product() {
             <section className="product-info">
 
                 <h1 className="main-title">
-                    Nom du produit
+                    {product.name}
                 </h1>
 
                 <p className="product-description">
-                    Description du produit. Cette partie contiendra
-                    prochainement la description récupérée depuis le
-                    backend.
-                    Description du produit. Cette partie contiendra
-                    prochainement la description récupérée depuis le
-                    backend.
-                    Description du produit. Cette partie contiendra
-                    prochainement la description récupérée depuis le
-                    backend.
-                    Description du produit. Cette partie contiendra
-                    prochainement la description récupérée depuis le
-                    backend.
+                    {product.description}
                 </p>
 
                 <p className="product-price">
-                    24,90 €
+                    {Number(product.price).toFixed(2).replace(".", ",")} €
                 </p>
 
 
@@ -161,7 +181,9 @@ export default function Product() {
                         <button
                             type="button"
                             className="product-quantity-button"
-                            onClick={() => setQuantity((current) => current + 1)}
+                            onClick={() => setQuantity((current) =>
+                                Math.min(product.stockQuantity, current + 1)
+                            )}
                         >
                             +
                         </button>
@@ -204,8 +226,8 @@ export default function Product() {
 
                     <img
                         className="product-lightbox-image"
-                        src={images[selectedImage]}
-                        alt={`Nom du produit - vue ${selectedImage + 1}`}
+                        src={`${import.meta.env.VITE_API_URL}${images[selectedImage].url}`}
+                        alt={images[selectedImage].alt}
                     />
 
                     <button
