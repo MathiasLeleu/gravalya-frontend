@@ -6,9 +6,13 @@ import { useParams } from "react-router-dom";
 import type { IProduct } from "../../@types";
 import { getProductById } from "../../api";
 
+import { useAuthStore } from "../../store";
+
 export default function Product() {
 
     const { id } = useParams();
+
+    const addToCart = useAuthStore((state) => state.addToCart);
 
     const [product, setProduct] = useState<IProduct | null>(null);
     const [error, setError] = useState("");
@@ -193,6 +197,7 @@ export default function Product() {
                     <button
                         type="button"
                         className="product-add-button"
+                        onClick={() => addToCart(product, quantity)}
                     >
                         Ajouter au panier
                     </button>
