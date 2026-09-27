@@ -1,10 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./checkout.css";
 
+import { useAuthStore } from "../../store";
+
+import { getMe } from "../../api";
+
 export default function Checkout() {
+  const cart = useAuthStore((state) => state.cart);
   const [shippingMethod, setShippingMethod] = useState(
     "chronopost-domicile"
   );
+
+  const [user, setUser] = useState<{
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const data = await getMe();
+        setUser(data.user);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  const cartSubtotal = cart.reduce(
+    (total, item) =>
+      total + Number(item.product.price) * item.quantity,
+    0
+  );
+
+  const shippingPrices: Record<string, number> = {
+  "chronopost-domicile": 3.50,
+  "chronopost-relais": 6.50,
+  "colissimo-domicile": 5.90,
+  "colissimo-relais": 5.50,
+  "mondial-relay-domicile": 6.90,
+  "mondial-relay-relais": 4.90,
+};
+
+const shippingCost = shippingPrices[shippingMethod];
+const cartTotal = cartSubtotal + shippingCost;
 
   const isRelayDelivery =
     shippingMethod === "chronopost-relais" ||
@@ -35,48 +77,58 @@ export default function Checkout() {
 
         <summary>
           <span>Votre commande</span>
-          <strong>39,80 €</strong>
+          <strong>
+            {cartTotal.toFixed(2).replace(".", ",")} €
+          </strong>
         </summary>
 
         <div className="checkout-mobile-summary-content">
 
-          <div className="checkout-mobile-summary-products">
-
-            <div className="checkout-mobile-summary-product">
+          {cart.map((item) => (
+            <div
+              key={item.product.id}
+              className="checkout-mobile-summary-product"
+            >
               <div>
-                <strong>Porte-clés personnalisé</strong>
-                <span>2 × 8,90 €</span>
+                <strong>{item.product.name}</strong>
+
+                <span>
+                  {item.quantity} ×{" "}
+                  {Number(item.product.price)
+                    .toFixed(2)
+                    .replace(".", ",")} €
+                </span>
               </div>
 
-              <strong>17,80 €</strong>
+              <strong>
+                {(Number(item.product.price) * item.quantity)
+                  .toFixed(2)
+                  .replace(".", ",")} €
+              </strong>
             </div>
-
-            <div className="checkout-mobile-summary-product">
-              <div>
-                <strong>Plaque de porte</strong>
-                <span>1 × 17,10 €</span>
-              </div>
-
-              <strong>17,10 €</strong>
-            </div>
-
-          </div>
+          ))}
 
           <div className="checkout-mobile-summary-totals">
 
             <div className="checkout-mobile-summary-line">
               <span>Sous-total</span>
-              <strong>34,90 €</strong>
+              <strong>
+                {cartSubtotal.toFixed(2).replace(".", ",")} €
+              </strong>
             </div>
 
             <div className="checkout-mobile-summary-line">
               <span>Livraison</span>
-              <strong>4,90 €</strong>
+              <strong>
+                {shippingCost.toFixed(2).replace(".", ",")} €
+              </strong>
             </div>
 
             <div className="checkout-mobile-summary-total">
               <span>Total</span>
-              <strong>39,80 €</strong>
+              <strong>
+                {cartTotal.toFixed(2).replace(".", ",")} €
+              </strong>
             </div>
 
           </div>
@@ -119,7 +171,7 @@ export default function Checkout() {
                     type="text"
                     id="firstName"
                     name="firstName"
-                    defaultValue="Mathias"
+                    defaultValue={user?.firstName ?? ""}
                   />
                 </div>
 
@@ -132,7 +184,7 @@ export default function Checkout() {
                     type="text"
                     id="lastName"
                     name="lastName"
-                    defaultValue="Dupont"
+                    defaultValue={user?.lastName ?? ""}
                   />
                 </div>
 
@@ -147,7 +199,7 @@ export default function Checkout() {
                   type="email"
                   id="email"
                   name="email"
-                  defaultValue="mathias@example.com"
+                  defaultValue={user?.email ?? ""}
                 />
               </div>
 
@@ -566,41 +618,29 @@ export default function Checkout() {
 
           <div className="checkout-summary-products">
 
-            <div className="checkout-summary-product">
+            {cart.map((item) => (
+              <div
+                key={item.product.id}
+                className="checkout-summary-product"
+              >
+                <div>
+                  <strong>{item.product.name}</strong>
 
-              <div>
+                  <span>
+                    {item.quantity} ×{" "}
+                    {Number(item.product.price)
+                      .toFixed(2)
+                      .replace(".", ",")} €
+                  </span>
+                </div>
+
                 <strong>
-                  Porte-clés personnalisé
+                  {(Number(item.product.price) * item.quantity)
+                    .toFixed(2)
+                    .replace(".", ",")} €
                 </strong>
-
-                <span>
-                  2 × 8,90 €
-                </span>
               </div>
-
-              <strong>
-                17,80 €
-              </strong>
-
-            </div>
-
-            <div className="checkout-summary-product">
-
-              <div>
-                <strong>
-                  Plaque de porte
-                </strong>
-
-                <span>
-                  1 × 17,10 €
-                </span>
-              </div>
-
-              <strong>
-                17,10 €
-              </strong>
-
-            </div>
+            ))}
 
           </div>
 
@@ -608,17 +648,23 @@ export default function Checkout() {
 
             <div className="checkout-summary-line">
               <span>Sous-total</span>
-              <strong>34,90 €</strong>
+              <strong>
+                {cartSubtotal.toFixed(2).replace(".", ",")} €
+              </strong>
             </div>
 
             <div className="checkout-summary-line">
               <span>Livraison</span>
-              <strong>4,90 €</strong>
+              <strong>
+                {shippingCost.toFixed(2).replace(".", ",")} €
+              </strong>
             </div>
 
             <div className="checkout-summary-total">
               <span>Total</span>
-              <strong>39,80 €</strong>
+              <strong>
+                {cartTotal.toFixed(2).replace(".", ",")} €
+              </strong>
             </div>
 
           </div>
