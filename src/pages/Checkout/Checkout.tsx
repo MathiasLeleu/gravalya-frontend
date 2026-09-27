@@ -11,24 +11,47 @@ export default function Checkout() {
     "chronopost-domicile"
   );
 
-  const [user, setUser] = useState<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  } | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    address2: "",
+    postalCode: "",
+    city: "",
+    country: "France",
+  });
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const data = await getMe();
-        setUser(data.user);
-      } catch (error) {
-        console.error(error);
-      }
+
+      setFormData((current) => ({
+        ...current,
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        email: data.user.email,
+      }));
+        } catch (error) {
+          console.error(error);
+        }
     };
 
     loadUser();
   }, []);
+
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
 
   const cartSubtotal = cart.reduce(
     (total, item) =>
@@ -171,7 +194,8 @@ const cartTotal = cartSubtotal + shippingCost;
                     type="text"
                     id="firstName"
                     name="firstName"
-                    defaultValue={user?.firstName ?? ""}
+                    value={formData.firstName}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -184,11 +208,12 @@ const cartTotal = cartSubtotal + shippingCost;
                     type="text"
                     id="lastName"
                     name="lastName"
-                    defaultValue={user?.lastName ?? ""}
+                    value={formData.lastName}
+                    onChange={handleChange}
                   />
-                </div>
 
-              </div>
+                  </div>
+                </div>
 
               <div className="checkout-form-field">
                 <label htmlFor="email">
@@ -199,7 +224,8 @@ const cartTotal = cartSubtotal + shippingCost;
                   type="email"
                   id="email"
                   name="email"
-                  defaultValue={user?.email ?? ""}
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -212,7 +238,8 @@ const cartTotal = cartSubtotal + shippingCost;
                   type="tel"
                   id="phone"
                   name="phone"
-                  defaultValue="06 12 34 56 78"
+                  value={formData.phone}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -240,7 +267,8 @@ const cartTotal = cartSubtotal + shippingCost;
                   type="text"
                   id="address"
                   name="address"
-                  defaultValue="12 rue de la République"
+                  value={formData.address}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -253,7 +281,8 @@ const cartTotal = cartSubtotal + shippingCost;
                   type="text"
                   id="address2"
                   name="address2"
-                  defaultValue="Appartement 2"
+                  value={formData.address2}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -268,7 +297,8 @@ const cartTotal = cartSubtotal + shippingCost;
                     type="text"
                     id="postalCode"
                     name="postalCode"
-                    defaultValue="29100"
+                    value={formData.postalCode}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -281,7 +311,8 @@ const cartTotal = cartSubtotal + shippingCost;
                     type="text"
                     id="city"
                     name="city"
-                    defaultValue="Pouldergat"
+                    value={formData.city}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -292,15 +323,13 @@ const cartTotal = cartSubtotal + shippingCost;
                   Pays *
                 </label>
 
-                <select
+                <input
+                  type="text"
                   id="country"
                   name="country"
-                  defaultValue="France"
-                >
-                  <option value="France">France</option>
-                  <option value="Belgique">Belgique</option>
-                  <option value="Luxembourg">Luxembourg</option>
-                </select>
+                  value="France"
+                  readOnly
+                />
               </div>
 
             </div>
