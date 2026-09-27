@@ -1,4 +1,4 @@
-import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, ICategory } from "../@types";
+import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, ICategory, IProduct } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -86,4 +86,15 @@ export async function getCategories(): Promise<ICategory[]> {
   }
 
   return data;
+}
+
+export async function getProducts(): Promise<IProduct[]> {
+    const response = await fetch(`${baseUrl}/products`);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Impossible de récupérer les produits.");
+    }
+
+    return data;
 }

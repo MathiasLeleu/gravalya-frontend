@@ -46,3 +46,26 @@ export interface ICategory {
   imageUrl: string;
   bannerUrl: string;
 }
+
+export interface IPicture {
+    id: number;
+    url: string;
+    alt: string;
+    isMain: boolean;
+}
+
+export interface IProduct {
+    id: number;
+    name: string;
+    description: string;
+    price: string;
+    weight: string;
+    height: string;
+    length: string;
+    width: string;
+    stockQuantity: number;
+    active: boolean;
+    categoryId: number;
+    category: ICategory;
+    pictures: IPicture[];
+}
