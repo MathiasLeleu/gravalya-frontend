@@ -69,3 +69,42 @@ export interface IProduct {
     category: ICategory;
     pictures: IPicture[];
 }
+
+export interface ICreateOrderPayload {
+    items: {
+        productId: number;
+        quantity: number;
+    }[];
+    shippingMethodId: number;
+    shippingFirstName: string;
+    shippingLastName: string;
+    shippingCountry: string;
+    shippingAddress: string;
+    shippingAddress2?: string;
+    shippingPostalCode: string;
+    shippingCity: string;
+    shippingPhone: string;
+    relayPoint?: {
+        relayPointId: number;
+        relayPointName: string;
+        relayPointAddress: string;
+        relayPointPostalCode: string;
+        relayPointCity: string;
+        relayPointCountry: string;
+    };
+}
+
+export interface IShippingMethod {
+    id: number;
+    name: string;
+    carrier: string;
+    deliveryType: string;
+}
+
+export interface IShippingRate {
+    id: number;
+    shippingMethodId: number;
+    minWeight: string;
+    maxWeight: string;
+    cost: string;
+}

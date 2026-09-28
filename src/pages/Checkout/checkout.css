@@ -565,3 +565,42 @@
     top: 45vw + 10px;
   }
 }
+
+.checkout-relay-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.checkout-relay-modal {
+  width: min(90%, 600px);
+  max-height: 80vh;
+  overflow-y: auto;
+
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.checkout-relay-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkout-relay-modal-header button {
+  border: none;
+  background: transparent;
+  font-size: 3rem;
+  cursor: pointer;
+}
+
+.checkout-relay-modal-content {
+  margin-top: 1.5rem;
+}

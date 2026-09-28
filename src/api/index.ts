@@ -1,4 +1,5 @@
-import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, ICategory, IProduct } from "../@types";
+import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, 
+  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -108,4 +109,50 @@ export async function getProductById(id: number): Promise<IProduct> {
     }
 
     return data;
+}
+
+export async function createOrder(payload: ICreateOrderPayload) {
+  const response = await fetch(`${baseUrl}/orders`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de créer la commande."
+    );
+  }
+
+  return data;
+}
+
+export async function getShippingMethods(): Promise<IShippingMethod[]> {
+  const response = await fetch(`${baseUrl}/shipping-methods`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les méthodes de livraison."
+    );
+  }
+
+  return data;
+}
+
+export async function getShippingRates(): Promise<IShippingRate[]> {
+  const response = await fetch(`${baseUrl}/shipping-rates`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les tarifs de livraison."
+    );
+  }
+
+  return data;
 }
