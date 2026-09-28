@@ -138,6 +138,30 @@ export default function Checkout() {
       cartTotalWeight <= Number(rate.maxWeight)
   );
 
+  useEffect(() => {
+    const selectedMethodAvailable = shippingRates.some(
+        (rate) =>
+            rate.shippingMethodId === shippingMethod &&
+            cartTotalWeight >= Number(rate.minWeight) &&
+            cartTotalWeight <= Number(rate.maxWeight)
+    );
+
+    if (!selectedMethodAvailable) {
+        const firstAvailableMethod = shippingMethods.find((method) =>
+            shippingRates.some(
+                (rate) =>
+                    rate.shippingMethodId === method.id &&
+                    cartTotalWeight >= Number(rate.minWeight) &&
+                    cartTotalWeight <= Number(rate.maxWeight)
+            )
+        );
+
+        if (firstAvailableMethod) {
+            setShippingMethod(firstAvailableMethod.id);
+        }
+    }
+  }, [shippingRates, shippingMethods, shippingMethod, cartTotalWeight]);
+
   const shippingCost = selectedShippingRate
     ? Number(selectedShippingRate.cost)
     : 0;
@@ -421,10 +445,16 @@ export default function Checkout() {
 
             <div className="checkout-shipping-methods">
 
-              {["Chronopost", "Colissimo", "Mondial Relay"].map((shippingName) => {
+              {["Chronopost", "Colissimo", "Mondial Relay", "Lettre Suivie"].map((shippingName) => {
 
                 const methods = shippingMethods.filter(
-                  (method) => method.name === shippingName
+                  (method) => method.name === shippingName &&
+                    shippingRates.some(
+                      (rate) =>
+                          rate.shippingMethodId === method.id &&
+                          cartTotalWeight >= Number(rate.minWeight) &&
+                          cartTotalWeight <= Number(rate.maxWeight)
+                    )
                 );
 
                 if (methods.length === 0) {
