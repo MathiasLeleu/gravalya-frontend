@@ -9,6 +9,7 @@ export default function OrderConfirmation() {
         const amount = location.state?.amount;
         const shippingCost = location.state?.shippingCost;
         const shippingMethod = location.state?.shippingMethod;
+        const relayPoint = location.state?.relayPoint;
 
     return (
         <main className="order-confirmation-page">
@@ -64,6 +65,24 @@ export default function OrderConfirmation() {
                                 : "—"}
                         </strong>
                     </div>
+
+                    {relayPoint && (
+                        <div className="order-confirmation-relay-point">
+                            <span>Point relais</span>
+
+                            <strong className="order-confirmation-relay-name">
+                                {relayPoint.relayPointName}
+                            </strong>
+
+                            <p>
+                                {relayPoint.relayPointAddress}
+                                <br />
+                                {relayPoint.relayPointPostalCode} {relayPoint.relayPointCity}
+                                <br />
+                                {relayPoint.relayPointCountry}
+                            </p>
+                        </div>
+                    )}
 
                     <div className="order-confirmation-row">
                         <span>Total</span>

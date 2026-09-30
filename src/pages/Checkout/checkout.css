@@ -220,6 +220,78 @@
   cursor: pointer;
 }
 
+/* ========================================
+   LISTE DES POINTS RELAIS
+======================================== */
+
+.checkout-relay-points {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.checkout-relay-point-option {
+
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 15px;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  background-color: #f8f5f2;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+
+.checkout-relay-point-option:hover {
+
+  background-color: var(--main-color);
+
+  transform: translateY(-2px);
+
+}
+
+
+.checkout-relay-point-option strong {
+
+  display: block;
+
+  margin-bottom: 6px;
+
+}
+
+
+.checkout-relay-point-option p {
+
+  margin: 0;
+
+  line-height: 1.4;
+
+}
+
+
+.checkout-relay-point-option span {
+
+  flex-shrink: 0;
+
+  font-weight: bold;
+
+  white-space: nowrap;
+
+}
+
 
 /* ========================================
    PAIEMENT

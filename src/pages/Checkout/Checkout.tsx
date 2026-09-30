@@ -4,8 +4,8 @@ import "./checkout.css";
 
 import { useAuthStore } from "../../store";
 
-import { getMe, getShippingMethods, getShippingRates, createOrder } from "../../api";
-import type { IShippingMethod, IShippingRate } from "../../@types";
+import { getMe, getShippingMethods, getShippingRates, createOrder, getRelayPoints } from "../../api";
+import type { IShippingMethod, IShippingRate, IRelayPoint } from "../../@types";
 
 export default function Checkout() {
   const cart = useAuthStore((state) => state.cart);
@@ -17,6 +17,10 @@ export default function Checkout() {
   const [shippingMethods, setShippingMethods] = useState<IShippingMethod[]>([]);
   const [shippingRates, setShippingRates] = useState<IShippingRate[]>([]);
   const [isRelayModalOpen, setIsRelayModalOpen] = useState(false);
+  const [relayPoints, setRelayPoints] = useState<IRelayPoint[]>([]);
+  const [selectedRelayPoint, setSelectedRelayPoint] = useState<IRelayPoint | null>(null);
+  const [isRelayLoading, setIsRelayLoading] = useState(false);
+  const [relayError, setRelayError] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -83,6 +87,41 @@ export default function Checkout() {
     }));
   };
 
+  const handleSearchRelayPoints = async () => {
+    if (!formData.postalCode || !formData.city) {
+      setRelayError("Veuillez renseigner votre code postal et votre ville.");
+      return;
+    }
+
+    setIsRelayLoading(true);
+    setRelayError("");
+    setSelectedRelayPoint(null);
+
+    try {
+      const points = await getRelayPoints(
+        shippingMethod,
+        formData.postalCode,
+        formData.city
+      );
+
+      setRelayPoints(points);
+
+      if (points.length === 0) {
+        setRelayError(
+          "Aucun point relais disponible pour cette adresse."
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setRelayPoints([]);
+      setRelayError(
+        "Impossible de récupérer les points relais."
+      );
+    } finally {
+      setIsRelayLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       const payload = {
@@ -99,7 +138,20 @@ export default function Checkout() {
         shippingPostalCode: formData.postalCode,
         shippingCity: formData.city,
         shippingPhone: formData.phone,
-      };
+
+        ...(isRelayDelivery && selectedRelayPoint
+        ? {
+            relayPoint: {
+              relayPointId: selectedRelayPoint.relayPointId,
+              relayPointName: selectedRelayPoint.relayPointName,
+              relayPointAddress: selectedRelayPoint.relayPointAddress,
+              relayPointPostalCode: selectedRelayPoint.relayPointPostalCode,
+              relayPointCity: selectedRelayPoint.relayPointCity,
+              relayPointCountry: "France"
+            },
+          }
+        : {}),
+    };
 
       const order = await createOrder(payload);
 
@@ -109,6 +161,7 @@ export default function Checkout() {
           amount: order.amount,
           shippingCost: order.shippingCost,
           shippingMethod: selectedShippingMethod,
+          relayPoint: selectedRelayPoint,
         },
       });
     } catch (error) {
@@ -525,25 +578,42 @@ export default function Checkout() {
                 </h3>
 
                 <div className="checkout-relay-point-card">
-                  <div>
-                    <strong>Point relais - Pouldergat</strong>
 
-                    <p>
-                      12 rue Exemple
-                      <br />
-                      29100 Pouldergat
-                      <br />
-                      France
-                    </p>
-                  </div>
+                  {selectedRelayPoint ? (
+                    <div>
+                      <strong>{selectedRelayPoint.relayPointName}</strong>
+
+                      <p>
+                        {selectedRelayPoint.relayPointAddress}
+                        <br />
+                        {selectedRelayPoint.relayPointPostalCode}{" "}
+                        {selectedRelayPoint.relayPointCity}
+                        <br />
+                        {selectedRelayPoint.relayPointCountry}
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <strong>Aucun point relais sélectionné</strong>
+
+                      <p>
+                        Choisissez un point relais pour continuer.
+                      </p>
+                    </div>
+                  )}
 
                   <button
                     type="button"
-                    onClick={() => setIsRelayModalOpen(true)}
+                    onClick={() => {
+                      setIsRelayModalOpen(true);
+                      handleSearchRelayPoints();
+                    }}
                   >
-                    Modifier
+                    {selectedRelayPoint ? "Modifier" : "Choisir"}
                   </button>
+
                 </div>
+
               </div>
             )}
 
@@ -565,9 +635,53 @@ export default function Checkout() {
                   </div>
 
                   <div className="checkout-relay-modal-content">
-                    <p>
-                      La sélection des points relais sera connectée à l'API dédiée.
-                    </p>
+
+                    {isRelayLoading && (
+                      <p>
+                        Recherche des points relais...
+                      </p>
+                    )}
+
+                    {!isRelayLoading && relayError && (
+                      <p>
+                        {relayError}
+                      </p>
+                    )}
+
+                    {!isRelayLoading && !relayError && relayPoints.length > 0 && (
+                      <div className="checkout-relay-points">
+
+                        {relayPoints.map((point) => (
+                          <button
+                            type="button"
+                            className="checkout-relay-point-option"
+                            key={point.relayPointId}
+                            onClick={() => {
+                              setSelectedRelayPoint(point);
+                              setIsRelayModalOpen(false);
+                            }}
+                          >
+                            <div>
+                              <strong>{point.relayPointName}</strong>
+
+                              <p>
+                                {point.relayPointAddress}
+                                <br />
+                                {point.relayPointPostalCode} {point.relayPointCity}
+                              </p>
+                            </div>
+
+                            <span>
+                              {point.distance !== null
+                                ? `${Math.round(point.distance)} m`
+                                : ""}
+                            </span>
+                          </button>
+                        ))}
+
+                      </div>
+                    )}
+
                   </div>
 
                 </div>

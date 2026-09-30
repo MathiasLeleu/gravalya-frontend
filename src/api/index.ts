@@ -1,5 +1,5 @@
 import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, 
-  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate } from "../@types";
+  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -151,6 +151,32 @@ export async function getShippingRates(): Promise<IShippingRate[]> {
   if (!response.ok) {
     throw new Error(
       data.message || "Impossible de récupérer les tarifs de livraison."
+    );
+  }
+
+  return data;
+}
+
+export async function getRelayPoints(
+  shippingMethodId: number,
+  postalCode: string,
+  city: string
+): Promise<IRelayPoint[]> {
+  const params = new URLSearchParams({
+    shippingMethodId: String(shippingMethodId),
+    postalCode,
+    city,
+  });
+
+  const response = await fetch(
+    `${baseUrl}/relay-points?${params.toString()}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les points relais."
     );
   }
 

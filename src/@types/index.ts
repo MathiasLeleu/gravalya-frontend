@@ -108,3 +108,15 @@ export interface IShippingRate {
     maxWeight: string;
     cost: string;
 }
+
+export interface IRelayPoint {
+    relayPointId: number;
+    relayPointName: string;
+    relayPointAddress: string;
+    relayPointPostalCode: string;
+    relayPointCity: string;
+    relayPointCountry: string;
+    carrier: string;
+    distance: number | null;
+    openingHours: unknown[];
+}
