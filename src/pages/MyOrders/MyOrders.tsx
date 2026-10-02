@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./myorders.css";
+
+import { getMyOrders } from "../../api";
 
 
 /* ========================================
@@ -15,170 +17,28 @@ type OrderItem = {
 
 type Order = {
     id: number;
+    orderNumber: string;
     date: string;
     status: string;
+    subtotal: number;
+    shippingCost: number;
     total: number;
+    shippingFirstName: string;
+    shippingLastName: string;
+    shippingAddress: string;
+    shippingAddress2: string | null;
+    shippingPostalCode: string;
+    shippingCity: string;
+    shippingCountry: string;
+    orderRelayPoint: {
+        relayPointName: string;
+        relayPointAddress: string;
+        relayPointPostalCode: string;
+        relayPointCity: string;
+        relayPointCountry: string;
+    } | null;
     items: OrderItem[];
 };
-
-
-/* ========================================
-   DONNÉES TEMPORAIRES
-======================================== */
-
-const orders: Order[] = [
-    {
-        id: 7,
-        date: "21 septembre 2026",
-        status: "En préparation",
-        total: 42.80,
-        items: [
-            {
-                name: "Plaque de porte personnalisée",
-                quantity: 1,
-                unitPrice: 19.90
-            },
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 2,
-                unitPrice: 8.90
-            },
-            {
-                name: "Badge personnalisé",
-                quantity: 1,
-                unitPrice: 5.10
-            }
-        ]
-    },
-    {
-        id: 6,
-        date: "20 septembre 2026",
-        status: "En attente de paiement",
-        total: 68.70,
-        items: [
-            {
-                name: "Décoration murale personnalisée",
-                quantity: 1,
-                unitPrice: 34.90
-            },
-            {
-                name: "Plaque de porte",
-                quantity: 2,
-                unitPrice: 16.90
-            }
-        ]
-    },
-    {
-        id: 5,
-        date: "19 septembre 2026",
-        status: "Expédiée",
-        total: 51.70,
-        items: [
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 3,
-                unitPrice: 8.90
-            },
-            {
-                name: "Badge personnalisé",
-                quantity: 2,
-                unitPrice: 12.50
-            }
-        ]
-    },
-    {
-        id: 4,
-        date: "16 septembre 2026",
-        status: "Livrée",
-        total: 89.80,
-        items: [
-            {
-                name: "Plaque de porte personnalisée",
-                quantity: 2,
-                unitPrice: 19.90
-            },
-            {
-                name: "Décoration murale personnalisée",
-                quantity: 1,
-                unitPrice: 34.90
-            },
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 1,
-                unitPrice: 15.10
-            }
-        ]
-    },
-    {
-        id: 3,
-        date: "14 septembre 2026",
-        status: "Annulée",
-        total: 29.80,
-        items: [
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 2,
-                unitPrice: 8.90
-            },
-            {
-                name: "Badge personnalisé",
-                quantity: 1,
-                unitPrice: 12.00
-            }
-        ]
-    },
-    {
-        id: 2,
-        date: "18 septembre 2026",
-        status: "Livrée",
-        total: 34.90,
-        items: [
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 2,
-                unitPrice: 8.90
-            },
-            {
-                name: "Plaque de porte",
-                quantity: 1,
-                unitPrice: 17.10
-            }
-        ]
-    },
-    {
-        id: 1,
-        date: "12 septembre 2026",
-        status: "Expédiée",
-        total: 24.90,
-        items: [
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 1,
-                unitPrice: 8.90
-            },
-            {
-                name: "Plaque de porte",
-                quantity: 1,
-                unitPrice: 16.00
-            }
-        ]
-    }
-];
-
-
-/* ========================================
-   DONNÉES TEMPORAIRES UTILISATEUR
-======================================== */
-
-const user = {
-    firstName: "Mathias",
-    lastName: "Leleu",
-    address: "12 rue Exemple",
-    postalCode: "29000",
-    city: "Quimper",
-    country: "France"
-};
-
 
 /* ========================================
    FONCTIONS
@@ -208,9 +68,70 @@ function getSubtotal(items: OrderItem[]) {
 
 export default function MyOrders() {
 
+    const [orders, setOrders] = useState<Order[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const orderDialogRef = useRef<HTMLDialogElement>(null);
+
+    useEffect(() => {
+        const loadOrders = async () => {
+            try {
+                const data = await getMyOrders();
+
+                const formattedOrders: Order[] = data.map((order: any) => {
+                    const subtotal = Number(order.amount);
+                    const shippingCost = Number(order.shippingCost);
+
+                    return {
+                        id: order.id,
+                        orderNumber: order.orderNumber,
+                        date: new Date(order.created_at).toLocaleDateString(
+                            "fr-FR"
+                        ),
+                        status: order.statut,
+                        subtotal,
+                        shippingCost,
+                        total: subtotal + shippingCost,
+
+                        shippingFirstName: order.shippingFirstName,
+                        shippingLastName: order.shippingLastName,
+                        shippingAddress: order.shippingAddress,
+                        shippingAddress2: order.shippingAddress2,
+                        shippingPostalCode: order.shippingPostalCode,
+                        shippingCity: order.shippingCity,
+                        shippingCountry: order.shippingCountry,
+
+                        orderRelayPoint: order.orderRelayPoint
+                            ? {
+                                relayPointName: order.orderRelayPoint.relayPointName,
+                                relayPointAddress: order.orderRelayPoint.relayPointAddress,
+                                relayPointPostalCode: order.orderRelayPoint.relayPointPostalCode,
+                                relayPointCity: order.orderRelayPoint.relayPointCity,
+                                relayPointCountry: order.orderRelayPoint.relayPointCountry,
+                            }
+                            : null,
+
+                        items: order.orderLines.map((line: any) => ({
+                            name: line.product.name,
+                            quantity: line.quantity,
+                            unitPrice: Number(line.unitPrice),
+                        })),
+                    };
+                });
+
+                setOrders(formattedOrders);
+            } catch (error) {
+                console.error(error);
+                setError("Impossible de récupérer vos commandes.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadOrders();
+    }, []);
 
 
     /* ========================================
@@ -282,7 +203,7 @@ export default function MyOrders() {
                             <header className="myorders-card-header">
 
                                 <h2 className="low-title">
-                                    Commande #{formatOrderId(order.id)}
+                                    {order.orderNumber}
                                 </h2>
 
                                 <span className="myorders-status">
@@ -378,7 +299,7 @@ export default function MyOrders() {
                                 id="myorders-order-title"
                                 className="sub-title"
                             >
-                                Commande #{formatOrderId(selectedOrderData.id)}
+                                {selectedOrderData.orderNumber}
                             </h2>
 
                             <p>
@@ -446,7 +367,8 @@ export default function MyOrders() {
                             </p>
 
                             <p>
-                                <strong>Livraison :</strong> 0,00 €
+                                <strong>Livraison :</strong>{" "}
+                                {formatPrice(selectedOrderData.shippingCost)}
                             </p>
 
                             <p>
@@ -468,19 +390,53 @@ export default function MyOrders() {
                             </h3>
 
                             <address>
-
-                                {user.firstName} {user.lastName}
+                                {selectedOrderData.shippingFirstName}{" "}
+                                {selectedOrderData.shippingLastName}
                                 <br />
 
-                                {user.address}
+                                {selectedOrderData.shippingAddress}
+
+                                {selectedOrderData.shippingAddress2 && (
+                                    <>
+                                        <br />
+                                        {selectedOrderData.shippingAddress2}
+                                    </>
+                                )}
+
                                 <br />
 
-                                {user.postalCode} {user.city}
+                                {selectedOrderData.shippingPostalCode}{" "}
+                                {selectedOrderData.shippingCity}
                                 <br />
 
-                                {user.country}
-
+                                {selectedOrderData.shippingCountry}
                             </address>
+
+                            {selectedOrderData.orderRelayPoint && (
+                                <div className="myorders-order-relay-point">
+
+                                    <h3 className="low-title">
+                                        Point relais
+                                    </h3>
+
+                                    <address>
+                                        <strong>
+                                            {selectedOrderData.orderRelayPoint.relayPointName}
+                                        </strong>
+                                        <br />
+
+                                        {selectedOrderData.orderRelayPoint.relayPointAddress}
+                                        <br />
+
+                                        {selectedOrderData.orderRelayPoint.relayPointPostalCode}{" "}
+                                        {selectedOrderData.orderRelayPoint.relayPointCity}
+                                        <br />
+
+                                        {selectedOrderData.orderRelayPoint.relayPointCountry}
+                                    </address>
+
+                                </div>
+                            )}
 
                         </section>
 

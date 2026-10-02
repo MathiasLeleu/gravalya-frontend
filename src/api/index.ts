@@ -182,3 +182,20 @@ export async function getRelayPoints(
 
   return data;
 }
+
+export async function getMyOrders() {
+  const response = await fetch(`${baseUrl}/orders/me`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer vos commandes."
+    );
+  }
+
+  return data;
+}
