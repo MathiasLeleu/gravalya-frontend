@@ -37,9 +37,9 @@ function App() {
                         <Route path="/produits/:id" element={<Product />} />
                         <Route path="/connexion" element={<Auth />} />
                         <Route path="/commande" element={<Checkout />} />
+                        <Route path="/commande/confirmation" element={<OrderConfirmation />} />
 
                         <Route element={<RequireAuth />}>
-                            <Route path="/commande/confirmation" element={<OrderConfirmation />} />
                             <Route path="/profil" element={<Profile />} />
                             <Route path="/mes-commandes" element={<MyOrders />} />
                         </Route>

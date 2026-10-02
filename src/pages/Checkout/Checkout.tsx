@@ -37,21 +37,26 @@ export default function Checkout() {
   useEffect(() => {
     const loadCheckoutData = async () => {
       try {
-        const [userData, shippingMethodsData, shippingRatesData] = await Promise.all([
-          getMe(),
+        const [shippingMethodsData, shippingRatesData] = await Promise.all([
           getShippingMethods(),
           getShippingRates(),
         ]);
 
-        setFormData((current) => ({
-          ...current,
-          firstName: userData.user.firstName,
-          lastName: userData.user.lastName,
-          email: userData.user.email,
-        }));
-
         setShippingMethods(shippingMethodsData);
         setShippingRates(shippingRatesData);
+
+        const token = useAuthStore.getState().token;
+
+        if (token) {
+          const userData = await getMe();
+
+          setFormData((current) => ({
+            ...current,
+            firstName: userData.user.firstName,
+            lastName: userData.user.lastName,
+            email: userData.user.email,
+          }));
+        }
       } catch (error) {
         console.error(error);
       }
@@ -129,6 +134,7 @@ export default function Checkout() {
           productId: item.product.id,
           quantity: item.quantity,
         })),
+        customerEmail: formData.email,
         shippingMethodId: shippingMethod,
         shippingFirstName: formData.firstName,
         shippingLastName: formData.lastName,
