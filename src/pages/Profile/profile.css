@@ -631,3 +631,11 @@
     }
 
 }
+
+@media (max-width: 768px) {
+
+    .profile-orders {
+        grid-template-columns: 1fr;
+    }
+
+}

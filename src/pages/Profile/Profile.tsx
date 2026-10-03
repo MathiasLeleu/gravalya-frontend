@@ -1,6 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./profile.css";
+
+import { getMyOrders } from "../../api";
+import { useAuthStore } from "../../store";
 
 
 /* ========================================
@@ -11,11 +14,7 @@ type User = {
     firstName: string;
     lastName: string;
     email: string;
-    address: string;
-    addressComplement: string;
-    postalCode: string;
-    city: string;
-    country: string;
+    role: string;
 };
 
 type OrderItem = {
@@ -26,67 +25,21 @@ type OrderItem = {
 
 type Order = {
     id: number;
+    orderNumber: string;
     date: string;
     status: string;
     total: number;
+    shippingCost: number;
+    shippingFirstName: string;
+    shippingLastName: string;
+    shippingAddress: string;
+    shippingAddress2: string | null;
+    shippingPostalCode: string;
+    shippingCity: string;
+    shippingCountry: string;
+    shippingPhone: string;
     items: OrderItem[];
 };
-
-
-/* ========================================
-   DONNÉES TEMPORAIRES
-======================================== */
-
-const user: User = {
-    firstName: "Mathias",
-    lastName: "Leleu",
-    email: "exemple@email.fr",
-    address: "12 rue Exemple",
-    addressComplement: "Appartement 2",
-    postalCode: "29000",
-    city: "Quimper",
-    country: "France"
-};
-
-
-const orders: Order[] = [
-    {
-        id: 2,
-        date: "18 septembre 2026",
-        status: "Livrée",
-        total: 34.90,
-        items: [
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 2,
-                unitPrice: 8.90
-            },
-            {
-                name: "Plaque de porte",
-                quantity: 1,
-                unitPrice: 17.10
-            }
-        ]
-    },
-    {
-        id: 1,
-        date: "12 septembre 2026",
-        status: "Expédiée",
-        total: 24.90,
-        items: [
-            {
-                name: "Porte-clés personnalisé",
-                quantity: 1,
-                unitPrice: 8.90
-            },
-            {
-                name: "Plaque de porte",
-                quantity: 1,
-                unitPrice: 16.00
-            }
-        ]
-    }
-];
 
 
 /* ========================================
@@ -111,13 +64,109 @@ function getSubtotal(items: OrderItem[]) {
 }
 
 
+/* ========================================
+   PAGE PROFIL
+======================================== */
+
 function Profile() {
+
+    const authUser = useAuthStore((state) => state.user);
+
+    const [user, setUser] = useState<User | null>(authUser);
+    const [orders, setOrders] = useState<Order[]>([]);
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
 
     const orderDialogRef = useRef<HTMLDialogElement>(null);
     const editDialogRef = useRef<HTMLDialogElement>(null);
     const firstNameInputRef = useRef<HTMLInputElement>(null);
+
+
+    /* ========================================
+       CHARGEMENT DES DONNÉES
+    ======================================== */
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                setIsLoading(true);
+                setError("");
+
+                if (authUser) {
+                    setUser(authUser);
+                }
+
+                const ordersData = await getMyOrders();
+
+                const formattedOrders: Order[] = ordersData.map(
+                    (order: any) => {
+
+                        const subtotal = Number(order.amount);
+                        const shippingCost = Number(order.shippingCost);
+
+                        return {
+                            id: order.id,
+                            orderNumber: order.orderNumber,
+                            date: new Date(
+                                order.created_at
+                            ).toLocaleDateString("fr-FR"),
+                            status: order.statut,
+                            total: subtotal + shippingCost,
+                            shippingCost,
+
+                            shippingFirstName:
+                                order.shippingFirstName,
+
+                            shippingLastName:
+                                order.shippingLastName,
+
+                            shippingAddress:
+                                order.shippingAddress,
+
+                            shippingAddress2:
+                                order.shippingAddress2,
+
+                            shippingPostalCode:
+                                order.shippingPostalCode,
+
+                            shippingCity:
+                                order.shippingCity,
+
+                            shippingCountry:
+                                order.shippingCountry,
+
+                            shippingPhone:
+                                order.shippingPhone,
+
+                            items: order.orderLines.map(
+                                (line: any) => ({
+                                    name: line.product.name,
+                                    quantity: line.quantity,
+                                    unitPrice:
+                                        Number(line.unitPrice),
+                                })
+                            ),
+                        };
+                    }
+                );
+
+                setOrders(formattedOrders);
+
+            } catch (error) {
+                console.error(error);
+                setError(
+                    "Impossible de récupérer vos informations."
+                );
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadProfile();
+    }, [authUser]);
 
 
     /* ========================================
@@ -171,6 +220,63 @@ function Profile() {
     );
 
 
+    /* ========================================
+       ADRESSE DE LIVRAISON
+    ======================================== */
+
+    const latestOrder = orders[0];
+
+
+    /* ========================================
+       CHARGEMENT
+    ======================================== */
+
+    if (isLoading) {
+        return (
+            <main className="profile-page">
+
+                <header className="profile-page-header">
+
+                    <h1 className="main-title">
+                        Mon profil
+                    </h1>
+
+                    <p className="profile-page-introduction">
+                        Chargement de vos informations...
+                    </p>
+
+                </header>
+
+            </main>
+        );
+    }
+
+
+    /* ========================================
+       ERREUR
+    ======================================== */
+
+    if (error || !user) {
+        return (
+            <main className="profile-page">
+
+                <header className="profile-page-header">
+
+                    <h1 className="main-title">
+                        Mon profil
+                    </h1>
+
+                    <p className="profile-page-introduction">
+                        {error || "Impossible de charger votre profil."}
+                    </p>
+
+                </header>
+
+            </main>
+        );
+    }
+
+
     return (
         <main className="profile-page">
 
@@ -208,15 +314,18 @@ function Profile() {
                 <div className="profile-info profile-card">
 
                     <p>
-                        <strong>Prénom :</strong> {user.firstName}
+                        <strong>Prénom :</strong>{" "}
+                        {user.firstName}
                     </p>
 
                     <p>
-                        <strong>Nom :</strong> {user.lastName}
+                        <strong>Nom :</strong>{" "}
+                        {user.lastName}
                     </p>
 
                     <p>
-                        <strong>Adresse e-mail :</strong> {user.email}
+                        <strong>Adresse e-mail :</strong>{" "}
+                        {user.email}
                     </p>
 
                 </div>
@@ -230,34 +339,51 @@ function Profile() {
                         Adresse de livraison
                     </h3>
 
-                    <p>
-                        <strong>Prénom :</strong> {user.firstName}
-                    </p>
+                    {latestOrder ? (
+                        <>
+                            <p>
+                                <strong>Prénom :</strong>{" "}
+                                {latestOrder.shippingFirstName}
+                            </p>
 
-                    <p>
-                        <strong>Nom :</strong> {user.lastName}
-                    </p>
+                            <p>
+                                <strong>Nom :</strong>{" "}
+                                {latestOrder.shippingLastName}
+                            </p>
 
-                    <p>
-                        <strong>Adresse :</strong> {user.address}
-                    </p>
+                            <p>
+                                <strong>Adresse :</strong>{" "}
+                                {latestOrder.shippingAddress}
+                            </p>
 
-                    <p>
-                        <strong>Complément :</strong>{" "}
-                        {user.addressComplement}
-                    </p>
+                            {latestOrder.shippingAddress2 && (
+                                <p>
+                                    <strong>Complément :</strong>{" "}
+                                    {latestOrder.shippingAddress2}
+                                </p>
+                            )}
 
-                    <p>
-                        <strong>Code postal :</strong> {user.postalCode}
-                    </p>
+                            <p>
+                                <strong>Code postal :</strong>{" "}
+                                {latestOrder.shippingPostalCode}
+                            </p>
 
-                    <p>
-                        <strong>Ville :</strong> {user.city}
-                    </p>
+                            <p>
+                                <strong>Ville :</strong>{" "}
+                                {latestOrder.shippingCity}
+                            </p>
 
-                    <p>
-                        <strong>Pays :</strong> {user.country}
-                    </p>
+                            <p>
+                                <strong>Pays :</strong>{" "}
+                                {latestOrder.shippingCountry}
+                            </p>
+
+                        </>
+                    ) : (
+                        <p>
+                            Aucune adresse de livraison disponible.
+                        </p>
+                    )}
 
                 </div>
 
@@ -302,7 +428,7 @@ function Profile() {
 
                 <div className="profile-orders">
 
-                    {orders.map((order) => (
+                    {orders.slice(0, 4).map((order) => (
 
                         <article
                             key={order.id}
@@ -312,7 +438,7 @@ function Profile() {
                             <header className="profile-order-header">
 
                                 <h3 className="low-title">
-                                    Commande #{formatOrderId(order.id)}
+                                    {order.orderNumber}
                                 </h3>
 
                                 <span className="profile-order-status">
@@ -325,7 +451,8 @@ function Profile() {
                             <div className="profile-order-info">
 
                                 <p>
-                                    <strong>Date :</strong> {order.date}
+                                    <strong>Date :</strong>{" "}
+                                    {order.date}
                                 </p>
 
                                 <p>
@@ -339,7 +466,9 @@ function Profile() {
                             <button
                                 type="button"
                                 className="profile-order-button"
-                                onClick={() => openOrderDialog(order.id)}
+                                onClick={() =>
+                                    openOrderDialog(order.id)
+                                }
                             >
                                 Voir le détail
                             </button>
@@ -480,90 +609,10 @@ function Profile() {
                             Adresse de livraison
                         </h3>
 
-
-                        <div className="profile-edit-field">
-
-                            <label htmlFor="profile-address">
-                                Adresse
-                            </label>
-
-                            <input
-                                id="profile-address"
-                                name="address"
-                                type="text"
-                                defaultValue={user.address}
-                                autoComplete="address-line1"
-                            />
-
-                        </div>
-
-
-                        <div className="profile-edit-field">
-
-                            <label htmlFor="profile-address-complement">
-                                Complément
-                            </label>
-
-                            <input
-                                id="profile-address-complement"
-                                name="addressComplement"
-                                type="text"
-                                defaultValue={user.addressComplement}
-                                autoComplete="address-line2"
-                            />
-
-                        </div>
-
-
-                        <div className="profile-edit-field">
-
-                            <label htmlFor="profile-postal-code">
-                                Code postal
-                            </label>
-
-                            <input
-                                id="profile-postal-code"
-                                name="postalCode"
-                                type="text"
-                                defaultValue={user.postalCode}
-                                autoComplete="postal-code"
-                            />
-
-                        </div>
-
-
-                        <div className="profile-edit-field">
-
-                            <label htmlFor="profile-city">
-                                Ville
-                            </label>
-
-                            <input
-                                id="profile-city"
-                                name="city"
-                                type="text"
-                                defaultValue={user.city}
-                                autoComplete="address-level2"
-                            />
-
-                        </div>
-
-
-                        <div className="profile-edit-field">
-
-                            <label htmlFor="profile-country">
-                                Pays
-                            </label>
-
-                            <input
-                                id="profile-country"
-                                name="country"
-                                type="text"
-                                defaultValue={user.country}
-                                autoComplete="country-name"
-                            />
-
-                        </div>
+                        <p>
+                            Les informations de livraison sont
+                            modifiables directement depuis vos commandes.
+                        </p>
 
                     </section>
 
@@ -632,7 +681,7 @@ function Profile() {
                                 id="profile-order-title"
                                 className="sub-title"
                             >
-                                Commande #{formatOrderId(selectedOrderData.id)}
+                                {selectedOrderData.orderNumber}
                             </h2>
 
                             <p>
@@ -656,25 +705,29 @@ function Profile() {
                                 Produits
                             </h3>
 
-                            {selectedOrderData.items.map((item, index) => (
+                            {selectedOrderData.items.map(
+                                (item, index) => (
 
-                                <div
-                                    key={`${item.name}-${index}`}
-                                    className="profile-order-product"
-                                >
+                                    <div
+                                        key={`${item.name}-${index}`}
+                                        className="profile-order-product"
+                                    >
 
-                                    <p>
-                                        {item.name}
-                                    </p>
+                                        <p>
+                                            {item.name}
+                                        </p>
 
-                                    <p>
-                                        {item.quantity} ×{" "}
-                                        {formatPrice(item.unitPrice)}
-                                    </p>
+                                        <p>
+                                            {item.quantity} ×{" "}
+                                            {formatPrice(
+                                                item.unitPrice
+                                            )}
+                                        </p>
 
-                                </div>
+                                    </div>
 
-                            ))}
+                                )
+                            )}
 
                         </section>
 
@@ -689,16 +742,25 @@ function Profile() {
 
                             <p>
                                 <strong>Sous-total :</strong>{" "}
-                                {formatPrice(getSubtotal(selectedOrderData.items))}
+                                {formatPrice(
+                                    getSubtotal(
+                                        selectedOrderData.items
+                                    )
+                                )}
                             </p>
 
                             <p>
-                                <strong>Livraison :</strong> 0,00 €
+                                <strong>Livraison :</strong>{" "}
+                                {formatPrice(
+                                    selectedOrderData.shippingCost
+                                )}
                             </p>
 
                             <p>
                                 <strong>Total :</strong>{" "}
-                                {formatPrice(selectedOrderData.total)}
+                                {formatPrice(
+                                    selectedOrderData.total
+                                )}
                             </p>
 
                         </section>
@@ -713,16 +775,46 @@ function Profile() {
                             </h3>
 
                             <address>
-                                {user.firstName} {user.lastName}
+
+                                {selectedOrderData.shippingFirstName}{" "}
+                                {selectedOrderData.shippingLastName}
+
                                 <br />
-                                {user.address}
+
+                                {selectedOrderData.shippingAddress}
+
+                                {selectedOrderData.shippingAddress2 && (
+                                    <>
+                                        <br />
+                                        {selectedOrderData.shippingAddress2}
+                                    </>
+                                )}
+
                                 <br />
-                                {user.postalCode} {user.city}
+
+                                {selectedOrderData.shippingPostalCode}{" "}
+                                {selectedOrderData.shippingCity}
+
                                 <br />
-                                {user.country}
+
+                                {selectedOrderData.shippingCountry}
+
                             </address>
 
                         </section>
+
+                        {/* MODIFICATION DE LA COMMANDE */}
+
+                        {selectedOrderData.status === "EN_ATTENTE" && (
+
+                            <Link
+                                to="/mes-commandes"
+                                className="profile-orders-button"
+                            >
+                                Modifier la commande
+                            </Link>
+
+                        )}
 
                     </article>
 
