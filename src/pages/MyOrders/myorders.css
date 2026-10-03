@@ -313,6 +313,147 @@
     margin: 8px 0;
 }
 
+/* ========================================
+   FORMULAIRE LIVRAISON
+======================================== */
+
+.myorders-delivery-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    margin-top: 20px;
+}
+
+.myorders-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.myorders-form-field label {
+    font-weight: 600;
+}
+
+.myorders-form-field input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 11px 13px;
+
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+    color: #000000;
+
+    font: inherit;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.myorders-form-field input:focus {
+    border-color: #000000;
+
+    outline: none;
+
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+}
+
+.myorders-form-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+
+    gap: 15px;
+}
+
+.myorders-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+
+    margin-top: 8px;
+}
+
+.myorders-save-delivery-button,
+.myorders-cancel-edit-button {
+    padding: 12px 20px;
+
+    border-radius: 6px;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+/* ENREGISTRER */
+
+.myorders-save-delivery-button {
+    border: 1px solid #000000;
+
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.myorders-save-delivery-button:hover {
+    background-color: #333333;
+    border-color: #333333;
+}
+
+.myorders-save-delivery-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* ANNULER LA MODIFICATION */
+
+.myorders-cancel-edit-button {
+    border: 1px solid #cccccc;
+
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.myorders-cancel-edit-button:hover {
+    background-color: #f2f2f2;
+    border-color: #999999;
+}
+
+.myorders-edit-delivery-button {
+    margin-top: 20px;
+
+    padding: 12px 20px;
+
+    border: 1px solid #000000;
+    border-radius: 6px;
+
+    background-color: #000000;
+    color: #ffffff;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.myorders-edit-delivery-button:hover {
+    background-color: #333333;
+    border-color: #333333;
+}
 
 /* ========================================
    PRODUITS
@@ -350,6 +491,13 @@
     line-height: 1.6;
 }
 
+.myorders-form-error {
+    margin: 0;
+
+    color: #b91c1c;
+
+    font-size: 0.9rem;
+}
 
 /* ========================================
    FOCUS VISIBLE
@@ -362,6 +510,11 @@
 }
 
 .myorders-cancel-button:focus-visible {
+    outline: 3px solid #000000;
+    outline-offset: 3px;
+}
+
+.myorders-edit-delivery-button:focus-visible {
     outline: 3px solid #000000;
     outline-offset: 3px;
 }

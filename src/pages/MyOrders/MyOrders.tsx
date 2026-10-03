@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./myorders.css";
 
-import { getMyOrders, cancelOrder } from "../../api";
+import { getMyOrders, updateOrder, cancelOrder } from "../../api";
 
 
 /* ========================================
@@ -30,6 +30,7 @@ type Order = {
     shippingPostalCode: string;
     shippingCity: string;
     shippingCountry: string;
+    shippingPhone: string;
     orderRelayPoint: {
         relayPointName: string;
         relayPointAddress: string;
@@ -72,6 +73,28 @@ export default function MyOrders() {
     const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const [isEditingDelivery, setIsEditingDelivery] = useState(false);
+    const [deliveryForm, setDeliveryForm] = useState({
+        firstName: "",
+        lastName: "",
+        address: "",
+        address2: "",
+        postalCode: "",
+        city: "",
+        phone: "",
+    });
+
+    const [isSavingDelivery, setIsSavingDelivery] = useState(false);
+
+    const [deliveryErrors, setDeliveryErrors] = useState({
+        firstName: "",
+        lastName: "",
+        address: "",
+        postalCode: "",
+        city: "",
+        phone: "",
+    });
 
     const orderDialogRef = useRef<HTMLDialogElement>(null);
 
@@ -189,6 +212,142 @@ export default function MyOrders() {
        OUVERTURE MODALE COMMANDE
     ======================================== */
 
+    const handleDeliveryChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { name, value } = event.target;
+
+        setDeliveryForm((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    };
+
+    const handleUpdateDelivery = async () => {
+        if (!selectedOrderData) {
+            return;
+        }
+
+        const errors = {
+            firstName: "",
+            lastName: "",
+            address: "",
+            postalCode: "",
+            city: "",
+            phone: "",
+        };
+
+        if (!deliveryForm.firstName.trim()) {
+            errors.firstName = "Le prénom est requis.";
+        }
+
+        if (!deliveryForm.lastName.trim()) {
+            errors.lastName = "Le nom est requis.";
+        }
+
+        if (!deliveryForm.address.trim()) {
+            errors.address = "L'adresse est requise.";
+        }
+
+        if (!deliveryForm.city.trim()) {
+            errors.city = "La ville est requise.";
+        }
+
+        setDeliveryErrors(errors);
+
+        if (Object.values(errors).some((error) => error !== "")) {
+            return;
+        }
+
+        try {
+            setIsSavingDelivery(true);
+
+            const updatedOrder = await updateOrder(
+                selectedOrderData.id,
+                {
+                    shippingFirstName: deliveryForm.firstName,
+                    shippingLastName: deliveryForm.lastName,
+                    shippingAddress: deliveryForm.address,
+                    shippingAddress2: deliveryForm.address2 || null,
+                    shippingPostalCode: deliveryForm.postalCode,
+                    shippingCity: deliveryForm.city,
+                    shippingPhone: deliveryForm.phone,
+                }
+            );
+
+            setOrders((current) =>
+                current.map((order) =>
+                    order.id === updatedOrder.id
+                        ? {
+                            ...order,
+                            shippingFirstName: updatedOrder.shippingFirstName,
+                            shippingLastName: updatedOrder.shippingLastName,
+                            shippingAddress: updatedOrder.shippingAddress,
+                            shippingAddress2: updatedOrder.shippingAddress2,
+                            shippingPostalCode: updatedOrder.shippingPostalCode,
+                            shippingCity: updatedOrder.shippingCity,
+                            shippingPhone: updatedOrder.shippingPhone,
+                        }
+                        : order
+                )
+            );
+
+            setIsEditingDelivery(false);
+
+        } catch (error) {
+            console.error(error);
+
+            const typedError = error as Error & {
+                details?: {
+                    message: string;
+                    path: string;
+                }[];
+            };
+
+            const backendErrors = {
+                firstName: "",
+                lastName: "",
+                address: "",
+                postalCode: "",
+                city: "",
+                phone: "",
+            };
+
+            typedError.details?.forEach((detail) => {
+                switch (detail.path) {
+                    case "shippingFirstName":
+                        backendErrors.firstName = detail.message;
+                        break;
+
+                    case "shippingLastName":
+                        backendErrors.lastName = detail.message;
+                        break;
+
+                    case "shippingAddress":
+                        backendErrors.address = detail.message;
+                        break;
+
+                    case "shippingPostalCode":
+                        backendErrors.postalCode = detail.message;
+                        break;
+
+                    case "shippingCity":
+                        backendErrors.city = detail.message;
+                        break;
+
+                    case "shippingPhone":
+                        backendErrors.phone = detail.message;
+                        break;
+                }
+            });
+
+            setDeliveryErrors(backendErrors);
+
+        } finally {
+            setIsSavingDelivery(false);
+        }
+    };
+
     const openOrderDialog = (orderId: number) => {
 
         setSelectedOrder(orderId);
@@ -202,10 +361,9 @@ export default function MyOrders() {
     ======================================== */
 
     const closeOrderDialog = () => {
-
+        setIsEditingDelivery(false);
         orderDialogRef.current?.close();
     };
-
 
     /* ========================================
        COMMANDE SÉLECTIONNÉE
@@ -330,7 +488,10 @@ export default function MyOrders() {
                 ref={orderDialogRef}
                 className="myorders-lightbox"
                 aria-labelledby="myorders-order-title"
-                onClose={() => setSelectedOrder(null)}
+                onClose={() => {
+                    setSelectedOrder(null);
+                    setIsEditingDelivery(false);
+                }}
                 onClick={(event) => {
 
                     if (event.target === event.currentTarget) {
@@ -454,28 +615,252 @@ export default function MyOrders() {
                                 Adresse de livraison
                             </h3>
 
-                            <address>
-                                {selectedOrderData.shippingFirstName}{" "}
-                                {selectedOrderData.shippingLastName}
-                                <br />
+                            {isEditingDelivery ? (
+                                <div className="myorders-delivery-form">
 
-                                {selectedOrderData.shippingAddress}
+                                    <div className="myorders-form-field">
+                                        <label htmlFor="delivery-first-name">
+                                            Prénom
+                                        </label>
 
-                                {selectedOrderData.shippingAddress2 && (
-                                    <>
+                                        <input
+                                            id="delivery-first-name"
+                                            type="text"
+                                            name="firstName"
+                                            value={deliveryForm.firstName}
+                                            onChange={handleDeliveryChange}
+                                        />
+
+                                        {deliveryErrors.firstName && (
+                                            <p className="myorders-form-error">
+                                                {deliveryErrors.firstName}
+                                            </p>
+                                        )}
+
+                                    </div>
+
+
+                                    <div className="myorders-form-field">
+                                        <label htmlFor="delivery-last-name">
+                                            Nom
+                                        </label>
+
+                                        <input
+                                            id="delivery-last-name"
+                                            type="text"
+                                            name="lastName"
+                                            value={deliveryForm.lastName}
+                                            onChange={handleDeliveryChange}
+                                        />
+                                        
+                                        {deliveryErrors.lastName && (
+                                            <p className="myorders-form-error">
+                                                {deliveryErrors.lastName}
+                                            </p>
+                                        )}
+
+                                    </div>
+
+
+                                    <div className="myorders-form-field">
+                                        <label htmlFor="delivery-address">
+                                            Adresse
+                                        </label>
+
+                                        <input
+                                            id="delivery-address"
+                                            type="text"
+                                            name="address"
+                                            value={deliveryForm.address}
+                                            onChange={handleDeliveryChange}
+                                        />
+                                        
+                                        {deliveryErrors.address && (
+                                            <p className="myorders-form-error">
+                                                {deliveryErrors.address}
+                                            </p>
+                                        )}
+
+                                    </div>
+
+
+                                    <div className="myorders-form-field">
+                                        <label htmlFor="delivery-address2">
+                                            Complément d'adresse
+                                        </label>
+
+                                        <input
+                                            id="delivery-address2"
+                                            type="text"
+                                            name="address2"
+                                            value={deliveryForm.address2}
+                                            onChange={handleDeliveryChange}
+                                        />
+
+                                    </div>
+
+
+                                    <div className="myorders-form-row">
+
+                                        <div className="myorders-form-field">
+                                            <label htmlFor="delivery-postal-code">
+                                                Code postal
+                                            </label>
+
+                                            <input
+                                                id="delivery-postal-code"
+                                                type="text"
+                                                name="postalCode"
+                                                value={deliveryForm.postalCode}
+                                                onChange={handleDeliveryChange}
+                                            />
+
+                                            {deliveryErrors.postalCode && (
+                                                <p className="myorders-form-error">
+                                                    {deliveryErrors.postalCode}
+                                                </p>
+                                            )}
+
+                                        </div>
+
+
+                                        <div className="myorders-form-field">
+                                            <label htmlFor="delivery-city">
+                                                Ville
+                                            </label>
+
+                                            <input
+                                                id="delivery-city"
+                                                type="text"
+                                                name="city"
+                                                value={deliveryForm.city}
+                                                onChange={handleDeliveryChange}
+                                            />
+
+                                            {deliveryErrors.city && (
+                                                <p className="myorders-form-error">
+                                                    {deliveryErrors.city}
+                                                </p>
+                                            )}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div className="myorders-form-field">
+                                        <label htmlFor="delivery-phone">
+                                            Téléphone
+                                        </label>
+
+                                        <input
+                                            id="delivery-phone"
+                                            type="tel"
+                                            name="phone"
+                                            value={deliveryForm.phone}
+                                            onChange={handleDeliveryChange}
+                                        />
+
+                                        {deliveryErrors.phone && (
+                                            <p className="myorders-form-error">
+                                                {deliveryErrors.phone}
+                                            </p>
+                                        )}
+
+                                    </div>
+
+
+                                    <div className="myorders-form-actions">
+
+                                        <button
+                                            type="button"
+                                            className="myorders-save-delivery-button"
+                                            onClick={handleUpdateDelivery}
+                                            disabled={isSavingDelivery}
+                                        >
+                                            {isSavingDelivery
+                                                ? "Enregistrement..."
+                                                : "Enregistrer"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="myorders-cancel-edit-button"
+                                            onClick={() => {
+                                                setDeliveryErrors({
+                                                    firstName: "",
+                                                    lastName: "",
+                                                    address: "",
+                                                    postalCode: "",
+                                                    city: "",
+                                                    phone: "",
+                                                });
+
+                                                setIsEditingDelivery(false);
+                                            }}
+                                        >
+                                            Annuler
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            ) : (
+                                <>
+                                    <address>
+                                        {selectedOrderData.shippingFirstName}{" "}
+                                        {selectedOrderData.shippingLastName}
                                         <br />
-                                        {selectedOrderData.shippingAddress2}
-                                    </>
-                                )}
 
-                                <br />
+                                        {selectedOrderData.shippingAddress}
 
-                                {selectedOrderData.shippingPostalCode}{" "}
-                                {selectedOrderData.shippingCity}
-                                <br />
+                                        {selectedOrderData.shippingAddress2 && (
+                                            <>
+                                                <br />
+                                                {selectedOrderData.shippingAddress2}
+                                            </>
+                                        )}
 
-                                {selectedOrderData.shippingCountry}
-                            </address>
+                                        <br />
+
+                                        {selectedOrderData.shippingPostalCode}{" "}
+                                        {selectedOrderData.shippingCity}
+                                        <br />
+
+                                        {selectedOrderData.shippingCountry}
+                                    </address>
+
+                                    {selectedOrderData.status === "EN_ATTENTE" && (
+                                        <button
+                                            type="button"
+                                            className="myorders-edit-delivery-button"
+                                            onClick={() => {
+                                                setDeliveryErrors({
+                                                    firstName: "",
+                                                    lastName: "",
+                                                    address: "",
+                                                    postalCode: "",
+                                                    city: "",
+                                                    phone: "",
+                                                });
+                                                setDeliveryForm({
+                                                    firstName: selectedOrderData.shippingFirstName,
+                                                    lastName: selectedOrderData.shippingLastName,
+                                                    address: selectedOrderData.shippingAddress,
+                                                    address2: selectedOrderData.shippingAddress2 || "",
+                                                    postalCode: selectedOrderData.shippingPostalCode,
+                                                    city: selectedOrderData.shippingCity,
+                                                    phone: selectedOrderData.shippingPhone,
+                                                });
+
+                                                setIsEditingDelivery(true);
+                                            }}
+                                        >
+                                            Modifier les informations de livraison
+                                        </button>
+                                    )}
+                                </>
+                            )}
 
                             {selectedOrderData.orderRelayPoint && (
                                 <div className="myorders-order-relay-point">

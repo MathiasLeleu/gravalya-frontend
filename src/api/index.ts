@@ -200,6 +200,48 @@ export async function getMyOrders() {
   return data;
 }
 
+export async function updateOrder(
+  orderId: number,
+  data: {
+    shippingFirstName?: string;
+    shippingLastName?: string;
+    shippingCountry?: string;
+    shippingAddress?: string;
+    shippingAddress2?: string | null;
+    shippingPostalCode?: string;
+    shippingCity?: string;
+    shippingPhone?: string;
+  }
+) {
+  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+    method: "PATCH",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(
+      result.error || "Impossible de modifier la commande."
+    ) as Error & {
+      details?: {
+        message: string;
+        path: string;
+      }[];
+    };
+
+  error.details = result.details;
+
+  throw error;
+}
+
+  return result;
+}
+
 export async function cancelOrder(orderId: number) {
   const response = await fetch(`${baseUrl}/orders/${orderId}`, {
     method: "DELETE",
