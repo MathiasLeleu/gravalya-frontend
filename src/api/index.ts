@@ -199,3 +199,20 @@ export async function getMyOrders() {
 
   return data;
 }
+
+export async function cancelOrder(orderId: number) {
+  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible d'annuler la commande."
+    );
+  }
+
+  return data;
+}

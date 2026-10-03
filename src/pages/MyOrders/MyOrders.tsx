@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./myorders.css";
 
-import { getMyOrders } from "../../api";
+import { getMyOrders, cancelOrder } from "../../api";
 
 
 /* ========================================
@@ -133,6 +133,57 @@ export default function MyOrders() {
         loadOrders();
     }, []);
 
+    const handleCancelOrder = async (orderId: number) => {
+        try {
+            await cancelOrder(orderId);
+
+            const data = await getMyOrders();
+
+            const formattedOrders: Order[] = data.map((order: any) => {
+                const subtotal = Number(order.amount);
+                const shippingCost = Number(order.shippingCost);
+
+                return {
+                    id: order.id,
+                    orderNumber: order.orderNumber,
+                    date: new Date(order.created_at).toLocaleDateString(
+                        "fr-FR"
+                    ),
+                    status: order.statut,
+                    subtotal,
+                    shippingCost,
+                    total: subtotal + shippingCost,
+                    shippingFirstName: order.shippingFirstName,
+                    shippingLastName: order.shippingLastName,
+                    shippingAddress: order.shippingAddress,
+                    shippingAddress2: order.shippingAddress2,
+                    shippingPostalCode: order.shippingPostalCode,
+                    shippingCity: order.shippingCity,
+                    shippingCountry: order.shippingCountry,
+                    orderRelayPoint: order.orderRelayPoint
+                        ? {
+                            relayPointName: order.orderRelayPoint.relayPointName,
+                            relayPointAddress: order.orderRelayPoint.relayPointAddress,
+                            relayPointPostalCode: order.orderRelayPoint.relayPointPostalCode,
+                            relayPointCity: order.orderRelayPoint.relayPointCity,
+                            relayPointCountry: order.orderRelayPoint.relayPointCountry,
+                        }
+                        : null,
+                    items: order.orderLines.map((line: any) => ({
+                        name: line.product.name,
+                        quantity: line.quantity,
+                        unitPrice: Number(line.unitPrice),
+                    })),
+                };
+            });
+
+            setOrders(formattedOrders);
+            setSelectedOrder(null);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
 
     /* ========================================
        OUVERTURE MODALE COMMANDE
@@ -228,13 +279,27 @@ export default function MyOrders() {
                             </div>
 
 
-                            <button
-                                type="button"
-                                className="myorders-detail-button"
-                                onClick={() => openOrderDialog(order.id)}
-                            >
-                                Voir le détail
-                            </button>
+                            <div className="myorders-card-actions">
+
+                                <button
+                                    type="button"
+                                    className="myorders-detail-button"
+                                    onClick={() => openOrderDialog(order.id)}
+                                >
+                                    Voir le détail
+                                </button>
+
+                                {order.status === "EN_ATTENTE" && (
+                                    <button
+                                        type="button"
+                                        className="myorders-cancel-button"
+                                        onClick={() => handleCancelOrder(order.id)}
+                                    >
+                                        Annuler la commande
+                                    </button>
+                                )}
+
+                            </div>
 
                         </article>
 

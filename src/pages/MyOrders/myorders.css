@@ -106,8 +106,6 @@
 ======================================== */
 
 .myorders-detail-button {
-    margin-top: 20px;
-
     padding: 10px 18px;
 
     border: none;
@@ -123,6 +121,47 @@
 
 .myorders-detail-button:hover {
     opacity: 0.8;
+}
+
+/* ========================================
+   ACTIONS COMMANDE
+======================================== */
+
+.myorders-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    margin-top: 20px;
+}
+
+
+/* ========================================
+   ANNULATION COMMANDE
+======================================== */
+
+.myorders-cancel-button {
+    padding: 12px 20px;
+
+    border: 1px solid #b91c1c;
+    border-radius: 6px;
+
+    background-color: #dc2626;
+    color: #ffffff;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.myorders-cancel-button:hover {
+    background-color: #991b1b;
+    border-color: #7f1d1d;
 }
 
 
@@ -318,6 +357,11 @@
 
 .myorders-detail-button:focus-visible,
 .myorders-back-button:focus-visible {
+    outline: 3px solid #000000;
+    outline-offset: 3px;
+}
+
+.myorders-cancel-button:focus-visible {
     outline: 3px solid #000000;
     outline-offset: 3px;
 }
