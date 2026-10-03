@@ -414,6 +414,137 @@
     cursor: not-allowed;
 }
 
+/* ========================================
+   MODIFICATION POINT RELAIS
+======================================== */
+
+.myorders-relay-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    margin-top: 10px;
+    padding-top: 20px;
+
+    border-top: 1px solid #dddddd;
+}
+
+.myorders-relay-edit .low-title {
+    margin-bottom: 0;
+}
+
+.myorders-relay-edit p {
+    margin: 0;
+
+    line-height: 1.5;
+}
+
+
+/* ========================================
+   RECHERCHE POINT RELAIS
+======================================== */
+
+.myorders-search-relay-button {
+    width: fit-content;
+
+    padding: 11px 18px;
+
+    border: 1px solid #000000;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+    color: #000000;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.myorders-search-relay-button:hover {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.myorders-search-relay-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* ========================================
+   LISTE DES POINTS RELAIS
+======================================== */
+
+.myorders-relay-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* ========================================
+   POINT RELAIS
+======================================== */
+
+.myorders-relay-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    width: 100%;
+
+    padding: 15px;
+
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+    color: #000000;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.myorders-relay-option:hover {
+    border-color: #000000;
+    background-color: #f8f8f8;
+}
+
+.myorders-relay-option strong {
+    font-weight: 600;
+}
+
+.myorders-relay-option span {
+    line-height: 1.4;
+}
+
+
+/* ========================================
+   POINT RELAIS SÉLECTIONNÉ
+======================================== */
+
+.myorders-relay-option.selected {
+    border: 2px solid #000000;
+
+    background-color: #f2f2f2;
+
+    box-shadow: 0 0 0 1px #000000;
+}
+
 
 /* ANNULER LA MODIFICATION */
 
@@ -519,6 +650,12 @@
     outline-offset: 3px;
 }
 
+.myorders-search-relay-button:focus-visible,
+.myorders-relay-option:focus-visible {
+    outline: 3px solid #000000;
+    outline-offset: 3px;
+}
+
 
 /* ========================================
    MOBILE
@@ -571,6 +708,14 @@
         flex-direction: column;
 
         gap: 5px;
+    }
+
+    .myorders-search-relay-button {
+        width: 100%;
+    }
+
+    .myorders-relay-option {
+        padding: 14px;
     }
 
 }

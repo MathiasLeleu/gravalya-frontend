@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./myorders.css";
 
-import { getMyOrders, updateOrder, cancelOrder } from "../../api";
+import { getMyOrders, updateOrder, cancelOrder, getRelayPoints } from "../../api";
+import type { IRelayPoint } from "../../@types/index.ts";
 
 
 /* ========================================
@@ -23,6 +24,7 @@ type Order = {
     subtotal: number;
     shippingCost: number;
     total: number;
+    shippingMethodId: number;
     shippingFirstName: string;
     shippingLastName: string;
     shippingAddress: string;
@@ -32,6 +34,7 @@ type Order = {
     shippingCountry: string;
     shippingPhone: string;
     orderRelayPoint: {
+        relayPointId: number;
         relayPointName: string;
         relayPointAddress: string;
         relayPointPostalCode: string;
@@ -87,6 +90,11 @@ export default function MyOrders() {
 
     const [isSavingDelivery, setIsSavingDelivery] = useState(false);
 
+    const [relayPoints, setRelayPoints] = useState<IRelayPoint[]>([]);
+    const [selectedRelayPoint, setSelectedRelayPoint] = useState<IRelayPoint | null>(null);
+    const [isRelayLoading, setIsRelayLoading] = useState(false);
+    const [relayError, setRelayError] = useState("");
+
     const [deliveryErrors, setDeliveryErrors] = useState({
         firstName: "",
         lastName: "",
@@ -117,6 +125,7 @@ export default function MyOrders() {
                         subtotal,
                         shippingCost,
                         total: subtotal + shippingCost,
+                        shippingMethodId: order.shippingMethodId,
 
                         shippingFirstName: order.shippingFirstName,
                         shippingLastName: order.shippingLastName,
@@ -176,6 +185,7 @@ export default function MyOrders() {
                     subtotal,
                     shippingCost,
                     total: subtotal + shippingCost,
+                    shippingMethodId: order.shippingMethodId,
                     shippingFirstName: order.shippingFirstName,
                     shippingLastName: order.shippingLastName,
                     shippingAddress: order.shippingAddress,
@@ -221,6 +231,51 @@ export default function MyOrders() {
             ...current,
             [name]: value,
         }));
+    };
+
+    const handleSearchRelayPoints = async () => {
+        if (
+            !deliveryForm.postalCode.trim() ||
+            !deliveryForm.city.trim()
+        ) {
+            setRelayError(
+                "Veuillez renseigner votre code postal et votre ville."
+            );
+            return;
+        }
+
+        setIsRelayLoading(true);
+        setRelayError("");
+        setSelectedRelayPoint(null);
+
+        try {
+            if (!selectedOrderData) {
+            setRelayError("Commande introuvable.");
+            return;
+        }
+
+        const points = await getRelayPoints(
+            selectedOrderData.shippingMethodId,
+            deliveryForm.postalCode,
+            deliveryForm.city
+        );
+
+            setRelayPoints(points);
+
+            if (points.length === 0) {
+                setRelayError(
+                    "Aucun point relais disponible pour cette adresse."
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            setRelayPoints([]);
+            setRelayError(
+                "Impossible de récupérer les points relais."
+            );
+        } finally {
+            setIsRelayLoading(false);
+        }
     };
 
     const handleUpdateDelivery = async () => {
@@ -272,6 +327,18 @@ export default function MyOrders() {
                     shippingPostalCode: deliveryForm.postalCode,
                     shippingCity: deliveryForm.city,
                     shippingPhone: deliveryForm.phone,
+                    ...(selectedRelayPoint
+                        ? {
+                            relayPoint: {
+                                relayPointId: selectedRelayPoint.relayPointId,
+                                relayPointName: selectedRelayPoint.relayPointName,
+                                relayPointAddress: selectedRelayPoint.relayPointAddress,
+                                relayPointPostalCode: selectedRelayPoint.relayPointPostalCode,
+                                relayPointCity: selectedRelayPoint.relayPointCity,
+                                relayPointCountry: "France",
+                            },
+                        }
+                        : {}),
                 }
             );
 
@@ -287,10 +354,31 @@ export default function MyOrders() {
                             shippingPostalCode: updatedOrder.shippingPostalCode,
                             shippingCity: updatedOrder.shippingCity,
                             shippingPhone: updatedOrder.shippingPhone,
+
+                            orderRelayPoint: updatedOrder.orderRelayPoint
+                                ? {
+                                    relayPointId:
+                                        updatedOrder.orderRelayPoint.relayPointId,
+                                    relayPointName:
+                                        updatedOrder.orderRelayPoint.relayPointName,
+                                    relayPointAddress:
+                                        updatedOrder.orderRelayPoint.relayPointAddress,
+                                    relayPointPostalCode:
+                                        updatedOrder.orderRelayPoint.relayPointPostalCode,
+                                    relayPointCity:
+                                        updatedOrder.orderRelayPoint.relayPointCity,
+                                    relayPointCountry:
+                                        updatedOrder.orderRelayPoint.relayPointCountry,
+                                }
+                                : null,
                         }
                         : order
                 )
             );
+
+            setSelectedRelayPoint(null);
+            setRelayPoints([]);
+            setRelayError("");
 
             setIsEditingDelivery(false);
 
@@ -769,6 +857,76 @@ export default function MyOrders() {
 
                                     </div>
 
+                                    {selectedOrderData.orderRelayPoint && (
+                                        <div className="myorders-relay-edit">
+
+                                            <h4 className="low-title">
+                                                Point relais
+                                            </h4>
+
+                                            <p>
+                                                Recherchez un nouveau point relais si vous modifiez
+                                                votre adresse, votre code postal ou votre ville.
+                                            </p>
+
+                                            <button
+                                                type="button"
+                                                className="myorders-search-relay-button"
+                                                onClick={handleSearchRelayPoints}
+                                                disabled={isRelayLoading}
+                                            >
+                                                {isRelayLoading
+                                                    ? "Recherche..."
+                                                    : "Rechercher un point relais"}
+                                            </button>
+
+                                            {relayError && (
+                                                <p className="myorders-form-error">
+                                                    {relayError}
+                                                </p>
+                                            )}
+
+                                            {relayPoints.length > 0 && (
+                                                <div className="myorders-relay-list">
+
+                                                    {relayPoints.map((relayPoint) => (
+
+                                                        <button
+                                                            type="button"
+                                                            key={relayPoint.relayPointId}
+                                                            className={
+                                                                selectedRelayPoint?.relayPointId ===
+                                                                relayPoint.relayPointId
+                                                                    ? "myorders-relay-option selected"
+                                                                    : "myorders-relay-option"
+                                                            }
+                                                            onClick={() =>
+                                                                setSelectedRelayPoint(relayPoint)
+                                                            }
+                                                        >
+                                                            <strong>
+                                                                {relayPoint.relayPointName}
+                                                            </strong>
+
+                                                            <span>
+                                                                {relayPoint.relayPointAddress}
+                                                            </span>
+
+                                                            <span>
+                                                                {relayPoint.relayPointPostalCode}{" "}
+                                                                {relayPoint.relayPointCity}
+                                                            </span>
+
+                                                        </button>
+
+                                                    ))}
+
+                                                </div>
+                                            )}
+
+                                        </div>
+                                    )}
+
 
                                     <div className="myorders-form-actions">
 
@@ -852,6 +1010,10 @@ export default function MyOrders() {
                                                     city: selectedOrderData.shippingCity,
                                                     phone: selectedOrderData.shippingPhone,
                                                 });
+
+                                                setSelectedRelayPoint(null);
+                                                setRelayPoints([]);
+                                                setRelayError("");
 
                                                 setIsEditingDelivery(true);
                                             }}

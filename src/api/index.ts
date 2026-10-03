@@ -211,6 +211,14 @@ export async function updateOrder(
     shippingPostalCode?: string;
     shippingCity?: string;
     shippingPhone?: string;
+    relayPoint?: {
+      relayPointId: number;
+      relayPointName: string;
+      relayPointAddress: string;
+      relayPointPostalCode: string;
+      relayPointCity: string;
+      relayPointCountry: string;
+    };
   }
 ) {
   const response = await fetch(`${baseUrl}/orders/${orderId}`, {
