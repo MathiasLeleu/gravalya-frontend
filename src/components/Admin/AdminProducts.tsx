@@ -3,24 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import {
     getCategories,
     getAdminProducts,
+    createProduct,
     updateProduct,
 } from "../../api";
 
-import type { ICategory, IProduct } from "../../@types";
+import type { 
+    ICategory, IProduct,
+    ICreateProductForm, ICreateProductPayload, IEditProductForm
+} from "../../@types";
 
 import "./admin-products.css";
-
-interface IEditProductForm {
-    name: string;
-    description: string;
-    price: string;
-    weight: string;
-    height: string;
-    length: string;
-    width: string;
-    stockQuantity: string;
-    categoryId: string;
-}
 
 export default function AdminProducts() {
 
@@ -32,12 +24,27 @@ export default function AdminProducts() {
     const [statusFilter, setStatusFilter] = useState("all");
     const [productToToggle, setProductToToggle] = useState<IProduct | null>(null);
     const [productToEdit, setProductToEdit] = useState<IProduct | null>(null);
+    const [createLoading, setCreateLoading] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
     const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    const [createForm, setCreateForm] = useState<ICreateProductForm>({
+        name: "",
+        description: "",
+        price: "",
+        weight: "",
+        height: "",
+        length: "",
+        width: "",
+        stockQuantity: "",
+        categoryId: "",
+    });
 
     const [editForm, setEditForm] = useState<IEditProductForm>({
         name: "",
@@ -160,6 +167,94 @@ export default function AdminProducts() {
             );
         } finally {
             setActionLoading(null);
+        }
+    }
+
+    async function handleCreateProduct() {
+        setError("");
+        setSuccessMessage("");
+
+        if (
+            !createForm.name.trim() ||
+            !createForm.description.trim() ||
+            !createForm.price ||
+            !createForm.weight ||
+            !createForm.height ||
+            !createForm.length ||
+            !createForm.width ||
+            !createForm.stockQuantity ||
+            !createForm.categoryId
+        ) {
+            setError("Tous les champs du produit sont requis.");
+            return;
+        }
+
+        const price = Number(createForm.price);
+        const weight = Number(createForm.weight);
+        const height = Number(createForm.height);
+        const length = Number(createForm.length);
+        const width = Number(createForm.width);
+        const stockQuantity = Number(createForm.stockQuantity);
+        const categoryId = Number(createForm.categoryId);
+
+        if (
+            Number.isNaN(price) ||
+            Number.isNaN(weight) ||
+            Number.isNaN(height) ||
+            Number.isNaN(length) ||
+            Number.isNaN(width) ||
+            Number.isNaN(stockQuantity) ||
+            Number.isNaN(categoryId)
+        ) {
+            setError("Veuillez saisir des valeurs valides.");
+            return;
+        }
+
+        if (
+            price < 0 ||
+            weight < 0 ||
+            height < 0 ||
+            length < 0 ||
+            width < 0 ||
+            stockQuantity < 0
+        ) {
+            setError("Les valeurs numériques ne peuvent pas être négatives.");
+            return;
+        }
+
+        try {
+            setCreateLoading(true);
+
+            const product = await createProduct({
+                name: createForm.name.trim(),
+                description: createForm.description.trim(),
+                price,
+                weight,
+                height,
+                length,
+                width,
+                stockQuantity,
+                categoryId,
+            });
+
+            const updatedProducts = await getAdminProducts();
+
+            setProducts(updatedProducts);
+
+            setIsCreateModalOpen(false);
+
+            setSuccessMessage(
+                `Le produit « ${product.name } » a été ajouté avec succès.`
+            );
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de créer le produit."
+            );
+        } finally {
+            setCreateLoading(false);
         }
     }
 
@@ -338,7 +433,28 @@ export default function AdminProducts() {
 
                 </div>
 
-                <button className="admin-add-button">
+                <button
+                    className="admin-add-button"
+                    onClick={() => {
+                        setCreateForm({
+                            name: "",
+                            description: "",
+                            price: "",
+                            weight: "",
+                            height: "",
+                            length: "",
+                            width: "",
+                            stockQuantity: "",
+                            categoryId: categories.length > 0
+                                ? String(categories[0].id)
+                                : "",
+                        });
+
+                        setError("");
+                        setSuccessMessage("");
+                        setIsCreateModalOpen(true);
+                    }}
+                >
                     + Ajouter un produit
                 </button>
 
@@ -510,6 +626,259 @@ export default function AdminProducts() {
                             </button>
 
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {isCreateModalOpen && (
+                <div
+                    className="admin-edit-overlay"
+                    onClick={() => setIsCreateModalOpen(false)}
+                >
+                    <div
+                        className="admin-edit-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="admin-create-title"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <header className="admin-edit-modal-header">
+
+                            <h2 id="admin-create-title">
+                                Ajouter un produit
+                            </h2>
+
+                            <button
+                                type="button"
+                                className="admin-edit-close"
+                                onClick={() => setIsCreateModalOpen(false)}
+                                aria-label="Fermer"
+                            >
+                                ×
+                            </button>
+
+                        </header>
+
+                        <div className="admin-edit-form">
+
+                            <div className="admin-edit-field">
+                                <label htmlFor="create-product-name">
+                                    Nom
+                                </label>
+
+                                <input
+                                    id="create-product-name"
+                                    type="text"
+                                    value={createForm.name}
+                                    onChange={(event) =>
+                                        setCreateForm({
+                                            ...createForm,
+                                            name: event.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+
+                            <div className="admin-edit-field">
+                                <label htmlFor="create-product-description">
+                                    Description
+                                </label>
+
+                                <textarea
+                                    id="create-product-description"
+                                    value={createForm.description}
+                                    onChange={(event) =>
+                                        setCreateForm({
+                                            ...createForm,
+                                            description: event.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+
+                            <div className="admin-edit-row">
+
+                                <div className="admin-edit-field">
+                                    <label htmlFor="create-product-price">
+                                        Prix
+                                    </label>
+
+                                    <input
+                                        id="create-product-price"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={createForm.price}
+                                        onChange={(event) =>
+                                            setCreateForm({
+                                                ...createForm,
+                                                price: event.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+
+                                <div className="admin-edit-field">
+                                    <label htmlFor="create-product-stock">
+                                        Stock
+                                    </label>
+
+                                    <input
+                                        id="create-product-stock"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value={createForm.stockQuantity}
+                                        onChange={(event) =>
+                                            setCreateForm({
+                                                ...createForm,
+                                                stockQuantity: event.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+
+                            </div>
+
+                            <div className="admin-edit-field">
+                                <label htmlFor="create-product-category">
+                                    Catégorie
+                                </label>
+
+                                <select
+                                    id="create-product-category"
+                                    value={createForm.categoryId}
+                                    onChange={(event) =>
+                                        setCreateForm({
+                                            ...createForm,
+                                            categoryId: event.target.value,
+                                        })
+                                    }
+                                >
+                                    {categories.map((category) => (
+                                        <option
+                                            key={category.id}
+                                            value={category.id}
+                                        >
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="admin-edit-row">
+
+                                <div className="admin-edit-field">
+                                    <label htmlFor="create-product-weight">
+                                        Poids
+                                    </label>
+
+                                    <input
+                                        id="create-product-weight"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={createForm.weight}
+                                        onChange={(event) =>
+                                            setCreateForm({
+                                                ...createForm,
+                                                weight: event.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+
+                                <div className="admin-edit-field">
+                                    <label htmlFor="create-product-height">
+                                        Hauteur
+                                    </label>
+
+                                    <input
+                                        id="create-product-height"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={createForm.height}
+                                        onChange={(event) =>
+                                            setCreateForm({
+                                                ...createForm,
+                                                height: event.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+
+                            </div>
+
+                            <div className="admin-edit-row">
+
+                                <div className="admin-edit-field">
+                                    <label htmlFor="create-product-length">
+                                        Longueur
+                                    </label>
+
+                                    <input
+                                        id="create-product-length"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={createForm.length}
+                                        onChange={(event) =>
+                                            setCreateForm({
+                                                ...createForm,
+                                                length: event.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+
+                                <div className="admin-edit-field">
+                                    <label htmlFor="create-product-width">
+                                        Largeur
+                                    </label>
+
+                                    <input
+                                        id="create-product-width"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={createForm.width}
+                                        onChange={(event) =>
+                                            setCreateForm({
+                                                ...createForm,
+                                                width: event.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div className="admin-edit-actions">
+
+                            <button
+                                type="button"
+                                className="admin-confirm-cancel"
+                                onClick={() => setIsCreateModalOpen(false)}
+                            >
+                                Annuler
+                            </button>
+
+                            <button
+                                type="button"
+                                className="admin-confirm-success"
+                                onClick={handleCreateProduct}
+                                disabled={createLoading}
+                            >
+                                {createLoading
+                                    ? "Ajout en cours..."
+                                    : "Ajouter"}
+                            </button>
+
+                        </div>
+
                     </div>
                 </div>
             )}

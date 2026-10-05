@@ -128,6 +128,34 @@ export async function getProductById(id: number): Promise<IProduct> {
     return data;
 }
 
+export async function createProduct(data: {
+  name: string;
+  description: string;
+  price: number;
+  weight: number;
+  height: number;
+  length: number;
+  width: number;
+  stockQuantity: number;
+  categoryId: number;
+}) {
+  const response = await fetch(`${baseUrl}/products`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de créer le produit."
+    );
+  }
+
+  return result;
+}
+
 export async function updateProduct(
   productId: number,
   data: {

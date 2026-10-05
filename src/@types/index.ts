@@ -70,6 +70,42 @@ export interface IProduct {
     pictures: IPicture[];
 }
 
+export interface ICreateProductForm {
+    name: string;
+    description: string;
+    price: string;
+    weight: string;
+    height: string;
+    length: string;
+    width: string;
+    stockQuantity: string;
+    categoryId: string;
+}
+
+export interface ICreateProductPayload {
+    name: string;
+    description: string;
+    price: number;
+    weight: number;
+    height: number;
+    length: number;
+    width: number;
+    stockQuantity: number;
+    categoryId: number;
+}
+
+export interface IEditProductForm {
+    name: string;
+    description: string;
+    price: string;
+    weight: string;
+    height: string;
+    length: string;
+    width: string;
+    stockQuantity: string;
+    categoryId: string;
+}
+
 export interface ICreateOrderPayload {
     items: {
         productId: number;
