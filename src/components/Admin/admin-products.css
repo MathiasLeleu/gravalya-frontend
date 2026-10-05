@@ -299,6 +299,111 @@
     color: #2e7d32;
 }
 
+.admin-edit-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 1rem;
+
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.admin-edit-modal {
+    width: min(100%, 600px);
+    max-height: 90vh;
+
+    padding: 2rem;
+
+    background: #ffffff;
+    border-radius: 12px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+    overflow-y: auto;
+}
+
+.admin-edit-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 1.5rem;
+}
+
+.admin-edit-modal-header h2 {
+    margin: 0;
+}
+
+.admin-edit-close {
+    border: none;
+    background: transparent;
+
+    font-size: 1.8rem;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.admin-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.admin-edit-field label {
+    font-weight: 600;
+}
+
+.admin-edit-field input,
+.admin-edit-field textarea,
+.admin-edit-field select {
+    width: 100%;
+    padding: 0.7rem;
+
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.admin-edit-field textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.admin-edit-field input[readonly],
+.admin-edit-field textarea[readonly],
+.admin-edit-field select:disabled {
+    background: #f5f5f5;
+    cursor: default;
+}
+
+.admin-edit-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.admin-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    margin-top: 2rem;
+}
+
 /* ========================================
    RESPONSIVE
 ======================================== */
@@ -360,4 +465,18 @@
         flex: 1;
     }
 
+}
+
+@media (max-width: 600px) {
+    .admin-edit-modal {
+        padding: 1.5rem;
+    }
+
+    .admin-edit-row {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-edit-actions {
+        flex-direction: column;
+    }
 }
