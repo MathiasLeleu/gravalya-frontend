@@ -252,6 +252,40 @@ export async function updatePicture(
   return result;
 }
 
+export async function uploadProductPicture(
+  productId: number,
+  file: File,
+  alt: string,
+  isMain: boolean
+): Promise<IPicture> {
+  const formData = new FormData();
+
+  formData.append("picture", file);
+  formData.append("alt", alt);
+  formData.append("isMain", String(isMain));
+
+  const response = await fetch(
+    `${baseUrl}/products/${productId}/pictures/upload`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${useAuthStore.getState().token}`,
+      },
+      body: formData,
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || result.error || "Impossible d'ajouter l'image."
+    );
+  }
+
+  return result;
+}
+
 export async function deletePicture(
   productId: number,
   pictureId: number

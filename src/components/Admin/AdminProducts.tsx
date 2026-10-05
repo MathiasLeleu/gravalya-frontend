@@ -7,6 +7,7 @@ import {
     updateProduct,
     getProductPictures,
     updatePicture,
+    uploadProductPicture,
     deletePicture
 } from "../../api";
 
@@ -32,6 +33,11 @@ export default function AdminProducts() {
     const [productPictures, setProductPictures] = useState<IPicture[]>([]);
     const [picturesLoading, setPicturesLoading] = useState(false);
     const [pictureActionLoading, setPictureActionLoading] = useState<number | null>(null);
+
+    const [pictureFile, setPictureFile] = useState<File | null>(null);
+    const [pictureAlt, setPictureAlt] = useState("");
+    const [pictureIsMain, setPictureIsMain] = useState(false);
+    const [pictureUploadLoading, setPictureUploadLoading] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -135,6 +141,11 @@ export default function AdminProducts() {
 
         setError("");
         setSuccessMessage("");
+
+        setPictureFile(null);
+        setPictureAlt("");
+        setPictureIsMain(false);
+
         setPicturesLoading(true);
 
         try {
@@ -146,7 +157,6 @@ export default function AdminProducts() {
                 )
             );
 
-            setProductPictures(pictures);
         } catch (error) {
             setProductPictures([]);
 
@@ -285,6 +295,63 @@ export default function AdminProducts() {
             );
         } finally {
             setCreateLoading(false);
+        }
+    }
+
+    async function handleUploadPicture() {
+        if (!productToEdit) {
+            return;
+        }
+
+        setError("");
+        setSuccessMessage("");
+
+        if (!pictureFile) {
+            setError("Veuillez sélectionner une image.");
+            return;
+        }
+
+        if (!pictureAlt.trim()) {
+            setError("Le texte alternatif est requis.");
+            return;
+        }
+
+        try {
+            setPictureUploadLoading(true);
+
+            await uploadProductPicture(
+                productToEdit.id,
+                pictureFile,
+                pictureAlt.trim(),
+                pictureIsMain
+            );
+
+            const updatedPictures = await getProductPictures(
+                productToEdit.id
+            );
+
+            setProductPictures(
+                [...updatedPictures].sort((a, b) =>
+                    Number(b.isMain) - Number(a.isMain)
+                )
+            );
+
+            setPictureFile(null);
+            setPictureAlt("");
+            setPictureIsMain(false);
+
+            setSuccessMessage(
+                "L'image a été ajoutée avec succès."
+            );
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible d'ajouter l'image."
+            );
+        } finally {
+            setPictureUploadLoading(false);
         }
     }
 
@@ -1006,6 +1073,9 @@ export default function AdminProducts() {
                     onClick={() => {
                         setProductToEdit(null);
                         setProductPictures([]);
+                        setPictureFile(null);
+                        setPictureAlt("");
+                        setPictureIsMain(false);
                     }}
                 >
                     <div
@@ -1027,6 +1097,9 @@ export default function AdminProducts() {
                                 onClick={() => {
                                     setProductToEdit(null);
                                     setProductPictures([]);
+                                    setPictureFile(null);
+                                    setPictureAlt("");
+                                    setPictureIsMain(false);
                                 }}
                                 aria-label="Fermer"
                             >
@@ -1217,6 +1290,74 @@ export default function AdminProducts() {
 
                             </div>
 
+                            <div className="admin-add-picture">
+
+                                <h3>
+                                    Ajouter une image
+                                </h3>
+
+                                <div className="admin-edit-field">
+
+                                    <label htmlFor="picture-file">
+                                        Image
+                                    </label>
+
+                                    <input
+                                        id="picture-file"
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        onChange={(event) => {
+                                            const file = event.target.files?.[0] ?? null;
+
+                                            setPictureFile(file);
+                                        }}
+                                    />
+
+                                </div>
+
+                                <div className="admin-edit-field">
+
+                                    <label htmlFor="picture-alt">
+                                        Texte alternatif
+                                    </label>
+
+                                    <input
+                                        id="picture-alt"
+                                        type="text"
+                                        value={pictureAlt}
+                                        placeholder="Description de l'image"
+                                        onChange={(event) =>
+                                            setPictureAlt(event.target.value)
+                                        }
+                                    />
+
+                                </div>
+
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={pictureIsMain}
+                                        onChange={(event) =>
+                                            setPictureIsMain(event.target.checked)
+                                        }
+                                    />
+
+                                    Définir comme image principale
+                                </label>
+
+                                <button
+                                    type="button"
+                                    className="admin-confirm-success"
+                                    onClick={handleUploadPicture}
+                                    disabled={pictureUploadLoading}
+                                >
+                                    {pictureUploadLoading
+                                        ? "Ajout en cours..."
+                                        : "Ajouter l'image"}
+                                </button>
+
+                            </div>
+
                             <div className="admin-edit-row">
 
                                 <div className="admin-edit-field">
@@ -1315,6 +1456,9 @@ export default function AdminProducts() {
                                 onClick={() => {
                                     setProductToEdit(null);
                                     setProductPictures([]);
+                                    setPictureFile(null);
+                                    setPictureAlt("");
+                                    setPictureIsMain(false);
                                 }}
                             >
                                 Annuler

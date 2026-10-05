@@ -466,6 +466,33 @@
     cursor: not-allowed;
 }
 
+.admin-add-picture {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+
+    border-top: 1px solid #dddddd;
+}
+
+.admin-add-picture h3 {
+    margin: 0;
+}
+
+.admin-add-picture input[type="file"] {
+    padding: 0.4rem;
+}
+
+.admin-add-picture > label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    cursor: pointer;
+}
+
 /* ========================================
    RESPONSIVE
 ======================================== */
