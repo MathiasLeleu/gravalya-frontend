@@ -45,6 +45,9 @@ export interface ICategory {
   description: string;
   imageUrl: string;
   bannerUrl: string;
+  products?: {
+    id: number;
+  }[];
 }
 
 export interface IPicture {

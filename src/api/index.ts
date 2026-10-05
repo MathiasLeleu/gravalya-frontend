@@ -89,6 +89,146 @@ export async function getCategories(): Promise<ICategory[]> {
   return data;
 }
 
+export async function getCategoryById(id: number): Promise<ICategory> {
+  const response = await fetch(`${baseUrl}/categories/${id}`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer la catégorie."
+    );
+  }
+
+  return data;
+}
+
+export async function getProductsByCategory(
+  slug: string
+): Promise<IProduct[]> {
+  const response = await fetch(
+    `${baseUrl}/products/category/${slug}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les produits de la catégorie."
+    );
+  }
+
+  return data;
+}
+
+export async function createCategory(data: {
+  name: string;
+  slug: string;
+  description: string;
+  image: File;
+  banner: File;
+}) {
+  const formData = new FormData();
+
+  formData.append("name", data.name);
+  formData.append("slug", data.slug);
+  formData.append("description", data.description);
+  formData.append("image", data.image);
+  formData.append("banner", data.banner);
+
+  const response = await fetch(`${baseUrl}/categories`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${useAuthStore.getState().token}`,
+    },
+    body: formData,
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de créer la catégorie."
+    );
+  }
+
+  return result;
+}
+
+export async function updateCategory(
+  categoryId: number,
+  data: {
+    name?: string;
+    slug?: string;
+    description?: string;
+    image?: File;
+    banner?: File;
+  }
+) {
+  const formData = new FormData();
+
+  if (data.name !== undefined) {
+    formData.append("name", data.name);
+  }
+
+  if (data.slug !== undefined) {
+    formData.append("slug", data.slug);
+  }
+
+  if (data.description !== undefined) {
+    formData.append("description", data.description);
+  }
+
+  if (data.image) {
+    formData.append("image", data.image);
+  }
+
+  if (data.banner) {
+    formData.append("banner", data.banner);
+  }
+
+  const response = await fetch(
+    `${baseUrl}/categories/${categoryId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${useAuthStore.getState().token}`,
+      },
+      body: formData,
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de modifier la catégorie."
+    );
+  }
+
+  return result;
+}
+
+export async function deleteCategory(categoryId: number) {
+  const response = await fetch(
+    `${baseUrl}/categories/${categoryId}`,
+    {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de supprimer la catégorie."
+    );
+  }
+
+  return result;
+}
+
 export async function getProducts(): Promise<IProduct[]> {
     const response = await fetch(`${baseUrl}/products`);
     const data = await response.json();
