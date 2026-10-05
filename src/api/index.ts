@@ -100,6 +100,23 @@ export async function getProducts(): Promise<IProduct[]> {
     return data;
 }
 
+export async function getAdminProducts(): Promise<IProduct[]> {
+  const response = await fetch(`${baseUrl}/admin/products`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les produits."
+    );
+  }
+
+  return data;
+}
+
 export async function getProductById(id: number): Promise<IProduct> {
     const response = await fetch(`${baseUrl}/products/${id}`);
     const data = await response.json();
@@ -109,6 +126,55 @@ export async function getProductById(id: number): Promise<IProduct> {
     }
 
     return data;
+}
+
+export async function updateProduct(
+  productId: number,
+  data: {
+    name?: string;
+    description?: string;
+    price?: number;
+    weight?: number;
+    height?: number;
+    length?: number;
+    width?: number;
+    stockQuantity?: number;
+    active?: boolean;
+    categoryId?: number;
+  }
+) {
+  const response = await fetch(`${baseUrl}/products/${productId}`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de modifier le produit."
+    );
+  }
+
+  return result;
+}
+
+export async function deleteProduct(productId: number) {
+  const response = await fetch(`${baseUrl}/products/${productId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de supprimer le produit."
+    );
+  }
+
+  return data;
 }
 
 export async function createOrder(payload: ICreateOrderPayload) {

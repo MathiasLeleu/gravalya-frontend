@@ -1,6 +1,124 @@
+import { useEffect, useMemo, useState } from "react";
+
+import {
+    getCategories,
+    getAdminProducts,
+    updateProduct,
+} from "../../api";
+
+import type { ICategory, IProduct } from "../../@types";
+
 import "./admin-products.css";
 
 export default function AdminProducts() {
+
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [categories, setCategories] = useState<ICategory[]>([]);
+
+    const [search, setSearch] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [productToToggle, setProductToToggle] = useState<IProduct | null>(null);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+
+    const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                setLoading(true);
+                setError("");
+
+                const [productsData, categoriesData] = await Promise.all([
+                    getAdminProducts(),
+                    getCategories(),
+                ]);
+
+                setProducts(productsData);
+                setCategories(categoriesData);
+
+            } catch (error) {
+                setError(
+                    error instanceof Error
+                        ? error.message
+                        : "Impossible de récupérer les données."
+                );
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadData();
+    }, []);
+
+    const filteredProducts = useMemo(() => {
+        return products.filter((product) => {
+
+            const matchesSearch =
+                product.name
+                    .toLowerCase()
+                    .includes(search.toLowerCase());
+
+            const matchesCategory =
+                categoryFilter === "all" ||
+                product.categoryId === Number(categoryFilter);
+
+            const matchesStatus =
+                statusFilter === "all" ||
+                (statusFilter === "active" && product.active) ||
+                (statusFilter === "inactive" && !product.active);
+
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesStatus
+            );
+        });
+    }, [products, search, categoryFilter, statusFilter]);
+
+    async function handleToggleProduct(product: IProduct) {
+        try {
+            setActionLoading(product.id);
+            setError("");
+            setSuccessMessage("");
+
+            await updateProduct(product.id, {
+                active: !product.active,
+            });
+
+            setProducts((currentProducts) =>
+                currentProducts.map((currentProduct) =>
+                    currentProduct.id === product.id
+                        ? {
+                            ...currentProduct,
+                            active: !currentProduct.active,
+                        }
+                        : currentProduct
+                )
+            );
+
+            setProductToToggle(null);
+
+            setSuccessMessage(
+                product.active
+                    ? `Le produit « ${product.name} » a été désactivé avec succès.`
+                    : `Le produit « ${product.name} » a été activé avec succès.`
+            );
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de modifier le produit."
+            );
+        } finally {
+            setActionLoading(null);
+        }
+    }
+
     return (
         <section className="admin-products-page">
 
@@ -22,32 +140,36 @@ export default function AdminProducts() {
                         type="search"
                         placeholder="Rechercher un produit..."
                         aria-label="Rechercher un produit"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
                     />
 
                     <select
-                        defaultValue="all"
+                        value={categoryFilter}
+                        onChange={(event) =>
+                            setCategoryFilter(event.target.value)
+                        }
                         aria-label="Filtrer par catégorie"
                     >
                         <option value="all">
                             Toutes les catégories
                         </option>
 
-                        <option value="gravure">
-                            Gravure
-                        </option>
-
-                        <option value="impression-3d">
-                            Impression 3D
-                        </option>
-
-                        <option value="sublimation">
-                            Sublimation
-                        </option>
-
+                        {categories.map((category) => (
+                            <option
+                                key={category.id}
+                                value={category.id}
+                            >
+                                {category.name}
+                            </option>
+                        ))}
                     </select>
 
                     <select
-                        defaultValue="all"
+                        value={statusFilter}
+                        onChange={(event) =>
+                            setStatusFilter(event.target.value)
+                        }
                         aria-label="Filtrer par statut"
                     >
                         <option value="all">
@@ -61,7 +183,6 @@ export default function AdminProducts() {
                         <option value="inactive">
                             Inactifs
                         </option>
-
                     </select>
 
                 </div>
@@ -72,147 +193,174 @@ export default function AdminProducts() {
 
             </div>
 
+            {error && (
+                <p>
+                    {error}
+                </p>
+            )}
+
+            {successMessage && (
+                <p
+                    className="admin-success-message"
+                    role="status"
+                >
+                    {successMessage}
+                </p>
+            )}
+
             <div className="admin-products-list">
 
-                <article className="admin-product-card">
+                {loading && (
+                    <p>
+                        Chargement des produits...
+                    </p>
+                )}
 
-                    <div className="admin-product-image">
-                        <span>Image</span>
-                    </div>
+                {!loading && filteredProducts.length === 0 && (
+                    <p>
+                        Aucun produit ne correspond à votre recherche.
+                    </p>
+                )}
 
-                    <div className="admin-product-info">
+                {!loading && filteredProducts.map((product) => (
 
-                        <h2>
-                            Porte-clé personnalisé
-                        </h2>
+                    <article
+                        className="admin-product-card"
+                        key={product.id}
+                    >
 
-                        <span className="admin-product-category">
-                            Gravure
-                        </span>
-
-                        <div className="admin-product-details">
+                        <div className="admin-product-image">
                             <span>
-                                8,90 €
-                            </span>
-
-                            <span>
-                                Stock : 12
-                            </span>
-                        </div>
-
-                    </div>
-
-                    <span className="admin-product-status active">
-                        Actif
-                    </span>
-
-                    <div className="admin-product-actions">
-
-                        <button className="admin-edit-button">
-                            Modifier
-                        </button>
-
-                        <button className="admin-delete-button">
-                            Supprimer
-                        </button>
-
-                    </div>
-
-                </article>
-
-                <article className="admin-product-card">
-
-                    <div className="admin-product-image">
-                        <span>Image</span>
-                    </div>
-
-                    <div className="admin-product-info">
-
-                        <h2>
-                            Plaque de porte
-                        </h2>
-
-                        <span className="admin-product-category">
-                            Gravure
-                        </span>
-
-                        <div className="admin-product-details">
-                            <span>
-                                24,90 €
-                            </span>
-
-                            <span>
-                                Stock : 4
+                                Image
                             </span>
                         </div>
 
-                    </div>
+                        <div className="admin-product-info">
 
-                    <span className="admin-product-status active">
-                        Actif
-                    </span>
+                            <h2>
+                                {product.name}
+                            </h2>
 
-                    <div className="admin-product-actions">
-
-                        <button className="admin-edit-button">
-                            Modifier
-                        </button>
-
-                        <button className="admin-delete-button">
-                            Supprimer
-                        </button>
-
-                    </div>
-
-                </article>
-
-                <article className="admin-product-card">
-
-                    <div className="admin-product-image">
-                        <span>Image</span>
-                    </div>
-
-                    <div className="admin-product-info">
-
-                        <h2>
-                            Mug personnalisé
-                        </h2>
-
-                        <span className="admin-product-category">
-                            Sublimation
-                        </span>
-
-                        <div className="admin-product-details">
-                            <span>
-                                15,90 €
+                            <span className="admin-product-category">
+                                {product.category.name}
                             </span>
 
-                            <span>
-                                Stock : 0
-                            </span>
+                            <div className="admin-product-details">
+
+                                <span>
+                                    {Number(product.price)
+                                        .toFixed(2)
+                                        .replace(".", ",")} €
+                                </span>
+
+                                <span>
+                                    Stock : {product.stockQuantity}
+                                </span>
+
+                            </div>
+
                         </div>
 
-                    </div>
+                        <span
+                            className={`admin-product-status ${
+                                product.active
+                                    ? "active"
+                                    : "inactive"
+                            }`}
+                        >
+                            {product.active ? "Actif" : "Inactif"}
+                        </span>
 
-                    <span className="admin-product-status inactive">
-                        Inactif
-                    </span>
+                        <div className="admin-product-actions">
 
-                    <div className="admin-product-actions">
+                            <button
+                                className="admin-edit-button"
+                            >
+                                Modifier
+                            </button>
 
-                        <button className="admin-edit-button">
-                            Modifier
-                        </button>
+                            {product.active ? (
+                                <button
+                                    className="admin-delete-button"
+                                    onClick={() => setProductToToggle(product)}
+                                    disabled={actionLoading === product.id}
+                                >
+                                    Désactiver
+                                </button>
+                            ) : (
+                                <button
+                                    className="admin-activate-button"
+                                    onClick={() => setProductToToggle(product)}
+                                    disabled={actionLoading === product.id}
+                                >
+                                    Activer
+                                </button>
+                            )}
 
-                        <button className="admin-activate-button">
-                            Activer
-                        </button>
+                        </div>
 
-                    </div>
+                    </article>
 
-                </article>
+                ))}
 
             </div>
+
+            {productToToggle && (
+                <div
+                    className="admin-confirm-overlay"
+                    onClick={() => setProductToToggle(null)}
+                >
+                    <div
+                        className="admin-confirm-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="admin-confirm-title"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <h2 id="admin-confirm-title">
+                            {productToToggle.active
+                                ? "Désactiver le produit ?"
+                                : "Activer le produit ?"}
+                        </h2>
+
+                        <p>
+                            {productToToggle.active
+                                ? `Voulez-vous vraiment désactiver « ${productToToggle.name} » ?`
+                                : `Voulez-vous vraiment activer « ${productToToggle.name} » ?`}
+                        </p>
+
+                        <div className="admin-confirm-actions">
+
+                            <button
+                                type="button"
+                                className="admin-confirm-cancel"
+                                onClick={() => setProductToToggle(null)}
+                                disabled={actionLoading === productToToggle.id}
+                            >
+                                Annuler
+                            </button>
+
+                            <button
+                                type="button"
+                                className={
+                                    productToToggle.active
+                                        ? "admin-confirm-danger"
+                                        : "admin-confirm-success"
+                                }
+                                onClick={() => handleToggleProduct(productToToggle)}
+                                disabled={actionLoading === productToToggle.id}
+                            >
+                                {actionLoading === productToToggle.id
+                                    ? "Chargement..."
+                                    : productToToggle.active
+                                        ? "Désactiver"
+                                        : "Activer"}
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </section>
     );
