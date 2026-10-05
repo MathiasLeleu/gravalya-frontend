@@ -5,11 +5,14 @@ import {
     getAdminProducts,
     createProduct,
     updateProduct,
+    getProductPictures,
+    updatePicture,
+    deletePicture
 } from "../../api";
 
 import type { 
-    ICategory, IProduct,
-    ICreateProductForm, ICreateProductPayload, IEditProductForm
+    ICategory, IProduct, IPicture,
+    ICreateProductForm, IEditProductForm
 } from "../../@types";
 
 import "./admin-products.css";
@@ -25,6 +28,10 @@ export default function AdminProducts() {
     const [productToToggle, setProductToToggle] = useState<IProduct | null>(null);
     const [productToEdit, setProductToEdit] = useState<IProduct | null>(null);
     const [createLoading, setCreateLoading] = useState(false);
+
+    const [productPictures, setProductPictures] = useState<IPicture[]>([]);
+    const [picturesLoading, setPicturesLoading] = useState(false);
+    const [pictureActionLoading, setPictureActionLoading] = useState<number | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -111,7 +118,7 @@ export default function AdminProducts() {
         });
     }, [products, search, categoryFilter, statusFilter]);
 
-    function openEditModal(product: IProduct) {
+    async function openEditModal(product: IProduct) {
         setProductToEdit(product);
 
         setEditForm({
@@ -128,6 +135,29 @@ export default function AdminProducts() {
 
         setError("");
         setSuccessMessage("");
+        setPicturesLoading(true);
+
+        try {
+            const pictures = await getProductPictures(product.id);
+
+            setProductPictures(
+                [...pictures].sort((a, b) =>
+                    Number(b.isMain) - Number(a.isMain)
+                )
+            );
+
+            setProductPictures(pictures);
+        } catch (error) {
+            setProductPictures([]);
+
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de récupérer les images du produit."
+            );
+        } finally {
+            setPicturesLoading(false);
+        }
     }
 
     async function handleToggleProduct(product: IProduct) {
@@ -362,6 +392,93 @@ export default function AdminProducts() {
             );
         } finally {
             setActionLoading(null);
+        }
+    }
+
+    async function handleSetMainPicture(picture: IPicture) {
+        if (!productToEdit || picture.isMain) {
+            return;
+        }
+
+        try {
+            setPictureActionLoading(picture.id);
+            setError("");
+            setSuccessMessage("");
+
+            await updatePicture(
+                productToEdit.id,
+                picture.id,
+                {
+                    isMain: true,
+                }
+            );
+
+            const updatedPictures = await getProductPictures(
+                productToEdit.id
+            );
+
+            setProductPictures(
+                [...updatedPictures].sort((a, b) =>
+                    Number(b.isMain) - Number(a.isMain)
+                )
+            );
+
+            setSuccessMessage(
+                "L'image a été définie comme image principale."
+            );
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de définir l'image principale."
+            );
+        } finally {
+            setPictureActionLoading(null);
+        }
+    }
+
+    async function handleDeletePicture(picture: IPicture) {
+        if (!productToEdit) {
+            return;
+        }
+
+        if (picture.isMain) {
+            setError(
+                "L'image principale ne peut pas être supprimée pour le moment."
+            );
+            return;
+        }
+
+        try {
+            setPictureActionLoading(picture.id);
+            setError("");
+            setSuccessMessage("");
+
+            await deletePicture(
+                productToEdit.id,
+                picture.id
+            );
+
+            setProductPictures((currentPictures) =>
+                currentPictures.filter(
+                    (currentPicture) =>
+                        currentPicture.id !== picture.id
+                )
+            );
+
+            setSuccessMessage(
+                "L'image a été supprimée avec succès."
+            );
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de supprimer l'image."
+            );
+        } finally {
+            setPictureActionLoading(null);
         }
     }
 
@@ -651,7 +768,7 @@ export default function AdminProducts() {
                             <button
                                 type="button"
                                 className="admin-edit-close"
-                                onClick={() => setIsCreateModalOpen(false)}
+                                onClick={() => {setIsCreateModalOpen(false);}}
                                 aria-label="Fermer"
                             >
                                 ×
@@ -861,7 +978,7 @@ export default function AdminProducts() {
                             <button
                                 type="button"
                                 className="admin-confirm-cancel"
-                                onClick={() => setIsCreateModalOpen(false)}
+                                onClick={() => {setIsCreateModalOpen(false);}}
                             >
                                 Annuler
                             </button>
@@ -886,7 +1003,10 @@ export default function AdminProducts() {
             {productToEdit && (
                 <div
                     className="admin-edit-overlay"
-                    onClick={() => setProductToEdit(null)}
+                    onClick={() => {
+                        setProductToEdit(null);
+                        setProductPictures([]);
+                    }}
                 >
                     <div
                         className="admin-edit-modal"
@@ -904,7 +1024,10 @@ export default function AdminProducts() {
                             <button
                                 type="button"
                                 className="admin-edit-close"
-                                onClick={() => setProductToEdit(null)}
+                                onClick={() => {
+                                    setProductToEdit(null);
+                                    setProductPictures([]);
+                                }}
                                 aria-label="Fermer"
                             >
                                 ×
@@ -1019,6 +1142,81 @@ export default function AdminProducts() {
                                 </select>
                             </div>
 
+                            
+                            <div className="admin-edit-images">
+
+                                <h3>
+                                    Images du produit
+                                </h3>
+
+                                {picturesLoading ? (
+                                    <p>
+                                        Chargement des images...
+                                    </p>
+                                ) : productPictures.length === 0 ? (
+                                    <p>
+                                        Aucune image pour ce produit.
+                                    </p>
+                                ) : (
+                                    <div className="admin-edit-images-grid">
+
+                                        {productPictures.map((picture) => (
+                                            <div
+                                                key={picture.id}
+                                                className="admin-edit-image-card"
+                                            >
+                                                <img
+                                                    src={`${import.meta.env.VITE_API_URL}${picture.url}`}
+                                                    alt={picture.alt}
+                                                />
+
+                                                {picture.isMain && (
+                                                    <span className="admin-edit-image-main">
+                                                        Image principale
+                                                    </span>
+                                                )}
+
+                                                <div className="admin-edit-image-actions">
+
+                                                    {!picture.isMain && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSetMainPicture(picture)
+                                                            }
+                                                            disabled={
+                                                                pictureActionLoading === picture.id
+                                                            }
+                                                        >
+                                                            {pictureActionLoading === picture.id
+                                                                ? "Chargement..."
+                                                                : "Définir principale"}
+                                                        </button>
+                                                    )}
+
+                                                    {!picture.isMain && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleDeletePicture(picture)
+                                                            }
+                                                            disabled={
+                                                                pictureActionLoading === picture.id
+                                                            }
+                                                        >
+                                                            Supprimer
+                                                        </button>
+                                                    )}
+
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                    </div>
+                                )}
+
+                            </div>
+
                             <div className="admin-edit-row">
 
                                 <div className="admin-edit-field">
@@ -1114,7 +1312,10 @@ export default function AdminProducts() {
                             <button
                                 type="button"
                                 className="admin-confirm-cancel"
-                                onClick={() => setProductToEdit(null)}
+                                onClick={() => {
+                                    setProductToEdit(null);
+                                    setProductPictures([]);
+                                }}
                             >
                                 Annuler
                             </button>

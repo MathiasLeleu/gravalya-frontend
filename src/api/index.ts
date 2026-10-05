@@ -1,5 +1,5 @@
 import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, 
-  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint } from "../@types";
+  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -203,6 +203,76 @@ export async function deleteProduct(productId: number) {
   }
 
   return data;
+}
+
+export async function getProductPictures(
+  productId: number
+): Promise<IPicture[]> {
+  const response = await fetch(
+    `${baseUrl}/products/${productId}/pictures`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les images du produit."
+    );
+  }
+
+  return data;
+}
+
+export async function updatePicture(
+  productId: number,
+  pictureId: number,
+  data: {
+    url?: string;
+    alt?: string;
+    isMain?: boolean;
+  }
+) {
+  const response = await fetch(
+    `${baseUrl}/products/${productId}/pictures/${pictureId}`,
+    {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de modifier l'image."
+    );
+  }
+
+  return result;
+}
+
+export async function deletePicture(
+  productId: number,
+  pictureId: number
+) {
+  const response = await fetch(
+    `${baseUrl}/products/${productId}/pictures/${pictureId}`,
+    {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Impossible de supprimer l'image."
+    );
+  }
+
+  return result;
 }
 
 export async function createOrder(payload: ICreateOrderPayload) {
