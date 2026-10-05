@@ -135,6 +135,10 @@
     background-color: #d4edda;
 }
 
+.admin-order-status.cancelled {
+    background-color: #f8d7da;
+}
+
 /* ========================================
    BUTTON
 ======================================== */
@@ -157,6 +161,165 @@
 
 .admin-order-button:hover {
     opacity: 0.75;
+}
+
+/* ========================================
+   MODALE DÉTAIL COMMANDE
+======================================== */
+
+.admin-order-dialog {
+    width: min(700px, 90vw);
+    max-height: 90vh;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    background: #f4ebe4;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    color: #222;
+    overflow: hidden;
+}
+
+.admin-order-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.admin-order-dialog-close {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.admin-order-dialog-close:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.admin-order-dialog-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 35px;
+}
+
+.admin-order-dialog-header {
+    padding-right: 45px;
+    margin-bottom: 25px;
+}
+
+.admin-order-dialog-header p {
+    margin: 7px 0;
+}
+
+.admin-order-dialog-section {
+    padding: 20px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.admin-order-dialog-section:first-of-type {
+    padding-top: 0;
+    border-top: none;
+}
+
+.admin-order-dialog-section .low-title {
+    margin-bottom: 15px;
+}
+
+.admin-order-dialog-product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 0;
+}
+
+.admin-order-dialog-product + .admin-order-dialog-product {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.admin-order-dialog-product span:last-child {
+    white-space: nowrap;
+}
+
+.admin-order-dialog-section address {
+    margin-top: 10px;
+    font-style: normal;
+    line-height: 1.6;
+}
+
+.admin-order-dialog-section h3 + address {
+    margin-bottom: 20px;
+}
+
+.admin-order-dialog-section select {
+    width: 100%;
+    max-width: 320px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.admin-order-dialog-section .admin-order-button {
+    margin-top: 15px;
+}
+
+.admin-order-dialog-section .admin-order-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.admin-order-dialog-section .default-text {
+    margin-top: 12px;
+}
+
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 600px) {
+
+    .admin-order-dialog {
+        width: 94vw;
+        max-height: 92vh;
+    }
+
+    .admin-order-dialog-content {
+        padding: 25px 20px;
+    }
+
+    .admin-order-dialog-product {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .admin-order-dialog-section select {
+        max-width: none;
+    }
+
+}
+
+@media (max-width: 300px) {
+
+    .admin-order-dialog-content {
+        padding: 20px 15px;
+    }
+
+    .admin-order-dialog-close {
+        top: 10px;
+        right: 10px;
+    }
+
 }
 
 /* ========================================

@@ -200,9 +200,32 @@ export async function getMyOrders() {
   return data;
 }
 
+export async function getAllOrders() {
+  const response = await fetch(`${baseUrl}/orders`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les commandes."
+    );
+  }
+
+  return data;
+}
+
 export async function updateOrder(
   orderId: number,
   data: {
+    statut?: 
+    | "EN_ATTENTE"
+    | "CONFIRMEE"
+    | "EXPEDIEE"
+    | "LIVREE"
+    | "ANNULEE";
     shippingFirstName?: string;
     shippingLastName?: string;
     shippingCountry?: string;
