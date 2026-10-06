@@ -76,7 +76,10 @@ export default function Product() {
         return <p>Chargement du produit...</p>;
     }
 
-    const images = product.pictures;
+    const images = [
+        ...product.pictures.filter((image) => image.isMain),
+        ...product.pictures.filter((image) => !image.isMain),
+    ];
 
     return (
         <main className="product-page">
@@ -158,6 +161,24 @@ export default function Product() {
                 <p className="product-description">
                     {product.description}
                 </p>
+
+                <div className="product-dimensions">
+                    <h2 className="low-title">
+                        Dimensions
+                    </h2>
+
+                    <div className="product-dimensions-values">
+                        <p>Hauteur : {product.height} cm</p>
+
+                        <div className="product-dimensions-bottom">
+                            <p>Longueur : {product.length} cm</p>
+                            <p>Largeur : {product.width} cm</p>
+                        </div>
+
+                        <p>Poids : {product.weight} g</p>
+                        
+                    </div>
+                </div>
 
                 <p className="product-price">
                     {Number(product.price).toFixed(2).replace(".", ",")} €

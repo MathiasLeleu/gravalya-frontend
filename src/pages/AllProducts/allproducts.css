@@ -78,7 +78,8 @@
 .products-page-content ul { 
     display: grid; 
  
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(270px, 320px)); 
+    justify-content: center;
  
     gap: 40px; 
  

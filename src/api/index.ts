@@ -1,5 +1,5 @@
 import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, IUser, IUserDetails,
-  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture } from "../@types";
+  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture, IShippingOption } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -553,6 +553,37 @@ export async function getRelayPoints(
   }
 
   return data;
+}
+
+export async function getShippingOptions(
+    shippingMethodId: number,
+    postalCode: string,
+    city: string,
+    weight: number
+): Promise<IShippingOption[]> {
+    const params = new URLSearchParams({
+        shippingMethodId: String(shippingMethodId),
+        postalCode,
+        city,
+        weight: String(weight),
+    });
+
+    const response = await fetch(
+        `${baseUrl}/shipping-options?${params.toString()}`
+    );
+
+    if (!response.ok) {
+        const error = await response.json();
+
+        throw new Error(
+            error.message ||
+            "Impossible de récupérer les options de livraison."
+        );
+    }
+
+    const data = await response.json();
+
+    return data.data;
 }
 
 export async function getMyOrders() {

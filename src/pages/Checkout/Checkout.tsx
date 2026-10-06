@@ -4,8 +4,34 @@ import "./checkout.css";
 
 import { useAuthStore } from "../../store";
 
-import { getMe, getShippingMethods, getShippingRates, createOrder, getRelayPoints } from "../../api";
-import type { IShippingMethod, IShippingRate, IRelayPoint } from "../../@types";
+import {
+  getMe,
+  getShippingMethods,
+  getShippingRates,
+  createOrder,
+  getRelayPoints,
+  getShippingOptions,
+} from "../../api";
+
+import type {
+  IShippingMethod,
+  IShippingRate,
+  IRelayPoint,
+  IShippingOption,
+} from "../../@types";
+
+const shippingServiceCodes: Record<string, string> = {
+  "Colissimo-Domicile": "colissimo:home/fr",
+  "Colissimo-Point relais": "colissimo:post-office",
+
+  "Chronopost-Domicile": "chronopost:18",
+  "Chronopost-Point relais": "chronopost:service_point",
+
+  "Mondial Relay-Domicile":
+    "mondial_relay:home_domestic,dualapi/c2c",
+  "Mondial Relay-Point relais":
+    "mondial_relay:service_point,dualapi/size=l,c2c",
+};
 
 export default function Checkout() {
   const cart = useAuthStore((state) => state.cart);
@@ -16,9 +42,11 @@ export default function Checkout() {
 
   const [shippingMethods, setShippingMethods] = useState<IShippingMethod[]>([]);
   const [shippingRates, setShippingRates] = useState<IShippingRate[]>([]);
+  const [shippingOptions, setShippingOptions] = useState<IShippingOption[]>([]);
   const [isRelayModalOpen, setIsRelayModalOpen] = useState(false);
   const [relayPoints, setRelayPoints] = useState<IRelayPoint[]>([]);
-  const [selectedRelayPoint, setSelectedRelayPoint] = useState<IRelayPoint | null>(null);
+  const [selectedRelayPoint, setSelectedRelayPoint] =
+    useState<IRelayPoint | null>(null);
   const [isRelayLoading, setIsRelayLoading] = useState(false);
   const [relayError, setRelayError] = useState("");
 
@@ -134,8 +162,11 @@ export default function Checkout() {
           productId: item.product.id,
           quantity: item.quantity,
         })),
+
         customerEmail: formData.email,
+
         shippingMethodId: shippingMethod,
+
         shippingFirstName: formData.firstName,
         shippingLastName: formData.lastName,
         shippingCountry: formData.country,
@@ -145,19 +176,26 @@ export default function Checkout() {
         shippingCity: formData.city,
         shippingPhone: formData.phone,
 
+        ...(selectedShippingMethod?.name !== "Lettre Suivie"
+          ? {
+              shippingOptionCode: selectedShippingOption?.code,
+            }
+          : {}),
+
         ...(isRelayDelivery && selectedRelayPoint
-        ? {
-            relayPoint: {
-              relayPointId: selectedRelayPoint.relayPointId,
-              relayPointName: selectedRelayPoint.relayPointName,
-              relayPointAddress: selectedRelayPoint.relayPointAddress,
-              relayPointPostalCode: selectedRelayPoint.relayPointPostalCode,
-              relayPointCity: selectedRelayPoint.relayPointCity,
-              relayPointCountry: "France"
-            },
-          }
-        : {}),
-    };
+          ? {
+              relayPoint: {
+                relayPointId: selectedRelayPoint.relayPointId,
+                relayPointName: selectedRelayPoint.relayPointName,
+                relayPointAddress: selectedRelayPoint.relayPointAddress,
+                relayPointPostalCode:
+                  selectedRelayPoint.relayPointPostalCode,
+                relayPointCity: selectedRelayPoint.relayPointCity,
+                relayPointCountry: selectedRelayPoint.relayPointCountry,
+              },
+            }
+          : {}),
+      };
 
       const order = await createOrder(payload);
 
@@ -171,7 +209,10 @@ export default function Checkout() {
         },
       });
     } catch (error) {
-      console.error("Erreur lors de la création de la commande :", error);
+      console.error(
+        "Erreur lors de la création de la commande :",
+        error
+      );
     }
   };
 
@@ -183,12 +224,25 @@ export default function Checkout() {
 
   const cartTotalWeight =
     Math.round(
-      cart.reduce(
-        (total, item) =>
-          total + Number(item.product.weight) * item.quantity,
-        0
+      (
+        cart.reduce(
+          (total, item) =>
+            total + Number(item.product.weight) * item.quantity,
+          0
+        ) / 1000
       ) * 1000
     ) / 1000;
+
+  console.log(
+    "Poids produits :",
+    cart.map((item) => ({
+      nom: item.product.name,
+      poids: item.product.weight,
+      quantite: item.quantity,
+    }))
+  );
+
+  console.log("Poids total :", cartTotalWeight);
 
   const selectedShippingRate = shippingRates.find(
     (rate) =>
@@ -198,34 +252,59 @@ export default function Checkout() {
   );
 
   useEffect(() => {
-    const selectedMethodAvailable = shippingRates.some(
-        (rate) =>
-            rate.shippingMethodId === shippingMethod &&
-            cartTotalWeight >= Number(rate.minWeight) &&
-            cartTotalWeight <= Number(rate.maxWeight)
+    if (
+      !formData.postalCode ||
+      !formData.city ||
+      cartTotalWeight <= 0
+    ) {
+      setShippingOptions([]);
+      return;
+    }
+
+    const sendcloudMethods = shippingMethods.filter(
+      (method) => method.name !== "Lettre Suivie"
     );
 
-    if (!selectedMethodAvailable) {
-        const firstAvailableMethod = shippingMethods.find((method) =>
-            shippingRates.some(
-                (rate) =>
-                    rate.shippingMethodId === method.id &&
-                    cartTotalWeight >= Number(rate.minWeight) &&
-                    cartTotalWeight <= Number(rate.maxWeight)
+    if (sendcloudMethods.length === 0) {
+      setShippingOptions([]);
+      return;
+    }
+
+    const loadShippingOptions = async () => {
+      try {
+        console.log("Poids total panier :", cartTotalWeight);
+
+        const options = await Promise.all(
+          sendcloudMethods.map((method) =>
+            getShippingOptions(
+              method.id,
+              formData.postalCode,
+              formData.city,
+              cartTotalWeight
             )
+          )
         );
 
-        if (firstAvailableMethod) {
-            setShippingMethod(firstAvailableMethod.id);
-        }
-    }
-  }, [shippingRates, shippingMethods, shippingMethod, cartTotalWeight]);
+        console.log("Options Sendcloud :", options);
 
-  const shippingCost = selectedShippingRate
-    ? Number(selectedShippingRate.cost)
-    : 0;
+        setShippingOptions(options.flat());
+      } catch (error) {
+        console.error(
+          "Erreur lors du chargement des options Sendcloud :",
+          error
+        );
 
-  const cartTotal = cartSubtotal + shippingCost;
+        setShippingOptions([]);
+      }
+    };
+
+    loadShippingOptions();
+  }, [
+    shippingMethods,
+    formData.postalCode,
+    formData.city,
+    cartTotalWeight,
+  ]);
 
   const selectedShippingMethod = shippingMethods.find(
     (method) => method.id === shippingMethod
@@ -233,6 +312,32 @@ export default function Checkout() {
 
   const isRelayDelivery =
     selectedShippingMethod?.deliveryType === "Point relais";
+
+  const selectedShippingOption = shippingOptions.find((option) => {
+    if (!selectedShippingMethod) {
+      return false;
+    }
+
+    const serviceKey =
+      `${selectedShippingMethod.name}-${selectedShippingMethod.deliveryType}`;
+
+    const serviceCode = shippingServiceCodes[serviceKey];
+
+    return option.code === serviceCode;
+  });
+
+  const shippingCost =
+    selectedShippingMethod?.name === "Lettre Suivie"
+      ? selectedShippingRate
+        ? Number(selectedShippingRate.cost)
+        : 0
+      : selectedShippingOption?.quotes?.[0]
+        ? Number(
+            selectedShippingOption.quotes[0].price.total.value
+          )
+        : 0;
+
+  const cartTotal = cartSubtotal + shippingCost;
 
   return (
     <main className="checkout-page">
@@ -242,7 +347,9 @@ export default function Checkout() {
       ======================================== */}
 
       <header className="checkout-page-header">
-        <h1 className="main-title">Finaliser ma commande</h1>
+        <h1 className="main-title">
+          Finaliser ma commande
+        </h1>
 
         <p className="checkout-page-introduction">
           Vérifiez vos informations avant de commander.
@@ -258,6 +365,7 @@ export default function Checkout() {
 
         <summary>
           <span>Votre commande</span>
+
           <strong>
             {cartTotal.toFixed(2).replace(".", ",")} €
           </strong>
@@ -271,7 +379,9 @@ export default function Checkout() {
               className="checkout-mobile-summary-product"
             >
               <div>
-                <strong>{item.product.name}</strong>
+                <strong>
+                  {item.product.name}
+                </strong>
 
                 <span>
                   {item.quantity} ×{" "}
@@ -293,6 +403,7 @@ export default function Checkout() {
 
             <div className="checkout-mobile-summary-line">
               <span>Sous-total</span>
+
               <strong>
                 {cartSubtotal.toFixed(2).replace(".", ",")} €
               </strong>
@@ -300,6 +411,7 @@ export default function Checkout() {
 
             <div className="checkout-mobile-summary-line">
               <span>Livraison</span>
+
               <strong>
                 {shippingCost.toFixed(2).replace(".", ",")} €
               </strong>
@@ -307,6 +419,7 @@ export default function Checkout() {
 
             <div className="checkout-mobile-summary-total">
               <span>Total</span>
+
               <strong>
                 {cartTotal.toFixed(2).replace(".", ",")} €
               </strong>
@@ -369,9 +482,9 @@ export default function Checkout() {
                     value={formData.lastName}
                     onChange={handleChange}
                   />
-
-                  </div>
                 </div>
+
+              </div>
 
               <div className="checkout-form-field">
                 <label htmlFor="email">
@@ -494,6 +607,7 @@ export default function Checkout() {
 
           </div>
 
+
           {/* MODE DE LIVRAISON */}
 
           <div className="checkout-section">
@@ -504,17 +618,39 @@ export default function Checkout() {
 
             <div className="checkout-shipping-methods">
 
-              {["Chronopost", "Colissimo", "Mondial Relay", "Lettre Suivie"].map((shippingName) => {
+              {[
+                "Chronopost",
+                "Colissimo",
+                "Mondial Relay",
+                "Lettre Suivie",
+              ].map((shippingName) => {
 
-                const methods = shippingMethods.filter(
-                  (method) => method.name === shippingName &&
-                    shippingRates.some(
+                const methods = shippingMethods.filter((method) => {
+
+                  if (method.name !== shippingName) {
+                    return false;
+                  }
+
+                  if (method.name === "Lettre Suivie") {
+                    return shippingRates.some(
                       (rate) =>
-                          rate.shippingMethodId === method.id &&
-                          cartTotalWeight >= Number(rate.minWeight) &&
-                          cartTotalWeight <= Number(rate.maxWeight)
-                    )
-                );
+                        rate.shippingMethodId === method.id &&
+                        cartTotalWeight >= Number(rate.minWeight) &&
+                        cartTotalWeight <= Number(rate.maxWeight)
+                    );
+                  }
+
+                  const serviceKey =
+                    `${method.name}-${method.deliveryType}`;
+
+                  const serviceCode =
+                    shippingServiceCodes[serviceKey];
+
+                  return shippingOptions.some(
+                    (option) =>
+                      option.code === serviceCode
+                  );
+                });
 
                 if (methods.length === 0) {
                   return null;
@@ -542,28 +678,77 @@ export default function Checkout() {
                             type="radio"
                             name="shippingMethod"
                             value={method.id}
-                            checked={shippingMethod === method.id}
+                            checked={
+                              shippingMethod === method.id
+                            }
                             onChange={(event) =>
-                              setShippingMethod(Number(event.target.value))
+                              setShippingMethod(
+                                Number(event.target.value)
+                              )
                             }
                           />
 
                           <span className="checkout-shipping-option-content">
-                            <strong>{method.deliveryType}</strong>
+
+                            <strong>
+                              {method.deliveryType}
+                            </strong>
+
                             <small>
                               {(() => {
-                                const rate = shippingRates.find(
-                                  (rate) =>
-                                    rate.shippingMethodId === method.id &&
-                                    cartTotalWeight >= Number(rate.minWeight) &&
-                                    cartTotalWeight <= Number(rate.maxWeight)
-                                );
 
-                                return rate
-                                  ? `${Number(rate.cost).toFixed(2).replace(".", ",")} €`
+                                if (
+                                  method.name ===
+                                  "Lettre Suivie"
+                                ) {
+
+                                  const rate =
+                                    shippingRates.find(
+                                      (rate) =>
+                                        rate.shippingMethodId ===
+                                          method.id &&
+                                        cartTotalWeight >=
+                                          Number(rate.minWeight) &&
+                                        cartTotalWeight <=
+                                          Number(rate.maxWeight)
+                                    );
+
+                                  return rate
+                                    ? `${Number(rate.cost)
+                                        .toFixed(2)
+                                        .replace(".", ",")} €`
+                                    : "Calcul...";
+                                }
+
+                                const serviceKey =
+                                  `${method.name}-${method.deliveryType}`;
+
+                                const serviceCode =
+                                  shippingServiceCodes[
+                                    serviceKey
+                                  ];
+
+                                const option =
+                                  shippingOptions.find(
+                                    (option) =>
+                                      option.code ===
+                                      serviceCode
+                                  );
+
+                                const quote =
+                                  option?.quotes?.[0];
+
+                                return quote
+                                  ? `${Number(
+                                      quote.price.total.value
+                                    )
+                                      .toFixed(2)
+                                      .replace(".", ",")} €`
                                   : "Calcul...";
+
                               })()}
                             </small>
+
                           </span>
 
                         </label>
@@ -577,8 +762,10 @@ export default function Checkout() {
 
             </div>
 
+
             {isRelayDelivery && (
               <div className="checkout-relay-point">
+
                 <h3 className="low-title">
                   Point relais
                 </h3>
@@ -587,24 +774,35 @@ export default function Checkout() {
 
                   {selectedRelayPoint ? (
                     <div>
-                      <strong>{selectedRelayPoint.relayPointName}</strong>
+
+                      <strong>
+                        {selectedRelayPoint.relayPointName}
+                      </strong>
 
                       <p>
                         {selectedRelayPoint.relayPointAddress}
                         <br />
+
                         {selectedRelayPoint.relayPointPostalCode}{" "}
                         {selectedRelayPoint.relayPointCity}
+
                         <br />
+
                         {selectedRelayPoint.relayPointCountry}
                       </p>
+
                     </div>
                   ) : (
                     <div>
-                      <strong>Aucun point relais sélectionné</strong>
+
+                      <strong>
+                        Aucun point relais sélectionné
+                      </strong>
 
                       <p>
                         Choisissez un point relais pour continuer.
                       </p>
+
                     </div>
                   )}
 
@@ -615,7 +813,9 @@ export default function Checkout() {
                       handleSearchRelayPoints();
                     }}
                   >
-                    {selectedRelayPoint ? "Modifier" : "Choisir"}
+                    {selectedRelayPoint
+                      ? "Modifier"
+                      : "Choisir"}
                   </button>
 
                 </div>
@@ -623,21 +823,27 @@ export default function Checkout() {
               </div>
             )}
 
+
             {isRelayModalOpen && (
               <div className="checkout-relay-modal-overlay">
+
                 <div className="checkout-relay-modal">
 
                   <div className="checkout-relay-modal-header">
+
                     <h2 className="sub-title">
                       Choisir un point relais
                     </h2>
 
                     <button
                       type="button"
-                      onClick={() => setIsRelayModalOpen(false)}
+                      onClick={() =>
+                        setIsRelayModalOpen(false)
+                      }
                     >
                       ×
                     </button>
+
                   </div>
 
                   <div className="checkout-relay-modal-content">
@@ -654,47 +860,61 @@ export default function Checkout() {
                       </p>
                     )}
 
-                    {!isRelayLoading && !relayError && relayPoints.length > 0 && (
-                      <div className="checkout-relay-points">
+                    {!isRelayLoading &&
+                      !relayError &&
+                      relayPoints.length > 0 && (
+                        <div className="checkout-relay-points">
 
-                        {relayPoints.map((point) => (
-                          <button
-                            type="button"
-                            className="checkout-relay-point-option"
-                            key={point.relayPointId}
-                            onClick={() => {
-                              setSelectedRelayPoint(point);
-                              setIsRelayModalOpen(false);
-                            }}
-                          >
-                            <div>
-                              <strong>{point.relayPointName}</strong>
+                          {relayPoints.map((point) => (
+                            <button
+                              type="button"
+                              className="checkout-relay-point-option"
+                              key={point.relayPointId}
+                              onClick={() => {
+                                setSelectedRelayPoint(point);
+                                setIsRelayModalOpen(false);
+                              }}
+                            >
 
-                              <p>
-                                {point.relayPointAddress}
-                                <br />
-                                {point.relayPointPostalCode} {point.relayPointCity}
-                              </p>
-                            </div>
+                              <div>
 
-                            <span>
-                              {point.distance !== null
-                                ? `${Math.round(point.distance)} m`
-                                : ""}
-                            </span>
-                          </button>
-                        ))}
+                                <strong>
+                                  {point.relayPointName}
+                                </strong>
 
-                      </div>
-                    )}
+                                <p>
+                                  {point.relayPointAddress}
+                                  <br />
+
+                                  {point.relayPointPostalCode}{" "}
+                                  {point.relayPointCity}
+                                </p>
+
+                              </div>
+
+                              <span>
+                                {point.distance !== null
+                                  ? `${Math.round(
+                                      point.distance
+                                    )} m`
+                                  : ""}
+                              </span>
+
+                            </button>
+                          ))}
+
+                        </div>
+                      )}
 
                   </div>
 
                 </div>
+
               </div>
             )}
 
           </div>
+
 
           {/* PAIEMENT */}
 
@@ -713,6 +933,7 @@ export default function Checkout() {
               <div className="checkout-form">
 
                 <div className="checkout-form-field">
+
                   <label htmlFor="cardNumber">
                     Numéro de carte *
                   </label>
@@ -724,11 +945,13 @@ export default function Checkout() {
                     placeholder="1234 5678 9012 3456"
                     inputMode="numeric"
                   />
+
                 </div>
 
                 <div className="checkout-form-row">
 
                   <div className="checkout-form-field">
+
                     <label htmlFor="cardExpiry">
                       Date d'expiration *
                     </label>
@@ -740,9 +963,11 @@ export default function Checkout() {
                       placeholder="MM / AA"
                       inputMode="numeric"
                     />
+
                   </div>
 
                   <div className="checkout-form-field">
+
                     <label htmlFor="cardCvc">
                       CVC *
                     </label>
@@ -754,6 +979,7 @@ export default function Checkout() {
                       placeholder="123"
                       inputMode="numeric"
                     />
+
                   </div>
 
                 </div>
@@ -788,8 +1014,12 @@ export default function Checkout() {
                 key={item.product.id}
                 className="checkout-summary-product"
               >
+
                 <div>
-                  <strong>{item.product.name}</strong>
+
+                  <strong>
+                    {item.product.name}
+                  </strong>
 
                   <span>
                     {item.quantity} ×{" "}
@@ -797,13 +1027,16 @@ export default function Checkout() {
                       .toFixed(2)
                       .replace(".", ",")} €
                   </span>
+
                 </div>
 
                 <strong>
-                  {(Number(item.product.price) * item.quantity)
+                  {(Number(item.product.price) *
+                    item.quantity)
                     .toFixed(2)
                     .replace(".", ",")} €
                 </strong>
+
               </div>
             ))}
 
@@ -812,24 +1045,39 @@ export default function Checkout() {
           <div className="checkout-summary-totals">
 
             <div className="checkout-summary-line">
-              <span>Sous-total</span>
+
+              <span>
+                Sous-total
+              </span>
+
               <strong>
                 {cartSubtotal.toFixed(2).replace(".", ",")} €
               </strong>
+
             </div>
 
             <div className="checkout-summary-line">
-              <span>Livraison</span>
+
+              <span>
+                Livraison
+              </span>
+
               <strong>
                 {shippingCost.toFixed(2).replace(".", ",")} €
               </strong>
+
             </div>
 
             <div className="checkout-summary-total">
-              <span>Total</span>
+
+              <span>
+                Total
+              </span>
+
               <strong>
                 {cartTotal.toFixed(2).replace(".", ",")} €
               </strong>
+
             </div>
 
           </div>

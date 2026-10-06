@@ -64,7 +64,7 @@ export interface IUserOrder {
     totalWeight: number;
     shippingCost: number;
     shippingMethodId: number;
-    shippingRateId: number;
+    shippingRateId: number | null;
     userId: number | null;
     shippingFirstName: string;
     shippingLastName: string;
@@ -166,6 +166,7 @@ export interface ICreateOrderPayload {
     shippingPostalCode: string;
     shippingCity: string;
     shippingPhone: string;
+    shippingOptionCode?: string;
     relayPoint?: {
         relayPointId: number;
         relayPointName: string;
@@ -201,4 +202,33 @@ export interface IRelayPoint {
     carrier: string;
     distance: number | null;
     openingHours: unknown[];
+}
+
+export interface IShippingOption {
+    code: string;
+    name: string;
+    carrier: {
+        code: string;
+        name: string;
+    };
+    product: {
+        code: string;
+        name: string;
+    };
+    functionalities: {
+        last_mile: string;
+    };
+    requirements: {
+        fields: string[];
+        is_service_point_required: boolean;
+    };
+    quotes: {
+        price: {
+            total: {
+                value: string;
+                currency: string;
+            };
+        };
+        lead_time: number | null;
+    }[];
 }

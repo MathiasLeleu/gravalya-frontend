@@ -151,6 +151,36 @@
     margin: 0;
 }
 
+/* ========================================
+   DIMENSIONS
+======================================== */
+
+.product-dimensions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.product-dimensions h2 {
+    margin-bottom: 15px;
+}
+
+.product-dimensions-values {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.product-dimensions-values p {
+    margin: 0;
+}
+
+.product-dimensions-bottom {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
 
 /* ========================================
    PRICE
