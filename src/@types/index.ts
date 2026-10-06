@@ -38,6 +38,49 @@ export interface IMeResponse {
   };
 }
 
+export interface IUser {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: "user" | "admin";
+}
+
+export interface IUserOrderLine {
+    id: number;
+    orderId: number;
+    productId: number;
+    quantity: number;
+    unitPrice: number;
+    unitWeight: number;
+}
+
+export interface IUserOrder {
+    id: number;
+    statut: "EN_ATTENTE" | "CONFIRMEE" | "EXPEDIEE" | "LIVREE" | "ANNULEE";
+    orderNumber: string;
+    customerEmail: string;
+    amount: number;
+    totalWeight: number;
+    shippingCost: number;
+    shippingMethodId: number;
+    shippingRateId: number;
+    userId: number | null;
+    shippingFirstName: string;
+    shippingLastName: string;
+    shippingCountry: string;
+    shippingAddress: string;
+    shippingAddress2: string | null;
+    shippingPostalCode: string;
+    shippingCity: string;
+    shippingPhone: string;
+    orderLines: IUserOrderLine[];
+}
+
+export interface IUserDetails extends IUser {
+    orders: IUserOrder[];
+}
+
 export interface ICategory {
   id: number;
   name: string;

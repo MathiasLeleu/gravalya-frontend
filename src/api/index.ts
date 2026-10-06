@@ -1,4 +1,4 @@
-import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, 
+import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, IUser, IUserDetails,
   ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture } from "../@types";
 
 import { useAuthStore } from "../store";
@@ -69,6 +69,40 @@ export async function getMe(): Promise<IMeResponse> {
   if (!response.ok) {
     throw new Error(
       data.message || "Impossible de récupérer votre profil."
+    );
+  }
+
+  return data;
+}
+
+export async function getUsers(): Promise<IUser[]> {
+  const response = await fetch(`${baseUrl}/users`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer les utilisateurs."
+    );
+  }
+
+  return data;
+}
+
+export async function getUserById(id: number): Promise<IUserDetails> {
+  const response = await fetch(`${baseUrl}/users/${id}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de récupérer l'utilisateur."
     );
   }
 

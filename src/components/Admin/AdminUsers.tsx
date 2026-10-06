@@ -1,6 +1,80 @@
+import { useEffect, useState } from "react";
+import { getUsers, getUserById } from "../../api";
+import type { IUser, IUserDetails } from "../../@types";
+
 import "./admin-users.css";
 
 export default function AdminUsers() {
+
+        const [users, setUsers] = useState<IUser[]>([]);
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState("");
+
+        const [search, setSearch] = useState("");
+        const [roleFilter, setRoleFilter] = useState("all");
+
+        const [selectedUser, setSelectedUser] = useState<IUserDetails | null>(null);
+        const [loadingUser, setLoadingUser] = useState(false);
+        const [userError, setUserError] = useState("");
+
+        useEffect(() => {
+            const loadUsers = async () => {
+                try {
+                    setLoading(true);
+                    setError("");
+
+                    const data = await getUsers();
+                    setUsers(data);
+                } catch (error) {
+                    setError(
+                        error instanceof Error
+                            ? error.message
+                            : "Impossible de récupérer les utilisateurs."
+                    );
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            loadUsers();
+        }, []);
+
+        const filteredUsers = users.filter((user) => {
+            const searchValue = search.toLowerCase();
+
+            const matchesSearch =
+                `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchValue) ||
+                user.email.toLowerCase().includes(searchValue);
+
+            const matchesRole =
+                roleFilter === "all" || user.role === roleFilter;
+
+            return matchesSearch && matchesRole;
+        });
+
+        const handleViewUser = async (userId: number) => {
+            try {
+                setLoadingUser(true);
+                setUserError("");
+
+                const data = await getUserById(userId);
+                setSelectedUser(data);
+            } catch (error) {
+                setUserError(
+                    error instanceof Error
+                        ? error.message
+                        : "Impossible de récupérer les informations de l'utilisateur."
+                );
+            } finally {
+                setLoadingUser(false);
+            }
+        };
+
+        const closeUserDetails = () => {
+            setSelectedUser(null);
+            setUserError("");
+        };
+
     return (
         <section className="admin-users-page">
 
@@ -22,10 +96,13 @@ export default function AdminUsers() {
                         type="search"
                         placeholder="Rechercher un utilisateur..."
                         aria-label="Rechercher un utilisateur"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
                     />
 
                     <select
-                        defaultValue="all"
+                        value={roleFilter}
+                        onChange={(event) => setRoleFilter(event.target.value)}
                         aria-label="Filtrer par rôle"
                     >
                         <option value="all">
@@ -47,183 +124,125 @@ export default function AdminUsers() {
 
             <div className="admin-users-list">
 
-                <article className="admin-user-card">
 
-                    <div className="admin-user-avatar">
-                        JD
-                    </div>
+                {loading && (
+                    <p>Chargement des utilisateurs...</p>
+                )}
 
-                    <div className="admin-user-info">
+                {!loading && error && (
+                    <p>{error}</p>
+                )}
 
-                        <h2>
-                            Jean Dupont
-                        </h2>
+                {!loading && !error && filteredUsers.length === 0 && (
+                    <p>Aucun utilisateur trouvé.</p>
+                )}
 
-                        <span>
-                            jean.dupont@example.com
+                {!loading && !error && filteredUsers.map((user) => (
+                    <article
+                        className="admin-user-card"
+                        key={user.id}
+                    >
+
+                        <div className="admin-user-avatar">
+                            {user.firstName.charAt(0)}
+                            {user.lastName.charAt(0)}
+                        </div>
+
+                        <div className="admin-user-info">
+
+                            <h2>
+                                {user.firstName} {user.lastName}
+                            </h2>
+
+                            <span>
+                                {user.email}
+                            </span>
+
+                        </div>
+
+                        <span className={`admin-user-role ${user.role}`}>
+                            {user.role === "admin"
+                                ? "Administrateur"
+                                : "Client"}
                         </span>
 
-                        <small>
-                            Inscrit le 15/09/2026
-                        </small>
+                        <div className="admin-user-actions">
 
-                    </div>
+                            <button
+                                className="admin-edit-button"
+                                onClick={() => handleViewUser(user.id)}
+                            >
+                                Voir le profil
+                            </button>
 
-                    <span className="admin-user-role user">
-                        Client
-                    </span>
+                            <button className="admin-delete-button">
+                                Supprimer
+                            </button>
 
-                    <span className="admin-user-status active">
-                        Actif
-                    </span>
+                        </div>
 
-                    <div className="admin-user-actions">
-
-                        <button className="admin-edit-button">
-                            Voir le profil
-                        </button>
-
-                        <button className="admin-delete-button">
-                            Désactiver
-                        </button>
-
-                    </div>
-
-                </article>
-
-                <article className="admin-user-card">
-
-                    <div className="admin-user-avatar">
-                        MM
-                    </div>
-
-                    <div className="admin-user-info">
-
-                        <h2>
-                            Marie Martin
-                        </h2>
-
-                        <span>
-                            marie.martin@example.com
-                        </span>
-
-                        <small>
-                            Inscrite le 12/09/2026
-                        </small>
-
-                    </div>
-
-                    <span className="admin-user-role user">
-                        Client
-                    </span>
-
-                    <span className="admin-user-status active">
-                        Actif
-                    </span>
-
-                    <div className="admin-user-actions">
-
-                        <button className="admin-edit-button">
-                            Voir le profil
-                        </button>
-
-                        <button className="admin-delete-button">
-                            Désactiver
-                        </button>
-
-                    </div>
-
-                </article>
-
-                <article className="admin-user-card">
-
-                    <div className="admin-user-avatar">
-                        PL
-                    </div>
-
-                    <div className="admin-user-info">
-
-                        <h2>
-                            Paul Legrand
-                        </h2>
-
-                        <span>
-                            paul.legrand@example.com
-                        </span>
-
-                        <small>
-                            Inscrit le 08/09/2026
-                        </small>
-
-                    </div>
-
-                    <span className="admin-user-role admin">
-                        Administrateur
-                    </span>
-
-                    <span className="admin-user-status active">
-                        Actif
-                    </span>
-
-                    <div className="admin-user-actions">
-
-                        <button className="admin-edit-button">
-                            Voir le profil
-                        </button>
-
-                        <button className="admin-delete-button">
-                            Désactiver
-                        </button>
-
-                    </div>
-
-                </article>
-
-                <article className="admin-user-card">
-
-                    <div className="admin-user-avatar">
-                        PD
-                    </div>
-
-                    <div className="admin-user-info">
-
-                        <h2>
-                            Pierre Durand
-                        </h2>
-
-                        <span>
-                            pierre.durand@example.com
-                        </span>
-
-                        <small>
-                            Inscrit le 02/09/2026
-                        </small>
-
-                    </div>
-
-                    <span className="admin-user-role user">
-                        Client
-                    </span>
-
-                    <span className="admin-user-status inactive">
-                        Inactif
-                    </span>
-
-                    <div className="admin-user-actions">
-
-                        <button className="admin-edit-button">
-                            Voir le profil
-                        </button>
-
-                        <button className="admin-delete-button">
-                            Réactiver
-                        </button>
-
-                    </div>
-
-                </article>
+                    </article>
+                ))}
 
             </div>
+
+            {selectedUser && (
+                <div className="admin-user-modal-overlay">
+                    <div className="admin-user-modal">
+
+                        <button
+                            className="admin-user-modal-close"
+                            onClick={closeUserDetails}
+                        >
+                            ×
+                        </button>
+
+                        <h2>
+                            {selectedUser.firstName} {selectedUser.lastName}
+                        </h2>
+
+                        <p>
+                            <strong>Email :</strong> {selectedUser.email}
+                        </p>
+
+                        <p>
+                            <strong>Rôle :</strong>{" "}
+                            {selectedUser.role === "admin"
+                                ? "Administrateur"
+                                : "Client"}
+                        </p>
+
+                        <h3>
+                            Commandes
+                        </h3>
+
+                        {selectedUser.orders.length === 0 ? (
+                            <p>
+                                Aucune commande.
+                            </p>
+                        ) : (
+                            <div>
+                                {selectedUser.orders.map((order) => (
+                                    <div key={order.id}>
+                                        <strong>
+                                            {order.orderNumber}
+                                        </strong>
+
+                                        <span>
+                                            {" "}— {order.amount} €
+                                        </span>
+
+                                        <span>
+                                            {" "}— {order.statut}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            )}
 
         </section>
     );

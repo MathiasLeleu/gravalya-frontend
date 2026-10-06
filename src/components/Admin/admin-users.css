@@ -203,6 +203,55 @@
 }
 
 /* ========================================
+   USER DETAILS MODAL
+======================================== */ 
+
+.admin-user-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.admin-user-modal {
+    position: relative;
+
+    width: min(90%, 500px);
+    max-height: 80vh;
+    overflow-y: auto;
+
+    padding: 2rem;
+
+    background: #f4ebe4;
+    border-radius: 12px;
+}
+
+.admin-user-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    border: none;
+    background: none;
+
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.admin-user-modal h2 {
+    margin-top: 0;
+}
+
+.admin-user-modal h3 {
+    margin-top: 2rem;
+}
+
+/* ========================================
    RESPONSIVE
 ======================================== */
 
