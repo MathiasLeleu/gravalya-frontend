@@ -233,17 +233,6 @@ export default function Checkout() {
       ) * 1000
     ) / 1000;
 
-  console.log(
-    "Poids produits :",
-    cart.map((item) => ({
-      nom: item.product.name,
-      poids: item.product.weight,
-      quantite: item.quantity,
-    }))
-  );
-
-  console.log("Poids total :", cartTotalWeight);
-
   const selectedShippingRate = shippingRates.find(
     (rate) =>
       rate.shippingMethodId === shippingMethod &&
@@ -272,8 +261,6 @@ export default function Checkout() {
 
     const loadShippingOptions = async () => {
       try {
-        console.log("Poids total panier :", cartTotalWeight);
-
         const options = await Promise.all(
           sendcloudMethods.map((method) =>
             getShippingOptions(
@@ -284,8 +271,6 @@ export default function Checkout() {
             )
           )
         );
-
-        console.log("Options Sendcloud :", options);
 
         setShippingOptions(options.flat());
       } catch (error) {
