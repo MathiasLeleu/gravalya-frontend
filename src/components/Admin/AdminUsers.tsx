@@ -17,6 +17,8 @@ export default function AdminUsers() {
         const [loadingUser, setLoadingUser] = useState(false);
         const [userError, setUserError] = useState("");
 
+        const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
         useEffect(() => {
             const loadUsers = async () => {
                 try {
@@ -53,10 +55,12 @@ export default function AdminUsers() {
         });
 
         const handleViewUser = async (userId: number) => {
-            try {
-                setLoadingUser(true);
-                setUserError("");
+            setSelectedUser(null);
+            setIsUserModalOpen(true);
+            setLoadingUser(true);
+            setUserError("");
 
+            try {
                 const data = await getUserById(userId);
                 setSelectedUser(data);
             } catch (error) {
@@ -71,9 +75,28 @@ export default function AdminUsers() {
         };
 
         const closeUserDetails = () => {
+            setIsUserModalOpen(false);
             setSelectedUser(null);
             setUserError("");
         };
+
+        useEffect(() => {
+            if (!isUserModalOpen) return;
+
+            const handleKeyDown = (event: KeyboardEvent) => {
+                if (event.key === "Escape") {
+                    setIsUserModalOpen(false);
+                    setSelectedUser(null);
+                    setUserError("");
+                }
+            };
+
+            window.addEventListener("keydown", handleKeyDown);
+
+            return () => {
+                window.removeEventListener("keydown", handleKeyDown);
+            };
+        }, [isUserModalOpen]);
 
     return (
         <section className="admin-users-page">
@@ -186,60 +209,65 @@ export default function AdminUsers() {
 
             </div>
 
-            {selectedUser && (
-                <div className="admin-user-modal-overlay">
-                    <div className="admin-user-modal">
-
+            {isUserModalOpen && (
+                <div
+                    className="admin-user-modal-overlay"
+                    onClick={closeUserDetails}
+                >
+                    <div
+                        className="admin-user-modal"
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <button
                             className="admin-user-modal-close"
                             onClick={closeUserDetails}
+                            aria-label="Fermer la fenêtre"
                         >
                             ×
                         </button>
 
-                        <h2>
-                            {selectedUser.firstName} {selectedUser.lastName}
-                        </h2>
-
-                        <p>
-                            <strong>Email :</strong> {selectedUser.email}
-                        </p>
-
-                        <p>
-                            <strong>Rôle :</strong>{" "}
-                            {selectedUser.role === "admin"
-                                ? "Administrateur"
-                                : "Client"}
-                        </p>
-
-                        <h3>
-                            Commandes
-                        </h3>
-
-                        {selectedUser.orders.length === 0 ? (
-                            <p>
-                                Aucune commande.
-                            </p>
-                        ) : (
-                            <div>
-                                {selectedUser.orders.map((order) => (
-                                    <div key={order.id}>
-                                        <strong>
-                                            {order.orderNumber}
-                                        </strong>
-
-                                        <span>
-                                            {" "}— {order.amount} €
-                                        </span>
-
-                                        <span>
-                                            {" "}— {order.statut}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                        {loadingUser && (
+                            <p>Chargement du profil utilisateur...</p>
                         )}
 
+                        {!loadingUser && userError && (
+                            <p role="alert">{userError}</p>
+                        )}
+
+                        {!loadingUser && !userError && selectedUser && (
+                            <>
+                                <h2>
+                                    {selectedUser.firstName} {selectedUser.lastName}
+                                </h2>
+
+                                <p>
+                                    <strong>Email :</strong> {selectedUser.email}
+                                </p>
+
+                                <p>
+                                    <strong>Rôle :</strong>{" "}
+                                    {selectedUser.role === "admin"
+                                        ? "Administrateur"
+                                        : "Client"}
+                                </p>
+
+                                <h3>Commandes</h3>
+
+                                {selectedUser.orders.length === 0 ? (
+                                    <p>Aucune commande.</p>
+                                ) : (
+                                    <div>
+                                        {selectedUser.orders.map((order) => (
+                                            <div key={order.id}>
+                                                <strong>{order.orderNumber}</strong>
+                                                <span> — {order.amount} €</span>
+                                                <span> — {order.statut}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             )}
