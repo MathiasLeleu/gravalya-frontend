@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUsers, getUserById } from "../../api";
+import { getUsers, getUserById, deleteUser } from "../../api";
 import type { IUser, IUserDetails } from "../../@types";
 
 import "./admin-users.css";
@@ -16,6 +16,10 @@ export default function AdminUsers() {
         const [selectedUser, setSelectedUser] = useState<IUserDetails | null>(null);
         const [loadingUser, setLoadingUser] = useState(false);
         const [userError, setUserError] = useState("");
+
+        const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
+        const [deleteError, setDeleteError] = useState("");
+        const [userToDelete, setUserToDelete] = useState<IUser | null>(null);
 
         const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
@@ -78,6 +82,39 @@ export default function AdminUsers() {
             setIsUserModalOpen(false);
             setSelectedUser(null);
             setUserError("");
+        };
+
+        const handleDeleteUser = async () => {
+            if (!userToDelete || deletingUserId !== null) {
+                return;
+            }
+
+            const user = userToDelete;
+
+            setDeletingUserId(user.id);
+            setDeleteError("");
+
+            try {
+                await deleteUser(user.id);
+
+                setUsers((currentUsers) =>
+                    currentUsers.filter((currentUser) => currentUser.id !== user.id)
+                );
+
+                if (selectedUser?.id === user.id) {
+                    closeUserDetails();
+                }
+
+                setUserToDelete(null);
+            } catch (error) {
+                setDeleteError(
+                    error instanceof Error
+                        ? error.message
+                        : "Impossible de supprimer cet utilisateur."
+                );
+            } finally {
+                setDeletingUserId(null);
+            }
         };
 
         useEffect(() => {
@@ -147,6 +184,12 @@ export default function AdminUsers() {
 
             <div className="admin-users-list">
 
+                {deleteError && (
+                    <p className="admin-users-error" role="alert">
+                        {deleteError}
+                    </p>
+                )}
+
 
                 {loading && (
                     <p>Chargement des utilisateurs...</p>
@@ -198,8 +241,17 @@ export default function AdminUsers() {
                                 Voir le profil
                             </button>
 
-                            <button className="admin-delete-button">
-                                Supprimer
+                            <button
+                                className="admin-delete-button"
+                                onClick={() => {
+                                    setDeleteError("");
+                                    setUserToDelete(user);
+                                }}
+                                disabled={deletingUserId !== null}
+                            >
+                                {deletingUserId === user.id
+                                    ? "Suppression..."
+                                    : "Supprimer"}
                             </button>
 
                         </div>
@@ -268,6 +320,87 @@ export default function AdminUsers() {
                                 )}
                             </>
                         )}
+                    </div>
+                </div>
+            )}
+
+            
+            {userToDelete && (
+                <div
+                    className="admin-user-modal-overlay"
+                    onClick={() => {
+                        if (deletingUserId === null) {
+                            setUserToDelete(null);
+                            setDeleteError("");
+                        }
+                    }}
+                >
+                    <div
+                        className="admin-user-modal admin-user-delete-modal"
+                        role="alertdialog"
+                        aria-modal="true"
+                        aria-labelledby="delete-user-title"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className="admin-user-modal-close"
+                            onClick={() => {
+                                setUserToDelete(null);
+                                setDeleteError("");
+                            }}
+                            disabled={deletingUserId !== null}
+                            aria-label="Annuler la suppression"
+                        >
+                            ×
+                        </button>
+
+                        <h2 id="delete-user-title">
+                            Supprimer cet utilisateur ?
+                        </h2>
+
+                        <p>
+                            Voulez-vous vraiment supprimer le compte de{" "}
+                            <strong>
+                                {userToDelete.firstName} {userToDelete.lastName}
+                            </strong>
+                            ?
+                        </p>
+
+                        <p className="admin-user-delete-warning">
+                            Cette action est définitive.
+                        </p>
+
+                        {deleteError && (
+                            <p className="admin-users-error" role="alert">
+                                {deleteError}
+                            </p>
+                        )}
+
+                        <div className="admin-user-delete-actions">
+                            <button
+                                type="button"
+                                className="admin-edit-button"
+                                onClick={() => {
+                                    setUserToDelete(null);
+                                    setDeleteError("");
+                                }}
+                                disabled={deletingUserId !== null}
+                            >
+                                Annuler
+                            </button>
+
+                            <button
+                                type="button"
+                                className="admin-delete-button"
+                                onClick={handleDeleteUser}
+                                disabled={deletingUserId !== null}
+                            >
+                                {deletingUserId === userToDelete.id
+                                    ? "Suppression..."
+                                    : "Confirmer la suppression"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

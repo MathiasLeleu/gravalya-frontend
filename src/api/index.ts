@@ -129,6 +129,25 @@ export async function deleteMyAccount(userId: number) {
   return data;
 }
 
+export async function deleteUser(userId: number) {
+  const response = await fetch(`${baseUrl}/users/${userId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+      data.error ||
+      "Impossible de supprimer cet utilisateur."
+    );
+  }
+
+  return data;
+}
+
 export async function getCategories(): Promise<ICategory[]> {
   const response = await fetch(`${baseUrl}/categories`);
 
