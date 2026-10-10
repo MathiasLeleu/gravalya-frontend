@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./checkout.css";
 
@@ -61,6 +61,10 @@ export default function Checkout() {
     city: "",
     country: "France",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const loadCheckoutData = async () => {
@@ -155,7 +159,13 @@ export default function Checkout() {
     }
   };
 
+  
   const handleSubmit = async () => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+
     try {
       const payload = {
         items: cart.map((item) => ({
@@ -164,9 +174,7 @@ export default function Checkout() {
         })),
 
         customerEmail: formData.email,
-
         shippingMethodId: shippingMethod,
-
         shippingFirstName: formData.firstName,
         shippingLastName: formData.lastName,
         shippingCountry: formData.country,
@@ -197,7 +205,12 @@ export default function Checkout() {
           : {}),
       };
 
-      const order = await createOrder(payload);
+      const idempotencyKey =
+        idempotencyKeyRef.current ?? crypto.randomUUID();
+
+      idempotencyKeyRef.current = idempotencyKey;
+
+      const order = await createOrder(payload, idempotencyKey);
 
       navigate("/commande/confirmation", {
         state: {
@@ -213,6 +226,9 @@ export default function Checkout() {
         "Erreur lors de la création de la commande :",
         error
       );
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -1071,8 +1087,9 @@ export default function Checkout() {
             type="button"
             className="checkout-submit-button"
             onClick={handleSubmit}
+            disabled={isSubmitting}
           >
-            Passer la commande
+            {isSubmitting ? "Commande en cours..." : "Passer la commande"}
           </button>
 
         </aside>

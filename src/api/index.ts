@@ -522,10 +522,16 @@ export async function deletePicture(
   return result;
 }
 
-export async function createOrder(payload: ICreateOrderPayload) {
+export async function createOrder(
+  payload: ICreateOrderPayload,
+  idempotencyKey: string
+) {
   const response = await fetch(`${baseUrl}/orders`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      "Idempotency-Key": idempotencyKey,
+    },
     body: JSON.stringify(payload),
   });
 
