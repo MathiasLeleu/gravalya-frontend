@@ -18,7 +18,7 @@ type DashboardOrder = {
     statut: OrderStatus;
     amount: number | string;
     shippingCost: number | string;
-    createdAt: string;
+    created_at: string;
     shippingFirstName: string;
     shippingLastName: string;
 };
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
     const recentOrders = [...orders]
         .sort(
             (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
         )
         .slice(0, 3);
 
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                                     </span>
 
                                     <small>
-                                        {formatDate(order.createdAt)}
+                                        {formatDate(order.created_at)}
                                     </small>
                                 </div>
 
