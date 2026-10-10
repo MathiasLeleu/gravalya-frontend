@@ -21,6 +21,7 @@ export interface ILoginPayload {
 export interface ILoginResponse {
   token: string;
   user: {
+    id: number;
     firstName: string;
     lastName: string;
     email: string;

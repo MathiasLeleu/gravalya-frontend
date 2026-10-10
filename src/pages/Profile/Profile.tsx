@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./profile.css";
 
-import { getMyOrders } from "../../api";
+import { getMyOrders, deleteMyAccount } from "../../api";
 import { useAuthStore } from "../../store";
 
 
@@ -83,6 +83,50 @@ function Profile() {
     const orderDialogRef = useRef<HTMLDialogElement>(null);
     const editDialogRef = useRef<HTMLDialogElement>(null);
     const firstNameInputRef = useRef<HTMLInputElement>(null);
+    const deleteDialogRef = useRef<HTMLDialogElement>(null);
+
+    const navigate = useNavigate();
+
+    const logout = useAuthStore((state) => state.logout);
+    const clearCart = useAuthStore((state) => state.clearCart);
+
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
+
+    const openDeleteDialog = () => {
+        setDeleteError("");
+        deleteDialogRef.current?.showModal();
+    };
+
+    const closeDeleteDialog = () => {
+        deleteDialogRef.current?.close();
+    };
+
+    const handleDeleteAccount = async () => {
+    if (!authUser?.id || isDeleting) {
+        return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError("");
+
+    try {
+        await deleteMyAccount(authUser.id);
+
+        clearCart();
+        logout();
+
+        navigate("/connexion", { replace: true });
+    } catch (err) {
+        setDeleteError(
+        err instanceof Error
+            ? err.message
+            : "Une erreur est survenue lors de la suppression du compte."
+        );
+    } finally {
+        setIsDeleting(false);
+    }
+    };
 
 
     /* ========================================
@@ -276,7 +320,6 @@ function Profile() {
         );
     }
 
-
     return (
         <main className="profile-page">
 
@@ -390,6 +433,13 @@ function Profile() {
 
                 {/* MODIFICATION DU PROFIL */}
 
+                <div className="profile-delete-warning">
+                    <strong>Attention :</strong> la suppression de votre compte est
+                    définitive. Vous perdrez l'accès à votre espace personnel.
+                    Cette action est irréversible.
+                </div>
+
+                
                 <div className="profile-actions">
 
                     <button
@@ -400,17 +450,24 @@ function Profile() {
                         Modifier mon profil
                     </button>
 
-
-                    {/* SUPPRESSION DU COMPTE */}
-
                     <button
                         type="button"
                         className="profile-delete-button"
+                        onClick={openDeleteDialog}
+                        disabled={isDeleting}
                     >
-                        Supprimer mon compte
+                        {isDeleting
+                            ? "Suppression en cours..."
+                            : "Supprimer mon compte"}
                     </button>
 
                 </div>
+
+                {deleteError && (
+                    <p className="profile-delete-error" role="alert">
+                        {deleteError}
+                    </p>
+                )}
 
             </section>
 
@@ -642,6 +699,85 @@ function Profile() {
 
             </dialog>
 
+            {/* ========================================
+                MODALE SUPPRESSION DU PROFIL
+            ======================================== */}
+
+            <dialog
+                ref={deleteDialogRef}
+                className="profile-lightbox profile-delete-dialog"
+                aria-labelledby="profile-delete-title"
+                onClick={(event) => {
+                    if (event.target === event.currentTarget) {
+                        closeDeleteDialog();
+                    }
+                }}
+            >
+
+                <button
+                    type="button"
+                    className="profile-lightbox-close"
+                    onClick={closeDeleteDialog}
+                    aria-label="Fermer la confirmation de suppression"
+                >
+                    ×
+                </button>
+
+                <div className="profile-modal">
+
+                    <header className="profile-edit-form-header">
+                        <h2
+                            id="profile-delete-title"
+                            className="sub-title"
+                        >
+                            Supprimer mon compte
+                        </h2>
+                    </header>
+
+                    <p>
+                        Êtes-vous sûr de vouloir supprimer votre compte ?
+                    </p>
+
+                    <div className="profile-delete-warning">
+                        <strong>Attention :</strong> la suppression de
+                        votre compte est définitive. Vous perdrez l'accès
+                        à votre espace personnel et aux informations
+                        associées à votre compte.
+                    </div>
+
+                    {deleteError && (
+                        <p className="profile-delete-error" role="alert">
+                            {deleteError}
+                        </p>
+                    )}
+
+                    <div className="profile-edit-actions">
+
+                        <button
+                            type="button"
+                            className="profile-edit-cancel"
+                            onClick={closeDeleteDialog}
+                            disabled={isDeleting}
+                        >
+                            Annuler
+                        </button>
+
+                        <button
+                            type="button"
+                            className="profile-delete-button"
+                            onClick={handleDeleteAccount}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting
+                                ? "Suppression en cours..."
+                                : "Confirmer la suppression"}
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </dialog>
 
             {/* ========================================
                 MODALE DÉTAIL COMMANDE

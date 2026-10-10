@@ -109,6 +109,26 @@ export async function getUserById(id: number): Promise<IUserDetails> {
   return data;
 }
 
+
+export async function deleteMyAccount(userId: number) {
+  const response = await fetch(`${baseUrl}/users/${userId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+      data.error ||
+      "Impossible de supprimer votre compte."
+    );
+  }
+
+  return data;
+}
+
 export async function getCategories(): Promise<ICategory[]> {
   const response = await fetch(`${baseUrl}/categories`);
 

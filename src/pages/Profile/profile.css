@@ -543,6 +543,163 @@
 
 
 /* ========================================
+   SUPPRESSION DU COMPTE
+======================================== */
+
+.profile-delete-warning {
+    margin: 20px 0;
+    padding: 15px;
+    color: #8a3b32;
+    background-color: #f8e9e6;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+.profile-delete-error {
+    margin-top: 15px;
+    color: #b42318;
+    line-height: 1.5;
+}
+
+.profile-delete-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   MODALE SUPPRESSION DU COMPTE
+======================================== */
+
+.profile-delete-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(90%, 460px);
+    max-width: 460px;
+    max-height: calc(100% - 32px);
+    height: fit-content;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    background-color: #f4ebe4;
+    color: #493b35;
+    overflow-y: auto;
+    box-sizing: border-box;
+    box-shadow: 0 12px 35px rgba(50, 35, 25, 0.25);
+}
+
+.profile-delete-dialog::backdrop {
+    background-color: rgba(35, 27, 23, 0.55);
+}
+
+.profile-delete-dialog .profile-modal {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+    background-color: #f4ebe4;
+    border-radius: 12px;
+}
+
+.profile-delete-dialog .profile-edit-form-header {
+    margin: 0 0 14px;
+    padding: 0 25px 12px 0;
+    border-bottom: 1px solid rgba(73, 59, 53, 0.15);
+}
+
+.profile-delete-dialog h2 {
+    margin: 0;
+    color: #493b35;
+    text-align: left;
+}
+
+.profile-delete-dialog p {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+.profile-delete-dialog .profile-delete-warning {
+    margin: 14px 0 18px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background-color: #f3ddd5;
+    color: #7d3930;
+    line-height: 1.5;
+}
+
+.profile-delete-dialog .profile-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.profile-delete-dialog .profile-edit-cancel,
+.profile-delete-dialog .profile-delete-button {
+    min-height: 40px;
+    padding: 9px 14px;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.profile-delete-dialog .profile-edit-cancel {
+    border: 1px solid #b9a69b;
+    background-color: transparent;
+    color: #493b35;
+}
+
+.profile-delete-dialog .profile-delete-button {
+    border: 1px solid #a84338;
+    background-color: #a84338;
+    color: #fffaf7;
+}
+
+.profile-delete-dialog .profile-delete-button:hover:not(:disabled) {
+    background-color: #87352d;
+}
+
+.profile-delete-dialog button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.profile-delete-dialog .profile-lightbox-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    z-index: 2;
+    border: none;
+    background: transparent;
+    color: #493b35;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.profile-delete-dialog .profile-delete-error {
+    color: #a42318;
+    font-weight: 500;
+}
+
+@media (max-width: 480px) {
+    .profile-delete-dialog .profile-modal {
+        padding: 22px 18px;
+    }
+
+    .profile-delete-dialog .profile-edit-actions {
+        flex-direction: column-reverse;
+    }
+
+    .profile-delete-dialog .profile-edit-cancel,
+    .profile-delete-dialog .profile-delete-button {
+        width: 100%;
+    }
+}
+
+/* ========================================
    FOCUS VISIBLE
 ======================================== */
 
