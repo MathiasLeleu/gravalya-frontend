@@ -40,7 +40,7 @@ type Order = {
     statut: OrderStatus;
     amount: number | string;
     shippingCost: number | string;
-    createdAt: string;
+    created_at: string;
     shippingFirstName: string;
     shippingLastName: string;
     shippingCountry: string;
@@ -274,7 +274,7 @@ export default function AdminOrders() {
                                     <div>
                                         <span>{customerName}</span>
                                         <small>
-                                            {formatDate(order.createdAt)}
+                                            {formatDate(order.created_at)}
                                         </small>
                                     </div>
                                 </div>
@@ -329,7 +329,7 @@ export default function AdminOrders() {
 
                             <p>
                                 <strong>Date :</strong>{" "}
-                                {formatDate(selectedOrder.createdAt)}
+                                {formatDate(selectedOrder.created_at)}
                             </p>
 
                             <p>
