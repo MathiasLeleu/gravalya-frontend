@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./checkout.css";
 
 import { useAuthStore } from "../../store";
@@ -39,6 +39,12 @@ export default function Checkout() {
 
   const navigate = useNavigate();
 
+  const location = useLocation();
+
+  const paymentCancelled =
+    new URLSearchParams(location.search).get("payment") ===
+    "cancelled";
+
   const [shippingMethod, setShippingMethod] = useState(1);
 
   const [shippingMethods, setShippingMethods] = useState<IShippingMethod[]>([]);
@@ -51,17 +57,52 @@ export default function Checkout() {
   const [isRelayLoading, setIsRelayLoading] = useState(false);
   const [relayError, setRelayError] = useState("");
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    address2: "",
-    postalCode: "",
-    city: "",
-    country: "France",
+  const [formData, setFormData] = useState(() => {
+    try {
+      const savedFormData = sessionStorage.getItem(
+        "gravelya-checkout-form"
+      );
+
+      if (savedFormData) {
+        return {
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          address: "",
+          address2: "",
+          postalCode: "",
+          city: "",
+          country: "France",
+          ...JSON.parse(savedFormData),
+        };
+      }
+    } catch (error) {
+      console.error(
+        "Impossible de restaurer les informations de livraison :",
+        error
+      );
+    }
+
+    return {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      address: "",
+      address2: "",
+      postalCode: "",
+      city: "",
+      country: "France",
+    };
   });
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      "gravelya-checkout-form",
+      JSON.stringify(formData)
+    );
+  }, [formData]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
@@ -83,7 +124,7 @@ export default function Checkout() {
         if (token) {
           const userData = await getMe();
 
-          setFormData((current) => ({
+          setFormData((current: typeof formData) => ({
             ...current,
             firstName: userData.user.firstName,
             lastName: userData.user.lastName,
@@ -119,7 +160,7 @@ export default function Checkout() {
   ) => {
     const { name, value } = event.target;
 
-    setFormData((current) => ({
+    setFormData((current: typeof formData) => ({
       ...current,
       [name]: value,
     }));
@@ -344,6 +385,12 @@ export default function Checkout() {
 
   return (
     <main className="checkout-page">
+
+      {paymentCancelled && (
+        <div className="checkout-payment-cancelled" role="alert">
+          Le paiement a été annulé. Vous pouvez reprendre votre commande.
+        </div>
+      )}
 
       {/* ========================================
           HEADER
