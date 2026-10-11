@@ -546,6 +546,55 @@ export async function createOrder(
   return data;
 }
 
+export async function createCheckoutSession(
+  orderId: number,
+  idempotencyKey: string
+): Promise<{ url: string }> {
+  const response = await fetch(
+    `${baseUrl}/orders/${orderId}/checkout`,
+    {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de démarrer le paiement Stripe."
+    );
+  }
+
+  if (!data.url) {
+    throw new Error(
+      "Stripe n'a pas retourné d'URL de paiement."
+    );
+  }
+
+  return data;
+}
+
+export async function getCheckoutStatus(sessionId: string) {
+  const response = await fetch(
+    `${baseUrl}/payment/checkout-status?session_id=${encodeURIComponent(sessionId)}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de vérifier le paiement."
+    );
+  }
+
+  return data;
+}
+
 export async function getShippingMethods(): Promise<IShippingMethod[]> {
   const response = await fetch(`${baseUrl}/shipping-methods`);
 

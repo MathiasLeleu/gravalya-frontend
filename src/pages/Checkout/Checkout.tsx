@@ -9,6 +9,7 @@ import {
   getShippingMethods,
   getShippingRates,
   createOrder,
+  createCheckoutSession,
   getRelayPoints,
   getShippingOptions,
 } from "../../api";
@@ -212,15 +213,16 @@ export default function Checkout() {
 
       const order = await createOrder(payload, idempotencyKey);
 
-      navigate("/commande/confirmation", {
-        state: {
-          orderNumber: order.orderNumber,
-          amount: order.amount,
-          shippingCost: order.shippingCost,
-          shippingMethod: selectedShippingMethod,
-          relayPoint: selectedRelayPoint,
-        },
-      });
+      const checkout = await createCheckoutSession(
+        order.id,
+        idempotencyKey
+      );
+
+      if (!checkout.url) {
+        throw new Error("Stripe n'a pas retourné d'URL de paiement.");
+      }
+
+      window.location.assign(checkout.url);
     } catch (error) {
       console.error(
         "Erreur lors de la création de la commande :",
@@ -627,12 +629,15 @@ export default function Checkout() {
               ].map((shippingName) => {
 
                 const methods = shippingMethods.filter((method) => {
-
                   if (method.name !== shippingName) {
                     return false;
                   }
 
                   if (method.name === "Lettre Suivie") {
+                    if (cartTotalWeight > 0.02) {
+                      return false;
+                    }
+
                     return shippingRates.some(
                       (rate) =>
                         rate.shippingMethodId === method.id &&
@@ -648,8 +653,7 @@ export default function Checkout() {
                     shippingServiceCodes[serviceKey];
 
                   return shippingOptions.some(
-                    (option) =>
-                      option.code === serviceCode
+                    (option) => option.code === serviceCode
                   );
                 });
 
@@ -916,82 +920,32 @@ export default function Checkout() {
 
           </div>
 
-
           {/* PAIEMENT */}
 
           <div className="checkout-section">
 
-            <h2 className="sub-title">
-              Paiement
-            </h2>
+              <h2 className="sub-title">
+                  Paiement
+              </h2>
 
-            <div className="checkout-payment">
+              <div className="checkout-payment">
 
-              <h3 className="low-title">
-                Carte bancaire
-              </h3>
+                  <h3 className="low-title">
+                      Carte bancaire
+                  </h3>
 
-              <div className="checkout-form">
+                  <p>
+                      Le paiement sera effectué sur notre page sécurisée Stripe,
+                      après validation de votre commande.
+                  </p>
 
-                <div className="checkout-form-field">
-
-                  <label htmlFor="cardNumber">
-                    Numéro de carte *
-                  </label>
-
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    name="cardNumber"
-                    placeholder="1234 5678 9012 3456"
-                    inputMode="numeric"
-                  />
-
-                </div>
-
-                <div className="checkout-form-row">
-
-                  <div className="checkout-form-field">
-
-                    <label htmlFor="cardExpiry">
-                      Date d'expiration *
-                    </label>
-
-                    <input
-                      type="text"
-                      id="cardExpiry"
-                      name="cardExpiry"
-                      placeholder="MM / AA"
-                      inputMode="numeric"
-                    />
-
-                  </div>
-
-                  <div className="checkout-form-field">
-
-                    <label htmlFor="cardCvc">
-                      CVC *
-                    </label>
-
-                    <input
-                      type="text"
-                      id="cardCvc"
-                      name="cardCvc"
-                      placeholder="123"
-                      inputMode="numeric"
-                    />
-
-                  </div>
-
-                </div>
+                  <p className="checkout-payment-security">
+                      <span aria-hidden="true">🔒 </span>
+                      Vos informations bancaires sont saisies directement sur Stripe
+                      et ne sont pas enregistrées par Gravelya Studio.
+                  </p>
 
               </div>
-
-              <p className="checkout-payment-security">
-                Paiement sécurisé par carte bancaire.
-              </p>
-
-            </div>
 
           </div>
 
