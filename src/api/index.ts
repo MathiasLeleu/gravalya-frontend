@@ -714,6 +714,46 @@ export async function getAllOrders() {
   return data;
 }
 
+export async function refreshSendcloudShipment(orderId: number) {
+  const response = await fetch(
+    `${baseUrl}/admin/orders/${orderId}/sendcloud/refresh`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible d'actualiser l'expédition Sendcloud."
+    );
+  }
+
+  return data;
+}
+
+export async function retrySendcloudShipment(orderId: number) {
+  const response = await fetch(
+    `${baseUrl}/admin/orders/${orderId}/sendcloud/retry`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Impossible de relancer l'expédition Sendcloud."
+    );
+  }
+
+  return data;
+}
+
 export async function updateOrder(
   orderId: number,
   data: {

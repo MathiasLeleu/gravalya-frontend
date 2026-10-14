@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getAllOrders, updateOrder } from "../../api";
+import { getAllOrders, refreshSendcloudShipment, retrySendcloudShipment, updateOrder } from "../../api";
 import "./admin-orders.css";
 
 type OrderStatus =
@@ -40,6 +40,14 @@ type Order = {
     statut: OrderStatus;
     amount: number | string;
     shippingCost: number | string;
+    sendcloudStatus?: string | null;
+    sendcloudShipmentId?: string | null;
+    sendcloudParcelId?: string | null;
+    sendcloudTrackingNumber?: string | null;
+    sendcloudTrackingUrl?: string | null;
+    sendcloudLabelUrl?: string | null;
+    sendcloudError?: string | null;
+    sendcloudCreatedAt?: string | null;
     created_at: string;
     shippingFirstName: string;
     shippingLastName: string;
@@ -106,6 +114,13 @@ export default function AdminOrders() {
     const [error, setError] = useState("");
     const [saveError, setSaveError] = useState("");
 
+    const [sendcloudAction, setSendcloudAction] = useState<
+        "refresh" | "retry" | null
+    >(null);
+
+    const [sendcloudError, setSendcloudError] = useState("");
+    const [sendcloudMessage, setSendcloudMessage] = useState("");
+
     const orderDialogRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
@@ -155,7 +170,7 @@ export default function AdminOrders() {
     };
 
     const closeOrderDialog = () => {
-        if (saving) {
+        if (saving || sendcloudAction) {
             return;
         }
 
@@ -200,6 +215,52 @@ export default function AdminOrders() {
             );
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleSendcloudAction = async (
+        action: "refresh" | "retry"
+    ) => {
+        if (!selectedOrder || sendcloudAction) {
+            return;
+        }
+
+        try {
+            setSendcloudAction(action);
+            setSendcloudError("");
+            setSendcloudMessage("");
+
+            if (action === "refresh") {
+                await refreshSendcloudShipment(selectedOrder.id);
+            } else {
+                await retrySendcloudShipment(selectedOrder.id);
+            }
+
+            const updatedOrders = await getAllOrders();
+
+            setOrders(updatedOrders);
+
+            const updatedOrder = updatedOrders.find(
+                (order: Order) => order.id === selectedOrder.id
+            );
+
+            if (updatedOrder) {
+                setSelectedOrder(updatedOrder);
+            }
+
+            setSendcloudMessage(
+                action === "refresh"
+                    ? "Les informations de l'expédition ont été actualisées."
+                    : "La demande de relance a été traitée."
+            );
+        } catch (error) {
+            setSendcloudError(
+                error instanceof Error
+                    ? error.message
+                    : "Une erreur est survenue lors de l'action Sendcloud."
+            );
+        } finally {
+            setSendcloudAction(null);
         }
     };
 
@@ -442,6 +503,122 @@ export default function AdminOrders() {
                                     </address>
                                 </>
                             )}
+                        </section>
+
+                        <section className="admin-order-dialog-section admin-order-sendcloud">
+                            <h3 className="low-title">Expédition Sendcloud</h3>
+
+                            <p>
+                                <strong>Statut :</strong>{" "}
+                                {selectedOrder.sendcloudStatus === "CREEE"
+                                    ? "Expédition créée"
+                                    : selectedOrder.sendcloudStatus === "EN_COURS"
+                                    ? "Création en cours"
+                                    : selectedOrder.sendcloudStatus === "ERREUR"
+                                        ? "Erreur"
+                                        : selectedOrder.sendcloudStatus === "DRY_RUN"
+                                        ? "Simulation"
+                                        : selectedOrder.sendcloudStatus || "Non créée"}
+                            </p>
+
+                            {selectedOrder.sendcloudShipmentId && (
+                                <p>
+                                    <strong>ID expédition :</strong>{" "}
+                                    {selectedOrder.sendcloudShipmentId}
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudParcelId && (
+                                <p>
+                                    <strong>ID colis :</strong>{" "}
+                                    {selectedOrder.sendcloudParcelId}
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudTrackingNumber && (
+                                <p>
+                                    <strong>Numéro de suivi :</strong>{" "}
+                                    {selectedOrder.sendcloudTrackingNumber}
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudCreatedAt && (
+                                <p>
+                                    <strong>Date de création :</strong>{" "}
+                                    {formatDate(selectedOrder.sendcloudCreatedAt)}
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudTrackingUrl && (
+                                <p>
+                                    <a
+                                        href={selectedOrder.sendcloudTrackingUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Consulter le suivi
+                                    </a>
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudLabelUrl && (
+                                <p>
+                                    <a
+                                        href={selectedOrder.sendcloudLabelUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Ouvrir l'étiquette d'expédition
+                                    </a>
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudError && (
+                                <p className="admin-order-sendcloud-error">
+                                    <strong>Erreur Sendcloud :</strong>{" "}
+                                    {selectedOrder.sendcloudError}
+                                </p>
+                            )}
+
+                            {sendcloudMessage && (
+                                <p className="admin-order-sendcloud-success">
+                                    {sendcloudMessage}
+                                </p>
+                            )}
+
+                            {sendcloudError && (
+                                <p className="admin-order-sendcloud-error">
+                                    {sendcloudError}
+                                </p>
+                            )}
+
+                            {selectedOrder.sendcloudShipmentId && (
+                                <button
+                                    type="button"
+                                    className="admin-order-button"
+                                    onClick={() => handleSendcloudAction("refresh")}
+                                    disabled={sendcloudAction !== null}
+                                >
+                                    {sendcloudAction === "refresh"
+                                        ? "Actualisation..."
+                                        : "Actualiser l'expédition"}
+                                </button>
+                            )}
+
+                            {selectedOrder.statut === "CONFIRMEE" &&
+                                !selectedOrder.sendcloudShipmentId &&
+                                selectedOrder.sendcloudStatus === "ERREUR" && (
+                                    <button
+                                        type="button"
+                                        className="admin-order-button"
+                                        onClick={() => handleSendcloudAction("retry")}
+                                        disabled={sendcloudAction !== null}
+                                    >
+                                        {sendcloudAction === "retry"
+                                            ? "Relance en cours..."
+                                            : "Relancer l'expédition"}
+                                    </button>
+                                )}
                         </section>
 
                         <section className="admin-order-dialog-section">

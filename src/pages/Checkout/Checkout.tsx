@@ -57,6 +57,8 @@ export default function Checkout() {
   const [isRelayLoading, setIsRelayLoading] = useState(false);
   const [relayError, setRelayError] = useState("");
 
+  const [isLoadingShippingOptions, setIsLoadingShippingOptions] = useState(false);
+
   const [formData, setFormData] = useState(() => {
     try {
       const savedFormData = sessionStorage.getItem(
@@ -299,10 +301,13 @@ export default function Checkout() {
       cartTotalWeight <= Number(rate.maxWeight)
   );
 
+  
   useEffect(() => {
+    let cancelled = false;
+
     if (
-      !formData.postalCode ||
-      !formData.city ||
+      !formData.postalCode.trim() ||
+      !formData.city.trim() ||
       cartTotalWeight <= 0
     ) {
       setShippingOptions([]);
@@ -318,31 +323,51 @@ export default function Checkout() {
       return;
     }
 
-    const loadShippingOptions = async () => {
+    // Évite de conserver les tarifs de l'ancienne adresse.
+    setShippingOptions([]);
+
+    setIsLoadingShippingOptions(true);
+    const timeoutId = window.setTimeout(async () => {
+
+      const loadedOptions: IShippingOption[] = [];
+
       try {
-        const options = await Promise.all(
-          sendcloudMethods.map((method) =>
-            getShippingOptions(
+        for (const method of sendcloudMethods) {
+          if (cancelled) return;
+
+          try {
+            const options = await getShippingOptions(
               method.id,
-              formData.postalCode,
-              formData.city,
+              formData.postalCode.trim(),
+              formData.city.trim(),
               cartTotalWeight
-            )
-          )
-        );
+            );
 
-        setShippingOptions(options.flat());
-      } catch (error) {
-        console.error(
-          "Erreur lors du chargement des options Sendcloud :",
-          error
-        );
+            if (cancelled) return;
 
-        setShippingOptions([]);
+            loadedOptions.push(...options);
+          } catch (error) {
+            console.error(
+              `Erreur Sendcloud pour ${method.name} (${method.deliveryType}) :`,
+              error
+            );
+          }
+        }
+
+        if (!cancelled) {
+          setShippingOptions(loadedOptions);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingShippingOptions(false);
+        }
       }
-    };
+    }, 800);
 
-    loadShippingOptions();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [
     shippingMethods,
     formData.postalCode,
@@ -665,6 +690,12 @@ export default function Checkout() {
             <h2 className="sub-title">
               Mode de livraison
             </h2>
+
+            {isLoadingShippingOptions && (
+              <p className="checkout-shipping-loading" role="status">
+                Recherche des tarifs de livraison en cours…
+              </p>
+            )}
 
             <div className="checkout-shipping-methods">
 

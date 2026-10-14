@@ -171,6 +171,13 @@
   font-size: 0.9rem;
 }
 
+.checkout-shipping-loading {
+    margin: 0 0 15px;
+    color: #493b35;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
 
 /* ========================================
    POINT RELAIS

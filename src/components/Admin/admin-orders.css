@@ -323,6 +323,42 @@
 }
 
 /* ========================================
+   SENDCLOUD
+======================================== */
+
+.admin-order-sendcloud {
+    overflow-wrap: anywhere;
+}
+
+.admin-order-sendcloud p {
+    margin-bottom: 10px;
+}
+
+.admin-order-sendcloud a {
+    color: #493b35;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.admin-order-sendcloud a:hover {
+    opacity: 0.75;
+}
+
+.admin-order-sendcloud-error {
+    color: #a52828;
+    overflow-wrap: anywhere;
+}
+
+.admin-order-sendcloud-success {
+    color: #286b43;
+}
+
+.admin-order-sendcloud button {
+    margin-top: 10px;
+}
+
+/* ========================================
    RESPONSIVE
 ======================================== */
 
