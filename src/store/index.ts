@@ -1,10 +1,16 @@
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ILoginResponse, IProduct } from "../@types";
+import type {
+  ILoginResponse,
+  IProduct,
+  IProductCustomization,
+} from "../@types";
 
 interface ICartItem {
   product: IProduct;
   quantity: number;
+  customization?: IProductCustomization;
 }
 
 interface AuthState {
@@ -15,10 +21,57 @@ interface AuthState {
   logout: () => void;
 
   cart: ICartItem[];
-  addToCart: (product: IProduct, quantity: number) => void;
-  removeFromCart: (productId: number) => void;
-  updateCartQuantity: (productId: number, quantity: number) => void;
+  addToCart: (
+    product: IProduct,
+    quantity: number,
+    customization?: IProductCustomization
+  ) => void;
+  removeFromCart: (lineKey: string) => void;
+  updateCartQuantity: (lineKey: string, quantity: number) => void;
   clearCart: () => void;
+}
+
+/**
+ * Normalise les choix pour éviter de créer des lignes différentes
+ * uniquement à cause d'espaces inutiles ou de champs vides.
+ */
+function normalizeCustomization(
+  customization?: IProductCustomization
+): IProductCustomization | undefined {
+  const color = customization?.color?.trim();
+  const text = customization?.text?.trim();
+
+  if (!color && !text) {
+    return undefined;
+  }
+
+  return {
+    ...(color ? { color } : {}),
+    ...(text ? { text } : {}),
+  };
+}
+
+/**
+ * Identifie une ligne à partir du produit et de ses personnalisations.
+ * Deux variantes différentes d'un même produit restent distinctes.
+ */
+export function getCartItemKey(
+  productId: number,
+  customization?: IProductCustomization
+): string {
+  const normalized = normalizeCustomization(customization);
+
+  return JSON.stringify([
+    productId,
+    normalized?.color ?? null,
+    normalized?.text ?? null,
+  ]);
+}
+
+function getMaxQuantity(product: IProduct): number {
+  return product.madeToOrder
+    ? 100
+    : Math.max(0, product.stockQuantity);
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -41,21 +94,43 @@ export const useAuthStore = create<AuthState>()(
 
       cart: [],
 
-      addToCart: (product, quantity) =>
+      addToCart: (product, quantity, customization) =>
         set((state) => {
+          const maxQuantity = getMaxQuantity(product);
+
+          if (maxQuantity < 1 || quantity < 1) {
+            return state;
+          }
+
+          const normalizedCustomization =
+            normalizeCustomization(customization);
+
+          const lineKey = getCartItemKey(
+            product.id,
+            normalizedCustomization
+          );
+
           const existingItem = state.cart.find(
-            (item) => item.product.id === product.id
+            (item) =>
+              getCartItemKey(
+                item.product.id,
+                item.customization
+              ) === lineKey
           );
 
           if (existingItem) {
             return {
               cart: state.cart.map((item) =>
-                item.product.id === product.id
+                getCartItemKey(
+                  item.product.id,
+                  item.customization
+                ) === lineKey
                   ? {
                       ...item,
+                      product,
                       quantity: Math.min(
                         item.quantity + quantity,
-                        product.stockQuantity
+                        maxQuantity
                       ),
                     }
                   : item
@@ -68,32 +143,52 @@ export const useAuthStore = create<AuthState>()(
               ...state.cart,
               {
                 product,
-                quantity: Math.min(quantity, product.stockQuantity),
+                quantity: Math.min(quantity, maxQuantity),
+                ...(normalizedCustomization
+                  ? { customization: normalizedCustomization }
+                  : {}),
               },
             ],
           };
         }),
 
-      removeFromCart: (productId) =>
+      removeFromCart: (lineKey) =>
         set((state) => ({
           cart: state.cart.filter(
-            (item) => item.product.id !== productId
+            (item) =>
+              getCartItemKey(
+                item.product.id,
+                item.customization
+              ) !== lineKey
           ),
         })),
 
-      updateCartQuantity: (productId, quantity) =>
+      updateCartQuantity: (lineKey, quantity) =>
         set((state) => ({
-          cart: state.cart.map((item) =>
-            item.product.id === productId
-              ? {
-                  ...item,
-                  quantity: Math.max(
-                    1,
-                    Math.min(quantity, item.product.stockQuantity)
-                  ),
-                }
-              : item
-          ),
+          cart: state.cart.map((item) => {
+            const itemKey = getCartItemKey(
+              item.product.id,
+              item.customization
+            );
+
+            if (itemKey !== lineKey) {
+              return item;
+            }
+
+            const maxQuantity = getMaxQuantity(item.product);
+
+            if (maxQuantity < 1) {
+              return item;
+            }
+
+            return {
+              ...item,
+              quantity: Math.max(
+                1,
+                Math.min(quantity, maxQuantity)
+              ),
+            };
+          }),
         })),
 
       clearCart: () =>

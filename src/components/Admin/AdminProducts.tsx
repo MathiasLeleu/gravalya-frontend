@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -8,18 +9,20 @@ import {
     getProductPictures,
     updatePicture,
     uploadProductPicture,
-    deletePicture
+    deletePicture,
 } from "../../api";
 
-import type { 
-    ICategory, IProduct, IPicture,
-    ICreateProductForm, IEditProductForm
+import type {
+    ICategory,
+    IProduct,
+    IPicture,
+    ICreateProductForm,
+    IEditProductForm,
 } from "../../@types";
 
 import "./admin-products.css";
 
 export default function AdminProducts() {
-
     const [products, setProducts] = useState<IProduct[]>([]);
     const [categories, setCategories] = useState<ICategory[]>([]);
 
@@ -44,7 +47,6 @@ export default function AdminProducts() {
     const [successMessage, setSuccessMessage] = useState("");
 
     const [actionLoading, setActionLoading] = useState<number | null>(null);
-
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const [createForm, setCreateForm] = useState<ICreateProductForm>({
@@ -57,6 +59,13 @@ export default function AdminProducts() {
         width: "",
         stockQuantity: "",
         categoryId: "",
+        madeToOrder: false,
+        customizationColors: "",
+        customizationTextEnabled: false,
+        customizationTextLabel: "Texte personnalisé",
+        customizationTextRequired: false,
+        customizationTextMaxLength: "30",
+        customizationTextPlaceholder: "",
     });
 
     const [editForm, setEditForm] = useState<IEditProductForm>({
@@ -69,6 +78,13 @@ export default function AdminProducts() {
         width: "",
         stockQuantity: "",
         categoryId: "",
+        madeToOrder: false,
+        customizationColors: "",
+        customizationTextEnabled: false,
+        customizationTextLabel: "Texte personnalisé",
+        customizationTextRequired: false,
+        customizationTextMaxLength: "30",
+        customizationTextPlaceholder: "",
     });
 
     useEffect(() => {
@@ -84,7 +100,6 @@ export default function AdminProducts() {
 
                 setProducts(productsData);
                 setCategories(categoriesData);
-
             } catch (error) {
                 setError(
                     error instanceof Error
@@ -101,11 +116,9 @@ export default function AdminProducts() {
 
     const filteredProducts = useMemo(() => {
         return products.filter((product) => {
-
-            const matchesSearch =
-                product.name
-                    .toLowerCase()
-                    .includes(search.toLowerCase());
+            const matchesSearch = product.name
+                .toLowerCase()
+                .includes(search.toLowerCase());
 
             const matchesCategory =
                 categoryFilter === "all" ||
@@ -116,11 +129,7 @@ export default function AdminProducts() {
                 (statusFilter === "active" && product.active) ||
                 (statusFilter === "inactive" && !product.active);
 
-            return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesStatus
-            );
+            return matchesSearch && matchesCategory && matchesStatus;
         });
     }, [products, search, categoryFilter, statusFilter]);
 
@@ -130,33 +139,46 @@ export default function AdminProducts() {
         setEditForm({
             name: product.name,
             description: product.description,
-            price: product.price,
-            weight: product.weight,
-            height: product.height,
-            length: product.length,
-            width: product.width,
+            price: String(product.price),
+            weight: String(product.weight),
+            height: String(product.height),
+            length: String(product.length),
+            width: String(product.width),
             stockQuantity: String(product.stockQuantity),
             categoryId: String(product.categoryId),
+            madeToOrder: product.madeToOrder ?? false,
+            customizationColors: (
+                product.customizationOptions?.colors ?? []
+            ).join(", "),
+            customizationTextEnabled:
+                product.customizationOptions?.text?.enabled ?? false,
+            customizationTextLabel:
+                product.customizationOptions?.text?.label ??
+                "Texte personnalisé",
+            customizationTextRequired:
+                product.customizationOptions?.text?.required ?? false,
+            customizationTextMaxLength: String(
+                product.customizationOptions?.text?.maxLength ?? 30
+            ),
+            customizationTextPlaceholder:
+                product.customizationOptions?.text?.placeholder ?? "",
         });
 
         setError("");
         setSuccessMessage("");
-
         setPictureFile(null);
         setPictureAlt("");
         setPictureIsMain(false);
-
         setPicturesLoading(true);
 
         try {
             const pictures = await getProductPictures(product.id);
 
             setProductPictures(
-                [...pictures].sort((a, b) =>
-                    Number(b.isMain) - Number(a.isMain)
+                [...pictures].sort(
+                    (a, b) => Number(b.isMain) - Number(a.isMain)
                 )
             );
-
         } catch (error) {
             setProductPictures([]);
 
@@ -184,9 +206,9 @@ export default function AdminProducts() {
                 currentProducts.map((currentProduct) =>
                     currentProduct.id === product.id
                         ? {
-                            ...currentProduct,
-                            active: !currentProduct.active,
-                        }
+                              ...currentProduct,
+                              active: !currentProduct.active,
+                          }
                         : currentProduct
                 )
             );
@@ -198,7 +220,6 @@ export default function AdminProducts() {
                     ? `Le produit « ${product.name} » a été désactivé avec succès.`
                     : `Le produit « ${product.name} » a été activé avec succès.`
             );
-
         } catch (error) {
             setError(
                 error instanceof Error
@@ -222,10 +243,10 @@ export default function AdminProducts() {
             !createForm.height ||
             !createForm.length ||
             !createForm.width ||
-            !createForm.stockQuantity ||
+            (!createForm.madeToOrder && !createForm.stockQuantity) ||
             !createForm.categoryId
         ) {
-            setError("Tous les champs du produit sont requis.");
+            setError("Veuillez remplir tous les champs obligatoires.");
             return;
         }
 
@@ -234,17 +255,17 @@ export default function AdminProducts() {
         const height = Number(createForm.height);
         const length = Number(createForm.length);
         const width = Number(createForm.width);
-        const stockQuantity = Number(createForm.stockQuantity);
+        const stockQuantity = Number(createForm.stockQuantity || 0);
         const categoryId = Number(createForm.categoryId);
 
         if (
-            Number.isNaN(price) ||
-            Number.isNaN(weight) ||
-            Number.isNaN(height) ||
-            Number.isNaN(length) ||
-            Number.isNaN(width) ||
-            Number.isNaN(stockQuantity) ||
-            Number.isNaN(categoryId)
+            !Number.isFinite(price) ||
+            !Number.isFinite(weight) ||
+            !Number.isFinite(height) ||
+            !Number.isFinite(length) ||
+            !Number.isFinite(width) ||
+            !Number.isInteger(stockQuantity) ||
+            !Number.isInteger(categoryId)
         ) {
             setError("Veuillez saisir des valeurs valides.");
             return;
@@ -256,11 +277,50 @@ export default function AdminProducts() {
             height < 0 ||
             length < 0 ||
             width < 0 ||
-            stockQuantity < 0
+            stockQuantity < 0 ||
+            categoryId <= 0
         ) {
-            setError("Les valeurs numériques ne peuvent pas être négatives.");
+            setError("Les valeurs numériques saisies sont invalides.");
             return;
         }
+
+        const colors = createForm.customizationColors
+            .split(",")
+            .map((color) => color.trim())
+            .filter(Boolean);
+
+        const textEnabled = createForm.customizationTextEnabled;
+        const textMaxLength = Number(createForm.customizationTextMaxLength);
+
+        if (
+            textEnabled &&
+            (!Number.isInteger(textMaxLength) ||
+                textMaxLength < 1 ||
+                textMaxLength > 200)
+        ) {
+            setError(
+                "La longueur maximale du texte doit être comprise entre 1 et 200 caractères."
+            );
+            return;
+        }
+
+        const customizationOptions = {
+            ...(colors.length > 0 ? { colors } : {}),
+            ...(textEnabled
+                ? {
+                      text: {
+                          enabled: true,
+                          label:
+                              createForm.customizationTextLabel.trim() ||
+                              "Texte personnalisé",
+                          required: createForm.customizationTextRequired,
+                          maxLength: textMaxLength,
+                          placeholder:
+                              createForm.customizationTextPlaceholder.trim(),
+                      },
+                  }
+                : {}),
+        };
 
         try {
             setCreateLoading(true);
@@ -275,18 +335,18 @@ export default function AdminProducts() {
                 width,
                 stockQuantity,
                 categoryId,
+                madeToOrder: createForm.madeToOrder,
+                customizationOptions,
             });
 
             const updatedProducts = await getAdminProducts();
 
             setProducts(updatedProducts);
-
             setIsCreateModalOpen(false);
 
             setSuccessMessage(
-                `Le produit « ${product.name } » a été ajouté avec succès.`
+                `Le produit « ${product.name} » a été ajouté avec succès.`
             );
-
         } catch (error) {
             setError(
                 error instanceof Error
@@ -295,6 +355,151 @@ export default function AdminProducts() {
             );
         } finally {
             setCreateLoading(false);
+        }
+    }
+
+    async function handleUpdateProduct() {
+        if (!productToEdit) {
+            return;
+        }
+
+        setError("");
+        setSuccessMessage("");
+
+        if (
+            !editForm.name.trim() ||
+            !editForm.description.trim() ||
+            !editForm.price ||
+            !editForm.weight ||
+            !editForm.height ||
+            !editForm.length ||
+            !editForm.width ||
+            (!editForm.madeToOrder && !editForm.stockQuantity) ||
+            !editForm.categoryId
+        ) {
+            setError("Tous les champs du produit sont requis.");
+            return;
+        }
+
+        const price = Number(editForm.price);
+        const weight = Number(editForm.weight);
+        const height = Number(editForm.height);
+        const length = Number(editForm.length);
+        const width = Number(editForm.width);
+        const stockQuantity = Number(editForm.stockQuantity || 0);
+        const categoryId = Number(editForm.categoryId);
+
+        if (
+            !Number.isFinite(price) ||
+            !Number.isFinite(weight) ||
+            !Number.isFinite(height) ||
+            !Number.isFinite(length) ||
+            !Number.isFinite(width) ||
+            !Number.isInteger(stockQuantity) ||
+            !Number.isInteger(categoryId)
+        ) {
+            setError("Veuillez saisir des valeurs valides.");
+            return;
+        }
+
+        if (
+            price < 0 ||
+            weight < 0 ||
+            height < 0 ||
+            length < 0 ||
+            width < 0 ||
+            stockQuantity < 0 ||
+            categoryId <= 0
+        ) {
+            setError("Les valeurs numériques saisies sont invalides.");
+            return;
+        }
+
+        const colors = editForm.customizationColors
+            .split(",")
+            .map((color) => color.trim())
+            .filter(Boolean);
+
+        const textEnabled = editForm.customizationTextEnabled;
+        const textMaxLength = Number(editForm.customizationTextMaxLength);
+
+        if (
+            textEnabled &&
+            (!Number.isInteger(textMaxLength) ||
+                textMaxLength < 1 ||
+                textMaxLength > 200)
+        ) {
+            setError(
+                "La longueur maximale du texte doit être comprise entre 1 et 200 caractères."
+            );
+            return;
+        }
+
+        const customizationOptions = {
+            ...(colors.length > 0 ? { colors } : {}),
+            ...(textEnabled
+                ? {
+                      text: {
+                          enabled: true,
+                          label:
+                              editForm.customizationTextLabel.trim() ||
+                              "Texte personnalisé",
+                          required: editForm.customizationTextRequired,
+                          maxLength: textMaxLength,
+                          placeholder:
+                              editForm.customizationTextPlaceholder.trim(),
+                      },
+                  }
+                : {}),
+        };
+
+        try {
+            setActionLoading(productToEdit.id);
+
+            const updatedProduct = await updateProduct(productToEdit.id, {
+                name: editForm.name.trim(),
+                description: editForm.description.trim(),
+                price,
+                weight,
+                height,
+                length,
+                width,
+                stockQuantity,
+                categoryId,
+                madeToOrder: editForm.madeToOrder,
+                customizationOptions,
+            });
+
+            const updatedCategory = categories.find(
+                (category) => category.id === categoryId
+            );
+
+            setProducts((currentProducts) =>
+                currentProducts.map((product) =>
+                    product.id === productToEdit.id
+                        ? {
+                              ...product,
+                              ...updatedProduct,
+                              categoryId,
+                              category: updatedCategory ?? product.category,
+                          }
+                        : product
+                )
+            );
+
+            setProductToEdit(null);
+
+            setSuccessMessage(
+                `Le produit « ${editForm.name.trim()} » a été modifié avec succès.`
+            );
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de modifier le produit."
+            );
+        } finally {
+            setActionLoading(null);
         }
     }
 
@@ -326,13 +531,11 @@ export default function AdminProducts() {
                 pictureIsMain
             );
 
-            const updatedPictures = await getProductPictures(
-                productToEdit.id
-            );
+            const updatedPictures = await getProductPictures(productToEdit.id);
 
             setProductPictures(
-                [...updatedPictures].sort((a, b) =>
-                    Number(b.isMain) - Number(a.isMain)
+                [...updatedPictures].sort(
+                    (a, b) => Number(b.isMain) - Number(a.isMain)
                 )
             );
 
@@ -340,10 +543,7 @@ export default function AdminProducts() {
             setPictureAlt("");
             setPictureIsMain(false);
 
-            setSuccessMessage(
-                "L'image a été ajoutée avec succès."
-            );
-
+            setSuccessMessage("L'image a été ajoutée avec succès.");
         } catch (error) {
             setError(
                 error instanceof Error
@@ -352,113 +552,6 @@ export default function AdminProducts() {
             );
         } finally {
             setPictureUploadLoading(false);
-        }
-    }
-
-    async function handleUpdateProduct() {
-        if (!productToEdit) {
-            return;
-        }
-
-        if (
-            !editForm.name.trim() ||
-            !editForm.description.trim() ||
-            !editForm.price ||
-            !editForm.weight ||
-            !editForm.height ||
-            !editForm.length ||
-            !editForm.width ||
-            !editForm.stockQuantity ||
-            !editForm.categoryId
-        ) {
-            setError("Tous les champs du produit sont requis.");
-            return;
-        }
-
-        const price = Number(editForm.price);
-        const weight = Number(editForm.weight);
-        const height = Number(editForm.height);
-        const length = Number(editForm.length);
-        const width = Number(editForm.width);
-        const stockQuantity = Number(editForm.stockQuantity);
-        const categoryId = Number(editForm.categoryId);
-
-        if (
-            Number.isNaN(price) ||
-            Number.isNaN(weight) ||
-            Number.isNaN(height) ||
-            Number.isNaN(length) ||
-            Number.isNaN(width) ||
-            Number.isNaN(stockQuantity) ||
-            Number.isNaN(categoryId)
-        ) {
-            setError("Veuillez saisir des valeurs valides.");
-            return;
-        }
-
-        if (
-            price < 0 ||
-            weight < 0 ||
-            height < 0 ||
-            length < 0 ||
-            width < 0 ||
-            stockQuantity < 0
-        ) {
-            setError("Les valeurs numériques ne peuvent pas être négatives.");
-            return;
-        }
-
-        try {
-            setActionLoading(productToEdit.id);
-            setError("");
-            setSuccessMessage("");
-
-            const updatedProduct = await updateProduct(
-                productToEdit.id,
-                {
-                    name: editForm.name.trim(),
-                    description: editForm.description.trim(),
-                    price,
-                    weight,
-                    height,
-                    length,
-                    width,
-                    stockQuantity,
-                    categoryId,
-                }
-            );
-
-            const updatedCategory = categories.find(
-                (category) => category.id === categoryId
-            );
-
-            setProducts((currentProducts) =>
-                currentProducts.map((product) =>
-                    product.id === productToEdit.id
-                        ? {
-                            ...product,
-                            ...updatedProduct,
-                            categoryId,
-                            category: updatedCategory ?? product.category,
-                        }
-                        : product
-                )
-            );
-
-            setProductToEdit(null);
-
-            setSuccessMessage(
-                `Le produit « ${editForm.name.trim()} » a été modifié avec succès.`
-            );
-
-        } catch (error) {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : "Impossible de modifier le produit."
-            );
-        } finally {
-            setActionLoading(null);
         }
     }
 
@@ -472,28 +565,21 @@ export default function AdminProducts() {
             setError("");
             setSuccessMessage("");
 
-            await updatePicture(
-                productToEdit.id,
-                picture.id,
-                {
-                    isMain: true,
-                }
-            );
+            await updatePicture(productToEdit.id, picture.id, {
+                isMain: true,
+            });
 
-            const updatedPictures = await getProductPictures(
-                productToEdit.id
-            );
+            const updatedPictures = await getProductPictures(productToEdit.id);
 
             setProductPictures(
-                [...updatedPictures].sort((a, b) =>
-                    Number(b.isMain) - Number(a.isMain)
+                [...updatedPictures].sort(
+                    (a, b) => Number(b.isMain) - Number(a.isMain)
                 )
             );
 
             setSuccessMessage(
                 "L'image a été définie comme image principale."
             );
-
         } catch (error) {
             setError(
                 error instanceof Error
@@ -522,22 +608,15 @@ export default function AdminProducts() {
             setError("");
             setSuccessMessage("");
 
-            await deletePicture(
-                productToEdit.id,
-                picture.id
-            );
+            await deletePicture(productToEdit.id, picture.id);
 
             setProductPictures((currentPictures) =>
                 currentPictures.filter(
-                    (currentPicture) =>
-                        currentPicture.id !== picture.id
+                    (currentPicture) => currentPicture.id !== picture.id
                 )
             );
 
-            setSuccessMessage(
-                "L'image a été supprimée avec succès."
-            );
-
+            setSuccessMessage("L'image a été supprimée avec succès.");
         } catch (error) {
             setError(
                 error instanceof Error
@@ -551,21 +630,13 @@ export default function AdminProducts() {
 
     return (
         <section className="admin-products-page">
-
             <header className="admin-section-header">
-                <h1 className="main-title">
-                    Produits
-                </h1>
-
-                <p>
-                    Gérez les produits de Gravelya Studio.
-                </p>
+                <h1 className="main-title">Produits</h1>
+                <p>Gérez les produits de Gravelya Studio.</p>
             </header>
 
             <div className="admin-products-actions">
-
                 <div className="admin-products-filters">
-
                     <input
                         type="search"
                         placeholder="Rechercher un produit..."
@@ -581,15 +652,10 @@ export default function AdminProducts() {
                         }
                         aria-label="Filtrer par catégorie"
                     >
-                        <option value="all">
-                            Toutes les catégories
-                        </option>
+                        <option value="all">Toutes les catégories</option>
 
                         {categories.map((category) => (
-                            <option
-                                key={category.id}
-                                value={category.id}
-                            >
+                            <option key={category.id} value={category.id}>
                                 {category.name}
                             </option>
                         ))}
@@ -602,22 +668,14 @@ export default function AdminProducts() {
                         }
                         aria-label="Filtrer par statut"
                     >
-                        <option value="all">
-                            Tous les produits
-                        </option>
-
-                        <option value="active">
-                            Actifs
-                        </option>
-
-                        <option value="inactive">
-                            Inactifs
-                        </option>
+                        <option value="all">Tous les produits</option>
+                        <option value="active">Actifs</option>
+                        <option value="inactive">Inactifs</option>
                     </select>
-
                 </div>
 
                 <button
+                    type="button"
                     className="admin-add-button"
                     onClick={() => {
                         setCreateForm({
@@ -629,9 +687,17 @@ export default function AdminProducts() {
                             length: "",
                             width: "",
                             stockQuantity: "",
-                            categoryId: categories.length > 0
-                                ? String(categories[0].id)
-                                : "",
+                            categoryId:
+                                categories.length > 0
+                                    ? String(categories[0].id)
+                                    : "",
+                            madeToOrder: false,
+                            customizationColors: "",
+                            customizationTextEnabled: false,
+                            customizationTextLabel: "Texte personnalisé",
+                            customizationTextRequired: false,
+                            customizationTextMaxLength: "30",
+                            customizationTextPlaceholder: "",
                         });
 
                         setError("");
@@ -641,120 +707,99 @@ export default function AdminProducts() {
                 >
                     + Ajouter un produit
                 </button>
-
             </div>
 
-            {error && (
-                <p>
-                    {error}
-                </p>
-            )}
+            {error && <p role="alert">{error}</p>}
 
             {successMessage && (
-                <p
-                    className="admin-success-message"
-                    role="status"
-                >
+                <p className="admin-success-message" role="status">
                     {successMessage}
                 </p>
             )}
 
             <div className="admin-products-list">
-
-                {loading && (
-                    <p>
-                        Chargement des produits...
-                    </p>
-                )}
+                {loading && <p>Chargement des produits...</p>}
 
                 {!loading && filteredProducts.length === 0 && (
-                    <p>
-                        Aucun produit ne correspond à votre recherche.
-                    </p>
+                    <p>Aucun produit ne correspond à votre recherche.</p>
                 )}
 
-                {!loading && filteredProducts.map((product) => (
-
-                    <article
-                        className="admin-product-card"
-                        key={product.id}
-                    >
-
-                        <div className="admin-product-image">
-                            <span>
-                                Image
-                            </span>
-                        </div>
-
-                        <div className="admin-product-info">
-
-                            <h2>
-                                {product.name}
-                            </h2>
-
-                            <span className="admin-product-category">
-                                {product.category.name}
-                            </span>
-
-                            <div className="admin-product-details">
-
-                                <span>
-                                    {Number(product.price)
-                                        .toFixed(2)
-                                        .replace(".", ",")} €
-                                </span>
-
-                                <span>
-                                    Stock : {product.stockQuantity}
-                                </span>
-
+                {!loading &&
+                    filteredProducts.map((product) => (
+                        <article
+                            className="admin-product-card"
+                            key={product.id}
+                        >
+                            <div className="admin-product-image">
+                                <span>Image</span>
                             </div>
 
-                        </div>
+                            <div className="admin-product-info">
+                                <h2>{product.name}</h2>
 
-                        <span
-                            className={`admin-product-status ${
-                                product.active
-                                    ? "active"
-                                    : "inactive"
-                            }`}
-                        >
-                            {product.active ? "Actif" : "Inactif"}
-                        </span>
+                                <span className="admin-product-category">
+                                    {product.category?.name ?? "Sans catégorie"}
+                                </span>
 
-                        <div className="admin-product-actions">
+                                <div className="admin-product-details">
+                                    <span>
+                                        {Number(product.price)
+                                            .toFixed(2)
+                                            .replace(".", ",")}{" "}
+                                        €
+                                    </span>
 
-                            <button
-                                className="admin-edit-button"
-                                onClick={() => openEditModal(product)}
+                                    <span>
+                                        {product.madeToOrder
+                                            ? "Fabriqué à la commande"
+                                            : `Stock : ${product.stockQuantity}`}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <span
+                                className={`admin-product-status ${
+                                    product.active ? "active" : "inactive"
+                                }`}
                             >
-                                Modifier
-                            </button>
+                                {product.active ? "Actif" : "Inactif"}
+                            </span>
 
-                            {product.active ? (
+                            <div className="admin-product-actions">
                                 <button
-                                    className="admin-delete-button"
-                                    onClick={() => setProductToToggle(product)}
-                                    disabled={actionLoading === product.id}
+                                    type="button"
+                                    className="admin-edit-button"
+                                    onClick={() => openEditModal(product)}
                                 >
-                                    Désactiver
+                                    Modifier
                                 </button>
-                            ) : (
-                                <button
-                                    className="admin-activate-button"
-                                    onClick={() => setProductToToggle(product)}
-                                    disabled={actionLoading === product.id}
-                                >
-                                    Activer
-                                </button>
-                            )}
 
-                        </div>
-
-                    </article>
-
-                ))}
-
+                                {product.active ? (
+                                    <button
+                                        type="button"
+                                        className="admin-delete-button"
+                                        onClick={() =>
+                                            setProductToToggle(product)
+                                        }
+                                        disabled={actionLoading === product.id}
+                                    >
+                                        Désactiver
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="admin-activate-button"
+                                        onClick={() =>
+                                            setProductToToggle(product)
+                                        }
+                                        disabled={actionLoading === product.id}
+                                    >
+                                        Activer
+                                    </button>
+                                )}
+                            </div>
+                        </article>
+                    ))}
             </div>
 
             {productToToggle && (
@@ -782,12 +827,13 @@ export default function AdminProducts() {
                         </p>
 
                         <div className="admin-confirm-actions">
-
                             <button
                                 type="button"
                                 className="admin-confirm-cancel"
                                 onClick={() => setProductToToggle(null)}
-                                disabled={actionLoading === productToToggle.id}
+                                disabled={
+                                    actionLoading === productToToggle.id
+                                }
                             >
                                 Annuler
                             </button>
@@ -799,21 +845,25 @@ export default function AdminProducts() {
                                         ? "admin-confirm-danger"
                                         : "admin-confirm-success"
                                 }
-                                onClick={() => handleToggleProduct(productToToggle)}
-                                disabled={actionLoading === productToToggle.id}
+                                onClick={() =>
+                                    handleToggleProduct(productToToggle)
+                                }
+                                disabled={
+                                    actionLoading === productToToggle.id
+                                }
                             >
                                 {actionLoading === productToToggle.id
                                     ? "Chargement..."
                                     : productToToggle.active
-                                        ? "Désactiver"
-                                        : "Activer"}
+                                      ? "Désactiver"
+                                      : "Activer"}
                             </button>
-
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* MODALE DE CRÉATION */}
             {isCreateModalOpen && (
                 <div
                     className="admin-edit-overlay"
@@ -827,7 +877,6 @@ export default function AdminProducts() {
                         onClick={(event) => event.stopPropagation()}
                     >
                         <header className="admin-edit-modal-header">
-
                             <h2 id="admin-create-title">
                                 Ajouter un produit
                             </h2>
@@ -835,21 +884,16 @@ export default function AdminProducts() {
                             <button
                                 type="button"
                                 className="admin-edit-close"
-                                onClick={() => {setIsCreateModalOpen(false);}}
+                                onClick={() => setIsCreateModalOpen(false)}
                                 aria-label="Fermer"
                             >
                                 ×
                             </button>
-
                         </header>
 
                         <div className="admin-edit-form">
-
                             <div className="admin-edit-field">
-                                <label htmlFor="create-product-name">
-                                    Nom
-                                </label>
-
+                                <label htmlFor="create-product-name">Nom</label>
                                 <input
                                     id="create-product-name"
                                     type="text"
@@ -867,7 +911,6 @@ export default function AdminProducts() {
                                 <label htmlFor="create-product-description">
                                     Description
                                 </label>
-
                                 <textarea
                                     id="create-product-description"
                                     value={createForm.description}
@@ -881,12 +924,10 @@ export default function AdminProducts() {
                             </div>
 
                             <div className="admin-edit-row">
-
                                 <div className="admin-edit-field">
                                     <label htmlFor="create-product-price">
                                         Prix
                                     </label>
-
                                     <input
                                         id="create-product-price"
                                         type="number"
@@ -906,12 +947,12 @@ export default function AdminProducts() {
                                     <label htmlFor="create-product-stock">
                                         Stock
                                     </label>
-
                                     <input
                                         id="create-product-stock"
                                         type="number"
                                         min="0"
                                         step="1"
+                                        disabled={createForm.madeToOrder}
                                         value={createForm.stockQuantity}
                                         onChange={(event) =>
                                             setCreateForm({
@@ -921,14 +962,27 @@ export default function AdminProducts() {
                                         }
                                     />
                                 </div>
-
                             </div>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={createForm.madeToOrder}
+                                    onChange={(event) =>
+                                        setCreateForm({
+                                            ...createForm,
+                                            madeToOrder: event.target.checked,
+                                        })
+                                    }
+                                />{" "}
+                                Produit fabriqué à la commande (pas de stock à
+                                gérer)
+                            </label>
 
                             <div className="admin-edit-field">
                                 <label htmlFor="create-product-category">
                                     Catégorie
                                 </label>
-
                                 <select
                                     id="create-product-category"
                                     value={createForm.categoryId}
@@ -939,6 +993,9 @@ export default function AdminProducts() {
                                         })
                                     }
                                 >
+                                    <option value="" disabled>
+                                        Choisir une catégorie
+                                    </option>
                                     {categories.map((category) => (
                                         <option
                                             key={category.id}
@@ -950,13 +1007,131 @@ export default function AdminProducts() {
                                 </select>
                             </div>
 
-                            <div className="admin-edit-row">
+                            <div className="admin-edit-field">
+                                <label htmlFor="create-product-colors">
+                                    Couleurs disponibles (séparées par des
+                                    virgules)
+                                </label>
+                                <input
+                                    id="create-product-colors"
+                                    type="text"
+                                    placeholder="Rouge, Bleu, Vert"
+                                    value={createForm.customizationColors}
+                                    onChange={(event) =>
+                                        setCreateForm({
+                                            ...createForm,
+                                            customizationColors:
+                                                event.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
 
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={createForm.customizationTextEnabled}
+                                    onChange={(event) =>
+                                        setCreateForm({
+                                            ...createForm,
+                                            customizationTextEnabled:
+                                                event.target.checked,
+                                        })
+                                    }
+                                />{" "}
+                                Autoriser un texte personnalisé
+                            </label>
+
+                            {createForm.customizationTextEnabled && (
+                                <>
+                                    <div className="admin-edit-field">
+                                        <label htmlFor="create-text-label">
+                                            Libellé du champ texte
+                                        </label>
+                                        <input
+                                            id="create-text-label"
+                                            type="text"
+                                            value={
+                                                createForm.customizationTextLabel
+                                            }
+                                            onChange={(event) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    customizationTextLabel:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="admin-edit-field">
+                                        <label htmlFor="create-text-max-length">
+                                            Longueur maximale (1 à 200)
+                                        </label>
+                                        <input
+                                            id="create-text-max-length"
+                                            type="number"
+                                            min="1"
+                                            max="200"
+                                            step="1"
+                                            value={
+                                                createForm.customizationTextMaxLength
+                                            }
+                                            onChange={(event) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    customizationTextMaxLength:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="admin-edit-field">
+                                        <label htmlFor="create-text-placeholder">
+                                            Texte indicatif
+                                        </label>
+                                        <input
+                                            id="create-text-placeholder"
+                                            type="text"
+                                            placeholder="Ex. : Indiquez le prénom"
+                                            value={
+                                                createForm.customizationTextPlaceholder
+                                            }
+                                            onChange={(event) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    customizationTextPlaceholder:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                createForm.customizationTextRequired
+                                            }
+                                            onChange={(event) =>
+                                                setCreateForm({
+                                                    ...createForm,
+                                                    customizationTextRequired:
+                                                        event.target.checked,
+                                                })
+                                            }
+                                        />{" "}
+                                        Rendre le texte obligatoire
+                                    </label>
+                                </>
+                            )}
+
+                            <div className="admin-edit-row">
                                 <div className="admin-edit-field">
                                     <label htmlFor="create-product-weight">
                                         Poids
                                     </label>
-
                                     <input
                                         id="create-product-weight"
                                         type="number"
@@ -976,7 +1151,6 @@ export default function AdminProducts() {
                                     <label htmlFor="create-product-height">
                                         Hauteur
                                     </label>
-
                                     <input
                                         id="create-product-height"
                                         type="number"
@@ -991,16 +1165,13 @@ export default function AdminProducts() {
                                         }
                                     />
                                 </div>
-
                             </div>
 
                             <div className="admin-edit-row">
-
                                 <div className="admin-edit-field">
                                     <label htmlFor="create-product-length">
                                         Longueur
                                     </label>
-
                                     <input
                                         id="create-product-length"
                                         type="number"
@@ -1020,7 +1191,6 @@ export default function AdminProducts() {
                                     <label htmlFor="create-product-width">
                                         Largeur
                                     </label>
-
                                     <input
                                         id="create-product-width"
                                         type="number"
@@ -1035,17 +1205,14 @@ export default function AdminProducts() {
                                         }
                                     />
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div className="admin-edit-actions">
-
                             <button
                                 type="button"
                                 className="admin-confirm-cancel"
-                                onClick={() => {setIsCreateModalOpen(false);}}
+                                onClick={() => setIsCreateModalOpen(false)}
                             >
                                 Annuler
                             </button>
@@ -1056,17 +1223,14 @@ export default function AdminProducts() {
                                 onClick={handleCreateProduct}
                                 disabled={createLoading}
                             >
-                                {createLoading
-                                    ? "Ajout en cours..."
-                                    : "Ajouter"}
+                                {createLoading ? "Ajout en cours..." : "Ajouter"}
                             </button>
-
                         </div>
-
                     </div>
                 </div>
             )}
 
+            {/* MODALE DE MODIFICATION */}
             {productToEdit && (
                 <div
                     className="admin-edit-overlay"
@@ -1086,7 +1250,6 @@ export default function AdminProducts() {
                         onClick={(event) => event.stopPropagation()}
                     >
                         <header className="admin-edit-modal-header">
-
                             <h2 id="admin-edit-title">
                                 Modifier le produit
                             </h2>
@@ -1105,16 +1268,11 @@ export default function AdminProducts() {
                             >
                                 ×
                             </button>
-
                         </header>
 
                         <div className="admin-edit-form">
-
                             <div className="admin-edit-field">
-                                <label htmlFor="edit-product-name">
-                                    Nom
-                                </label>
-
+                                <label htmlFor="edit-product-name">Nom</label>
                                 <input
                                     id="edit-product-name"
                                     type="text"
@@ -1132,7 +1290,6 @@ export default function AdminProducts() {
                                 <label htmlFor="edit-product-description">
                                     Description
                                 </label>
-
                                 <textarea
                                     id="edit-product-description"
                                     value={editForm.description}
@@ -1146,12 +1303,10 @@ export default function AdminProducts() {
                             </div>
 
                             <div className="admin-edit-row">
-
                                 <div className="admin-edit-field">
                                     <label htmlFor="edit-product-price">
                                         Prix
                                     </label>
-
                                     <input
                                         id="edit-product-price"
                                         type="number"
@@ -1171,12 +1326,12 @@ export default function AdminProducts() {
                                     <label htmlFor="edit-product-stock">
                                         Stock
                                     </label>
-
                                     <input
                                         id="edit-product-stock"
                                         type="number"
                                         min="0"
                                         step="1"
+                                        disabled={editForm.madeToOrder}
                                         value={editForm.stockQuantity}
                                         onChange={(event) =>
                                             setEditForm({
@@ -1186,14 +1341,27 @@ export default function AdminProducts() {
                                         }
                                     />
                                 </div>
-
                             </div>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={editForm.madeToOrder}
+                                    onChange={(event) =>
+                                        setEditForm({
+                                            ...editForm,
+                                            madeToOrder: event.target.checked,
+                                        })
+                                    }
+                                />{" "}
+                                Produit fabriqué à la commande (pas de stock à
+                                gérer)
+                            </label>
 
                             <div className="admin-edit-field">
                                 <label htmlFor="edit-product-category">
                                     Catégorie
                                 </label>
-
                                 <select
                                     id="edit-product-category"
                                     value={editForm.categoryId}
@@ -1204,6 +1372,9 @@ export default function AdminProducts() {
                                         })
                                     }
                                 >
+                                    <option value="" disabled>
+                                        Choisir une catégorie
+                                    </option>
                                     {categories.map((category) => (
                                         <option
                                             key={category.id}
@@ -1215,24 +1386,135 @@ export default function AdminProducts() {
                                 </select>
                             </div>
 
-                            
-                            <div className="admin-edit-images">
+                            <div className="admin-edit-field">
+                                <label htmlFor="edit-product-colors">
+                                    Couleurs disponibles (séparées par des
+                                    virgules)
+                                </label>
+                                <input
+                                    id="edit-product-colors"
+                                    type="text"
+                                    placeholder="Rouge, Bleu, Vert"
+                                    value={editForm.customizationColors}
+                                    onChange={(event) =>
+                                        setEditForm({
+                                            ...editForm,
+                                            customizationColors:
+                                                event.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
 
-                                <h3>
-                                    Images du produit
-                                </h3>
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={editForm.customizationTextEnabled}
+                                    onChange={(event) =>
+                                        setEditForm({
+                                            ...editForm,
+                                            customizationTextEnabled:
+                                                event.target.checked,
+                                        })
+                                    }
+                                />{" "}
+                                Autoriser un texte personnalisé
+                            </label>
+
+                            {editForm.customizationTextEnabled && (
+                                <>
+                                    <div className="admin-edit-field">
+                                        <label htmlFor="edit-text-label">
+                                            Libellé du champ texte
+                                        </label>
+                                        <input
+                                            id="edit-text-label"
+                                            type="text"
+                                            value={
+                                                editForm.customizationTextLabel
+                                            }
+                                            onChange={(event) =>
+                                                setEditForm({
+                                                    ...editForm,
+                                                    customizationTextLabel:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="admin-edit-field">
+                                        <label htmlFor="edit-text-max-length">
+                                            Longueur maximale (1 à 200)
+                                        </label>
+                                        <input
+                                            id="edit-text-max-length"
+                                            type="number"
+                                            min="1"
+                                            max="200"
+                                            step="1"
+                                            value={
+                                                editForm.customizationTextMaxLength
+                                            }
+                                            onChange={(event) =>
+                                                setEditForm({
+                                                    ...editForm,
+                                                    customizationTextMaxLength:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="admin-edit-field">
+                                        <label htmlFor="edit-text-placeholder">
+                                            Texte indicatif
+                                        </label>
+                                        <input
+                                            id="edit-text-placeholder"
+                                            type="text"
+                                            placeholder="Ex. : Indiquez le prénom"
+                                            value={
+                                                editForm.customizationTextPlaceholder
+                                            }
+                                            onChange={(event) =>
+                                                setEditForm({
+                                                    ...editForm,
+                                                    customizationTextPlaceholder:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                editForm.customizationTextRequired
+                                            }
+                                            onChange={(event) =>
+                                                setEditForm({
+                                                    ...editForm,
+                                                    customizationTextRequired:
+                                                        event.target.checked,
+                                                })
+                                            }
+                                        />{" "}
+                                        Rendre le texte obligatoire
+                                    </label>
+                                </>
+                            )}
+
+                            <div className="admin-edit-images">
+                                <h3>Images du produit</h3>
 
                                 {picturesLoading ? (
-                                    <p>
-                                        Chargement des images...
-                                    </p>
+                                    <p>Chargement des images...</p>
                                 ) : productPictures.length === 0 ? (
-                                    <p>
-                                        Aucune image pour ce produit.
-                                    </p>
+                                    <p>Aucune image pour ce produit.</p>
                                 ) : (
                                     <div className="admin-edit-images-grid">
-
                                         {productPictures.map((picture) => (
                                             <div
                                                 key={picture.id}
@@ -1250,18 +1532,21 @@ export default function AdminProducts() {
                                                 )}
 
                                                 <div className="admin-edit-image-actions">
-
                                                     {!picture.isMain && (
                                                         <button
                                                             type="button"
                                                             onClick={() =>
-                                                                handleSetMainPicture(picture)
+                                                                handleSetMainPicture(
+                                                                    picture
+                                                                )
                                                             }
                                                             disabled={
-                                                                pictureActionLoading === picture.id
+                                                                pictureActionLoading ===
+                                                                picture.id
                                                             }
                                                         >
-                                                            {pictureActionLoading === picture.id
+                                                            {pictureActionLoading ===
+                                                            picture.id
                                                                 ? "Chargement..."
                                                                 : "Définir principale"}
                                                         </button>
@@ -1271,56 +1556,46 @@ export default function AdminProducts() {
                                                         <button
                                                             type="button"
                                                             onClick={() =>
-                                                                handleDeletePicture(picture)
+                                                                handleDeletePicture(
+                                                                    picture
+                                                                )
                                                             }
                                                             disabled={
-                                                                pictureActionLoading === picture.id
+                                                                pictureActionLoading ===
+                                                                picture.id
                                                             }
                                                         >
                                                             Supprimer
                                                         </button>
                                                     )}
-
                                                 </div>
                                             </div>
                                         ))}
-
                                     </div>
                                 )}
-
                             </div>
 
                             <div className="admin-add-picture">
-
-                                <h3>
-                                    Ajouter une image
-                                </h3>
+                                <h3>Ajouter une image</h3>
 
                                 <div className="admin-edit-field">
-
-                                    <label htmlFor="picture-file">
-                                        Image
-                                    </label>
-
+                                    <label htmlFor="picture-file">Image</label>
                                     <input
                                         id="picture-file"
                                         type="file"
                                         accept="image/jpeg,image/png,image/webp"
                                         onChange={(event) => {
-                                            const file = event.target.files?.[0] ?? null;
-
+                                            const file =
+                                                event.target.files?.[0] ?? null;
                                             setPictureFile(file);
                                         }}
                                     />
-
                                 </div>
 
                                 <div className="admin-edit-field">
-
                                     <label htmlFor="picture-alt">
                                         Texte alternatif
                                     </label>
-
                                     <input
                                         id="picture-alt"
                                         type="text"
@@ -1330,7 +1605,6 @@ export default function AdminProducts() {
                                             setPictureAlt(event.target.value)
                                         }
                                     />
-
                                 </div>
 
                                 <label>
@@ -1338,10 +1612,11 @@ export default function AdminProducts() {
                                         type="checkbox"
                                         checked={pictureIsMain}
                                         onChange={(event) =>
-                                            setPictureIsMain(event.target.checked)
+                                            setPictureIsMain(
+                                                event.target.checked
+                                            )
                                         }
-                                    />
-
+                                    />{" "}
                                     Définir comme image principale
                                 </label>
 
@@ -1355,16 +1630,13 @@ export default function AdminProducts() {
                                         ? "Ajout en cours..."
                                         : "Ajouter l'image"}
                                 </button>
-
                             </div>
 
                             <div className="admin-edit-row">
-
                                 <div className="admin-edit-field">
                                     <label htmlFor="edit-product-weight">
                                         Poids
                                     </label>
-
                                     <input
                                         id="edit-product-weight"
                                         type="number"
@@ -1384,7 +1656,6 @@ export default function AdminProducts() {
                                     <label htmlFor="edit-product-height">
                                         Hauteur
                                     </label>
-
                                     <input
                                         id="edit-product-height"
                                         type="number"
@@ -1399,16 +1670,13 @@ export default function AdminProducts() {
                                         }
                                     />
                                 </div>
-
                             </div>
 
                             <div className="admin-edit-row">
-
                                 <div className="admin-edit-field">
                                     <label htmlFor="edit-product-length">
                                         Longueur
                                     </label>
-
                                     <input
                                         id="edit-product-length"
                                         type="number"
@@ -1428,7 +1696,6 @@ export default function AdminProducts() {
                                     <label htmlFor="edit-product-width">
                                         Largeur
                                     </label>
-
                                     <input
                                         id="edit-product-width"
                                         type="number"
@@ -1443,13 +1710,10 @@ export default function AdminProducts() {
                                         }
                                     />
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div className="admin-edit-actions">
-
                             <button
                                 type="button"
                                 className="admin-confirm-cancel"
@@ -1468,23 +1732,16 @@ export default function AdminProducts() {
                                 type="button"
                                 className="admin-confirm-success"
                                 onClick={handleUpdateProduct}
-                                disabled={
-                                    productToEdit !== null &&
-                                    actionLoading === productToEdit.id
-                                }
+                                disabled={actionLoading === productToEdit.id}
                             >
-                                {productToEdit !== null &&
-                                actionLoading === productToEdit.id
+                                {actionLoading === productToEdit.id
                                     ? "Enregistrement..."
                                     : "Enregistrer"}
                             </button>
-
                         </div>
-
                     </div>
                 </div>
             )}
-
         </section>
     );
 }

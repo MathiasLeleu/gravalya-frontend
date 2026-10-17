@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./checkout.css";
 
-import { useAuthStore } from "../../store";
+import { useAuthStore, getCartItemKey } from "../../store";
 
 import {
   getMe,
@@ -215,6 +215,7 @@ export default function Checkout() {
         items: cart.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
+          customization: item.customization ?? {},
         })),
 
         customerEmail: formData.email,
@@ -450,13 +451,19 @@ export default function Checkout() {
 
           {cart.map((item) => (
             <div
-              key={item.product.id}
+              key={getCartItemKey(item.product.id, item.customization)}
               className="checkout-mobile-summary-product"
             >
               <div>
-                <strong>
-                  {item.product.name}
-                </strong>
+                <strong>{item.product.name}</strong>
+
+                {item.customization?.color && (
+                  <span>Couleur : {item.customization.color}</span>
+                )}
+
+                {item.customization?.text && (
+                  <span>Texte personnalisé : {item.customization.text}</span>
+                )}
 
                 <span>
                   {item.quantity} ×{" "}
@@ -1044,15 +1051,19 @@ export default function Checkout() {
 
             {cart.map((item) => (
               <div
-                key={item.product.id}
+                key={getCartItemKey(item.product.id, item.customization)}
                 className="checkout-summary-product"
               >
-
                 <div>
+                  <strong>{item.product.name}</strong>
 
-                  <strong>
-                    {item.product.name}
-                  </strong>
+                  {item.customization?.color && (
+                    <span>Couleur : {item.customization.color}</span>
+                  )}
+
+                  {item.customization?.text && (
+                    <span>Texte personnalisé : {item.customization.text}</span>
+                  )}
 
                   <span>
                     {item.quantity} ×{" "}
@@ -1060,16 +1071,13 @@ export default function Checkout() {
                       .toFixed(2)
                       .replace(".", ",")} €
                   </span>
-
                 </div>
 
                 <strong>
-                  {(Number(item.product.price) *
-                    item.quantity)
+                  {(Number(item.product.price) * item.quantity)
                     .toFixed(2)
                     .replace(".", ",")} €
                 </strong>
-
               </div>
             ))}
 

@@ -1,6 +1,8 @@
+
 import "./CartDrawer.css";
 
 import { useAuthStore } from "../../store";
+import { getCartItemKey } from "../../store";
 import { useNavigate } from "react-router-dom";
 
 interface CartDrawerProps {
@@ -12,7 +14,6 @@ export default function CartDrawer({
     isOpen,
     onClose,
 }: CartDrawerProps) {
-
     const navigate = useNavigate();
 
     const cart = useAuthStore((state) => state.cart);
@@ -37,9 +38,7 @@ export default function CartDrawer({
             />
 
             <aside className="cart-drawer">
-
                 <div className="cart-drawer-header">
-
                     <h2 className="sub-title">
                         Votre panier
                     </h2>
@@ -52,31 +51,37 @@ export default function CartDrawer({
                     >
                         ×
                     </button>
-
                 </div>
 
-
                 <div className="cart-drawer-content">
-
                     {cart.length === 0 ? (
                         <p>
                             Votre panier est vide.
                         </p>
                     ) : (
                         <div className="cart-items">
-
                             {cart.map((item) => {
-
                                 const mainImage = item.product.pictures.find(
                                     (picture) => picture.isMain
                                 );
 
+                                const lineKey = getCartItemKey(
+                                    item.product.id,
+                                    item.customization
+                                );
+
+                                const maxQuantity = item.product.madeToOrder
+                                    ? 100
+                                    : Math.max(
+                                        0,
+                                        item.product.stockQuantity
+                                    );
+
                                 return (
                                     <article
-                                        key={item.product.id}
+                                        key={lineKey}
                                         className="cart-item"
                                     >
-
                                         {mainImage && (
                                             <img
                                                 src={`${import.meta.env.VITE_API_URL}${mainImage.url}`}
@@ -86,7 +91,6 @@ export default function CartDrawer({
                                         )}
 
                                         <div className="cart-item-info">
-
                                             <h3>
                                                 {item.product.name}
                                             </h3>
@@ -97,17 +101,31 @@ export default function CartDrawer({
                                                     .replace(".", ",")} €
                                             </p>
 
-                                            <div className="cart-item-actions">
+                                            {item.customization?.color && (
+                                                <p>
+                                                    Couleur :{" "}
+                                                    {item.customization.color}
+                                                </p>
+                                            )}
 
+                                            {item.customization?.text && (
+                                                <p>
+                                                    Texte personnalisé :{" "}
+                                                    {item.customization.text}
+                                                </p>
+                                            )}
+
+                                            <div className="cart-item-actions">
                                                 <button
                                                     type="button"
                                                     onClick={() =>
                                                         updateCartQuantity(
-                                                            item.product.id,
+                                                            lineKey,
                                                             item.quantity - 1
                                                         )
                                                     }
                                                     disabled={item.quantity <= 1}
+                                                    aria-label={`Diminuer la quantité de ${item.product.name}`}
                                                 >
                                                     −
                                                 </button>
@@ -120,41 +138,36 @@ export default function CartDrawer({
                                                     type="button"
                                                     onClick={() =>
                                                         updateCartQuantity(
-                                                            item.product.id,
+                                                            lineKey,
                                                             item.quantity + 1
                                                         )
                                                     }
                                                     disabled={
-                                                        item.quantity >=
-                                                        item.product.stockQuantity
+                                                        item.quantity >= maxQuantity
                                                     }
+                                                    aria-label={`Augmenter la quantité de ${item.product.name}`}
                                                 >
                                                     +
                                                 </button>
-
                                             </div>
 
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    removeFromCart(item.product.id)
+                                                    removeFromCart(lineKey)
                                                 }
                                             >
                                                 Supprimer
                                             </button>
-
                                         </div>
-
                                     </article>
                                 );
                             })}
-
                         </div>
                     )}
 
                     {cart.length > 0 && (
                         <div className="cart-total">
-
                             <p>
                                 Total
                             </p>
@@ -162,7 +175,6 @@ export default function CartDrawer({
                             <p>
                                 {cartTotal.toFixed(2).replace(".", ",")} €
                             </p>
-
                         </div>
                     )}
 
@@ -178,9 +190,7 @@ export default function CartDrawer({
                             Passer la commande
                         </button>
                     )}
-
                 </div>
-
             </aside>
         </>
     );

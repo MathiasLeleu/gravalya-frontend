@@ -54,6 +54,7 @@ export interface IUserOrderLine {
     quantity: number;
     unitPrice: number;
     unitWeight: number;
+    customization?: IProductCustomization;
 }
 
 export interface IUserOrder {
@@ -101,6 +102,22 @@ export interface IPicture {
     isMain: boolean;
 }
 
+export interface IProductCustomizationOptions {
+    colors?: string[];
+    text?: {
+        enabled: boolean;
+        label?: string;
+        required?: boolean;
+        maxLength?: number;
+        placeholder?: string;
+    };
+}
+
+export interface IProductCustomization {
+    color?: string;
+    text?: string;
+}
+
 export interface IProduct {
     id: number;
     name: string;
@@ -111,6 +128,8 @@ export interface IProduct {
     length: string;
     width: string;
     stockQuantity: number;
+    madeToOrder: boolean;
+    customizationOptions: IProductCustomizationOptions;
     active: boolean;
     categoryId: number;
     category: ICategory;
@@ -127,6 +146,13 @@ export interface ICreateProductForm {
     width: string;
     stockQuantity: string;
     categoryId: string;
+    madeToOrder: boolean;
+    customizationColors: string;
+    customizationTextEnabled: boolean;
+    customizationTextLabel: string;
+    customizationTextRequired: boolean;
+    customizationTextMaxLength: string;
+    customizationTextPlaceholder: string;
 }
 
 export interface ICreateProductPayload {
@@ -139,6 +165,8 @@ export interface ICreateProductPayload {
     width: number;
     stockQuantity: number;
     categoryId: number;
+    madeToOrder: boolean;
+    customizationOptions: IProductCustomizationOptions;
 }
 
 export interface IEditProductForm {
@@ -151,12 +179,20 @@ export interface IEditProductForm {
     width: string;
     stockQuantity: string;
     categoryId: string;
+    madeToOrder: boolean;
+    customizationColors: string;
+    customizationTextEnabled: boolean;
+    customizationTextLabel: string;
+    customizationTextRequired: boolean;
+    customizationTextMaxLength: string;
+    customizationTextPlaceholder: string;
 }
 
 export interface ICreateOrderPayload {
     items: {
         productId: number;
         quantity: number;
+        customization?: IProductCustomization;
     }[];
     shippingMethodId: number;
     shippingFirstName: string;

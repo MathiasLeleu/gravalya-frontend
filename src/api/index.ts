@@ -1,5 +1,6 @@
 import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, IUser, IUserDetails,
-  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture, IShippingOption } from "../@types";
+  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture, IShippingOption,
+  ICreateProductPayload, IProductCustomizationOptions } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -341,17 +342,9 @@ export async function getProductById(id: number): Promise<IProduct> {
     return data;
 }
 
-export async function createProduct(data: {
-  name: string;
-  description: string;
-  price: number;
-  weight: number;
-  height: number;
-  length: number;
-  width: number;
-  stockQuantity: number;
-  categoryId: number;
-}) {
+export async function createProduct(
+  data: ICreateProductPayload
+): Promise<IProduct> {
   const response = await fetch(`${baseUrl}/products`, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -382,8 +375,10 @@ export async function updateProduct(
     stockQuantity?: number;
     active?: boolean;
     categoryId?: number;
+    madeToOrder?: boolean;
+    customizationOptions?: IProductCustomizationOptions;
   }
-) {
+): Promise<IProduct> {
   const response = await fetch(`${baseUrl}/products/${productId}`, {
     method: "PATCH",
     headers: getAuthHeaders(),
