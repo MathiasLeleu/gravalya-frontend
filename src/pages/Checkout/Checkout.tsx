@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "./checkout.css";
 
 import { useAuthStore, getCartItemKey } from "../../store";
@@ -36,8 +36,6 @@ const shippingServiceCodes: Record<string, string> = {
 
 export default function Checkout() {
   const cart = useAuthStore((state) => state.cart);
-
-  const navigate = useNavigate();
 
   const location = useLocation();
 

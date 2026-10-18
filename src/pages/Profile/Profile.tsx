@@ -50,12 +50,6 @@ function formatPrice(price: number) {
     return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
-
-function formatOrderId(id: number) {
-    return String(id).padStart(4, "0");
-}
-
-
 function getSubtotal(items: OrderItem[]) {
     return items.reduce(
         (sum, item) => sum + item.quantity * item.unitPrice,

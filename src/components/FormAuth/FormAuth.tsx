@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { useState, type SubmitEvent } from "react";
 import { registerUser } from "../../api";
 
 export default function FormAuth() {
@@ -12,7 +12,7 @@ export default function FormAuth() {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");

@@ -25,7 +25,7 @@ export default function Header() {
 
   const openPanel = (
     view: Exclude<PanelView, null>,
-    triggerRef: React.RefObject<HTMLButtonElement>
+    triggerRef: React.RefObject<HTMLButtonElement | null>
   ) => {
     lastTriggerRef.current = triggerRef.current;
     setPanelView(view);

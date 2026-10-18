@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import { loginUser } from "../../api";
 import { useAuthStore } from "../../store";
 
@@ -12,7 +12,7 @@ export default function FormLogin() {
 
   const login = useAuthStore((state) => state.login);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");

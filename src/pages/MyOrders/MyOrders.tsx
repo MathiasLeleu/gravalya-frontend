@@ -52,12 +52,6 @@ function formatPrice(price: number) {
     return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
-
-function formatOrderId(id: number) {
-    return String(id).padStart(4, "0");
-}
-
-
 function getSubtotal(items: OrderItem[]) {
     return items.reduce(
         (sum, item) => sum + item.quantity * item.unitPrice,
@@ -490,7 +484,14 @@ export default function MyOrders() {
 
                 <div className="myorders">
 
-                    {orders.map((order) => (
+                    {isLoading ? (
+                        <p>Chargement de vos commandes...</p>
+                    ) : error ? (
+                        <p role="alert">{error}</p>
+                    ) : orders.length === 0 ? (
+                        <p>Vous n'avez pas encore de commande.</p>
+                    ) : (
+                        orders.map((order) => (
 
                         <article
                             key={order.id}
@@ -549,7 +550,9 @@ export default function MyOrders() {
 
                         </article>
 
-                    ))}
+                        ))
+
+                    )}
 
                 </div>
 
