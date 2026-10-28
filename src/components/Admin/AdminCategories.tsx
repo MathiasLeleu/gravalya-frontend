@@ -4,6 +4,8 @@ import {getCategories, createCategory, updateCategory, deleteCategory} from "../
 
 import type { ICategory } from "../../@types";
 
+import { getImageUrl } from "../../utils/imageUrl";
+
 import "./admin-categories.css";
 
 export default function AdminCategories() {
@@ -487,7 +489,7 @@ export default function AdminCategories() {
 
                                         {category.imageUrl ? (
                                             <img
-                                                src={`${import.meta.env.VITE_API_URL}${category.imageUrl}`}
+                                                src={getImageUrl(category.imageUrl)}
                                                 alt={category.name}
                                             />
                                         ) : (

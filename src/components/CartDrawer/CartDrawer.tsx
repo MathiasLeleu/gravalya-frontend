@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUrl";
 
 import "./CartDrawer.css";
 
@@ -84,7 +85,7 @@ export default function CartDrawer({
                                     >
                                         {mainImage && (
                                             <img
-                                                src={`${import.meta.env.VITE_API_URL}${mainImage.url}`}
+                                                src={getImageUrl(mainImage.url)}
                                                 alt={mainImage.alt}
                                                 className="cart-item-image"
                                             />

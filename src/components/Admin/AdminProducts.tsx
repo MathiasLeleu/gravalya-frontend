@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUrl";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -1521,7 +1522,7 @@ export default function AdminProducts() {
                                                 className="admin-edit-image-card"
                                             >
                                                 <img
-                                                    src={`${import.meta.env.VITE_API_URL}${picture.url}`}
+                                                    src={getImageUrl(picture.url)}
                                                     alt={picture.alt}
                                                 />
 

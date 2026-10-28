@@ -10,6 +10,8 @@ import {
 
 import type { ICategory, IProduct } from "../../@types"
 
+import { getImageUrl } from "../../utils/imageUrl";
+
 export default function AllProducts() {
 
     const { slug } = useParams()
@@ -83,7 +85,7 @@ export default function AllProducts() {
                     style={
                         category
                             ? {
-                                backgroundImage: `url(${import.meta.env.VITE_API_URL}${category.bannerUrl})`
+                                backgroundImage: `url("${getImageUrl(category.bannerUrl)}")`
                             }
                             : undefined
                     }
@@ -129,7 +131,7 @@ export default function AllProducts() {
                                 <Link to={`/produits/${product.id}`}>
 
                                     <img
-                                        src={`${import.meta.env.VITE_API_URL}${product.pictures[0].url}`}
+                                        src={getImageUrl(product.pictures[0].url)}
                                         alt={product.pictures[0].alt}
                                     />
 

@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUrl";
 
 import "./product.css";
 
@@ -175,7 +176,7 @@ export default function Product() {
               onClick={() => setIsLightboxOpen(true)}
             >
               <img
-                src={`${import.meta.env.VITE_API_URL}${images[selectedImage].url}`}
+                src={getImageUrl(images[selectedImage].url)}
                 alt={images[selectedImage].alt}
               />
             </div>
@@ -207,7 +208,7 @@ export default function Product() {
                         aria-label={`Afficher l'image ${index + 1}`}
                       >
                         <img
-                          src={`${import.meta.env.VITE_API_URL}${image.url}`}
+                          src={getImageUrl(image.url)}
                           alt={image.alt}
                         />
                       </button>
@@ -411,7 +412,7 @@ export default function Product() {
 
           <img
             className="product-lightbox-image"
-            src={`${import.meta.env.VITE_API_URL}${images[selectedImage].url}`}
+            src={getImageUrl(images[selectedImage].url)}
             alt={images[selectedImage].alt}
             onClick={(event) => event.stopPropagation()}
           />

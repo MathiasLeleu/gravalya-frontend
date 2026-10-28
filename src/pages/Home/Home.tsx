@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import SearchSortBar, { filterAndSort, type SortValue } from "../../components/SearchSortBar/SearchSortBar"
 import "./home.css"
 
+import { getImageUrl } from "../../utils/imageUrl";
+
 import { getCategories } from "../../api"
 import type { ICategory } from "../../@types"
  
@@ -91,7 +93,7 @@ export default function Home() {
                             <li key={category.id} className="home-page-category">
                                 <Link to={`/produits/categorie/${category.slug}`}>
                                     <img
-                                        src={`${import.meta.env.VITE_API_URL}${category.imageUrl}`}
+                                        src={getImageUrl(category.imageUrl)}
                                         alt={category.name}
                                     />
                                     <h3 className="low-title">{category.name}</h3>
