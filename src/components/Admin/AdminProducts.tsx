@@ -11,12 +11,15 @@ import {
     updatePicture,
     uploadProductPicture,
     deletePicture,
+    getCloudinaryImages,
+    attachCloudinaryPicture,
 } from "../../api";
 
 import type {
     ICategory,
     IProduct,
     IPicture,
+    ICloudinaryImage,
     ICreateProductForm,
     IEditProductForm,
 } from "../../@types";
@@ -37,6 +40,18 @@ export default function AdminProducts() {
     const [productPictures, setProductPictures] = useState<IPicture[]>([]);
     const [picturesLoading, setPicturesLoading] = useState(false);
     const [pictureActionLoading, setPictureActionLoading] = useState<number | null>(null);
+
+    // Bibliothèque Cloudinary
+    const [isCloudinaryLibraryOpen, setIsCloudinaryLibraryOpen] = useState(false);
+    const [cloudinaryImages, setCloudinaryImages] = useState<ICloudinaryImage[]>([]);
+    const [cloudinaryLoading, setCloudinaryLoading] = useState(false);
+    const [cloudinaryNextCursor, setCloudinaryNextCursor] = useState<string | null>(null);
+    const [cloudinarySelectedImage, setCloudinarySelectedImage] = useState<ICloudinaryImage | null>(null);
+    const [cloudinaryAlt, setCloudinaryAlt] = useState("");
+    const [cloudinaryIsMain, setCloudinaryIsMain] = useState(false);
+    const [cloudinaryAttachLoading, setCloudinaryAttachLoading] = useState(false);
+
+    const [cloudinarySearch, setCloudinarySearch] = useState("");
 
     const [pictureFile, setPictureFile] = useState<File | null>(null);
     const [pictureAlt, setPictureAlt] = useState("");
@@ -170,6 +185,12 @@ export default function AdminProducts() {
         setPictureFile(null);
         setPictureAlt("");
         setPictureIsMain(false);
+        setIsCloudinaryLibraryOpen(false);
+        setCloudinaryImages([]);
+        setCloudinaryNextCursor(null);
+        setCloudinarySelectedImage(null);
+        setCloudinaryAlt("");
+        setCloudinaryIsMain(false);
         setPicturesLoading(true);
 
         try {
@@ -503,6 +524,148 @@ export default function AdminProducts() {
             setActionLoading(null);
         }
     }
+
+    async function openCloudinaryLibrary() {
+    setIsCloudinaryLibraryOpen(true);
+    setCloudinarySelectedImage(null);
+    setCloudinaryAlt("");
+    setCloudinaryIsMain(false);
+    setCloudinaryImages([]);
+    setCloudinaryNextCursor(null);
+    setError("");
+    setCloudinarySearch("");
+
+    try {
+        setCloudinaryLoading(true);
+
+        const result = await getCloudinaryImages("produits");
+
+        setCloudinaryImages(result.images);
+        setCloudinaryNextCursor(result.nextCursor);
+    } catch (error) {
+        setError(
+            error instanceof Error
+                ? error.message
+                : "Impossible de charger la bibliothèque Cloudinary."
+        );
+    } finally {
+        setCloudinaryLoading(false);
+    }
+}
+
+async function searchCloudinaryImages() {
+    if (cloudinaryLoading) {
+        return;
+    }
+
+    try {
+        setCloudinaryLoading(true);
+        setError("");
+
+        setCloudinaryImages([]);
+        setCloudinaryNextCursor(null);
+        setCloudinarySelectedImage(null);
+        setCloudinaryAlt("");
+        setCloudinaryIsMain(false);
+
+        const result = await getCloudinaryImages(
+            "produits",
+            null,
+            cloudinarySearch.trim()
+        );
+
+        setCloudinaryImages(result.images);
+        setCloudinaryNextCursor(result.nextCursor);
+    } catch (error) {
+        setError(
+            error instanceof Error
+                ? error.message
+                : "Impossible de rechercher les images Cloudinary."
+        );
+    } finally {
+        setCloudinaryLoading(false);
+    }
+}
+
+async function loadMoreCloudinaryImages() {
+    if (!cloudinaryNextCursor || cloudinaryLoading) {
+        return;
+    }
+
+    try {
+        setCloudinaryLoading(true);
+        setError("");
+
+        const result = await getCloudinaryImages(
+            "produits",
+            cloudinaryNextCursor,
+            cloudinarySearch.trim()
+        );
+
+        setCloudinaryImages((currentImages) => [
+            ...currentImages,
+            ...result.images,
+        ]);
+
+        setCloudinaryNextCursor(result.nextCursor);
+    } catch (error) {
+        setError(
+            error instanceof Error
+                ? error.message
+                : "Impossible de charger les images suivantes."
+        );
+    } finally {
+        setCloudinaryLoading(false);
+    }
+}
+
+async function handleAttachCloudinaryPicture() {
+    if (!productToEdit || !cloudinarySelectedImage) {
+        return;
+    }
+
+    setError("");
+    setSuccessMessage("");
+
+    if (!cloudinaryAlt.trim()) {
+        setError("Le texte alternatif est requis.");
+        return;
+    }
+
+    try {
+        setCloudinaryAttachLoading(true);
+
+        await attachCloudinaryPicture(
+            productToEdit.id,
+            cloudinarySelectedImage.publicId,
+            cloudinaryAlt.trim(),
+            cloudinaryIsMain
+        );
+
+        const updatedPictures = await getProductPictures(productToEdit.id);
+
+        setProductPictures(
+            [...updatedPictures].sort(
+                (a, b) => Number(b.isMain) - Number(a.isMain)
+            )
+        );
+
+        setIsCloudinaryLibraryOpen(false);
+        setCloudinarySelectedImage(null);
+        setCloudinaryAlt("");
+        setCloudinaryIsMain(false);
+
+        setSuccessMessage("L'image Cloudinary a été associée au produit avec succès.");
+    } catch (error) {
+        setError(
+            error instanceof Error
+                ? error.message
+                : "Impossible d'associer cette image au produit."
+        );
+    } finally {
+        setCloudinaryAttachLoading(false);
+    }
+}
 
     async function handleUploadPicture() {
         if (!productToEdit) {
@@ -1579,6 +1742,160 @@ export default function AdminProducts() {
                             <div className="admin-add-picture">
                                 <h3>Ajouter une image</h3>
 
+                                {/* Bibliothèque Cloudinary */}
+                                <button
+                                    type="button"
+                                    className="admin-cloudinary-library-toggle"
+                                    onClick={openCloudinaryLibrary}
+                                >
+                                    Choisir dans la bibliothèque Cloudinary
+                                </button>
+
+                                {isCloudinaryLibraryOpen && (
+                                    <div className="admin-cloudinary-library">
+                                        <h4>Bibliothèque Cloudinary — Produits</h4>
+
+                                        <div className="admin-cloudinary-search">
+                                            <input
+                                                type="text"
+                                                value={cloudinarySearch}
+                                                placeholder="Rechercher une image par nom..."
+                                                onChange={(event) => setCloudinarySearch(event.target.value)}
+                                                onKeyDown={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault();
+                                                        searchCloudinaryImages();
+                                                    }
+                                                }}
+                                            />
+
+                                            <button
+                                                type="button"
+                                                className="admin-confirm-success"
+                                                onClick={searchCloudinaryImages}
+                                                disabled={cloudinaryLoading}
+                                            >
+                                                Rechercher
+                                            </button>
+                                        </div>
+
+                                        {cloudinaryImages.length > 0 && (
+                                            <div className="admin-cloudinary-grid">
+                                                {cloudinaryImages.map((image) => {
+                                                    const alreadyAttached = productPictures.some(
+                                                        (picture) =>
+                                                            picture.cloudinaryPublicId === image.publicId
+                                                    );
+
+                                                    const isSelected =
+                                                        cloudinarySelectedImage?.publicId === image.publicId;
+
+                                                    return (
+                                                        <button
+                                                            key={image.publicId}
+                                                            type="button"
+                                                            className={`admin-cloudinary-image-card ${
+                                                                isSelected ? "selected" : ""
+                                                            }`}
+                                                            disabled={alreadyAttached}
+                                                            onClick={() => {
+                                                                setCloudinarySelectedImage(image);
+                                                                setCloudinaryAlt("");
+                                                                setCloudinaryIsMain(false);
+                                                            }}
+                                                        >
+                                                            <img src={image.url} alt="" />
+
+                                                            <span>
+                                                                {image.publicId}
+                                                            </span>
+
+                                                            {alreadyAttached && (
+                                                                <small>Déjà associée</small>
+                                                            )}
+
+                                                            {isSelected && (
+                                                                <small>Image sélectionnée</small>
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
+                                        {cloudinaryLoading && (
+                                            <p>Chargement des images...</p>
+                                        )}
+
+                                        {!cloudinaryLoading && cloudinaryImages.length === 0 && (
+                                            <p>Aucune image trouvée dans la bibliothèque.</p>
+                                        )}
+
+                                        {cloudinaryNextCursor && (
+                                            <button
+                                                type="button"
+                                                className="admin-confirm-success"
+                                                onClick={loadMoreCloudinaryImages}
+                                                disabled={cloudinaryLoading}
+                                            >
+                                                {cloudinaryLoading
+                                                    ? "Chargement..."
+                                                    : "Afficher plus d'images"}
+                                            </button>
+                                        )}
+
+                                        {cloudinarySelectedImage && (
+                                            <div className="admin-cloudinary-selection">
+                                                <h4>Image sélectionnée</h4>
+
+                                                <img
+                                                    src={cloudinarySelectedImage.url}
+                                                    alt=""
+                                                />
+
+                                                <div className="admin-edit-field">
+                                                    <label htmlFor="cloudinary-picture-alt">
+                                                        Texte alternatif
+                                                    </label>
+
+                                                    <input
+                                                        id="cloudinary-picture-alt"
+                                                        type="text"
+                                                        value={cloudinaryAlt}
+                                                        placeholder="Description de l'image"
+                                                        onChange={(event) =>
+                                                            setCloudinaryAlt(event.target.value)
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={cloudinaryIsMain}
+                                                        onChange={(event) =>
+                                                            setCloudinaryIsMain(event.target.checked)
+                                                        }
+                                                    />{" "}
+                                                    Définir comme image principale
+                                                </label>
+
+                                                <button
+                                                    type="button"
+                                                    className="admin-confirm-success"
+                                                    onClick={handleAttachCloudinaryPicture}
+                                                    disabled={cloudinaryAttachLoading}
+                                                >
+                                                    {cloudinaryAttachLoading
+                                                        ? "Association en cours..."
+                                                        : "Associer au produit"}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Ajout d'une image locale — conservé */}
                                 <div className="admin-edit-field">
                                     <label htmlFor="picture-file">Image</label>
                                     <input
@@ -1586,8 +1903,7 @@ export default function AdminProducts() {
                                         type="file"
                                         accept="image/jpeg,image/png,image/webp"
                                         onChange={(event) => {
-                                            const file =
-                                                event.target.files?.[0] ?? null;
+                                            const file = event.target.files?.[0] ?? null;
                                             setPictureFile(file);
                                         }}
                                     />
@@ -1613,9 +1929,7 @@ export default function AdminProducts() {
                                         type="checkbox"
                                         checked={pictureIsMain}
                                         onChange={(event) =>
-                                            setPictureIsMain(
-                                                event.target.checked
-                                            )
+                                            setPictureIsMain(event.target.checked)
                                         }
                                     />{" "}
                                     Définir comme image principale

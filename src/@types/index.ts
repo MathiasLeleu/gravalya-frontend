@@ -98,8 +98,25 @@ export interface ICategory {
 export interface IPicture {
     id: number;
     url: string;
+    cloudinaryPublicId?: string | null;
     alt: string;
     isMain: boolean;
+}
+
+export interface ICloudinaryImage {
+    publicId: string;
+    url: string;
+    format: string;
+    width: number;
+    height: number;
+    bytes: number;
+    createdAt: string;
+    folder: string;
+}
+
+export interface ICloudinaryImagesResponse {
+    images: ICloudinaryImage[];
+    nextCursor: string | null;
 }
 
 export interface IProductCustomizationOptions {

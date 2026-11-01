@@ -1,6 +1,6 @@
 import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, IUser, IUserDetails,
   ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture, IShippingOption,
-  ICreateProductPayload, IProductCustomizationOptions } from "../@types";
+  ICreateProductPayload, IProductCustomizationOptions, ICloudinaryImagesResponse } from "../@types";
 
 import { useAuthStore } from "../store";
 
@@ -429,6 +429,74 @@ export async function getProductPictures(
   }
 
   return data;
+}
+
+export async function getCloudinaryImages(
+    folder: "produits" | "categories",
+    nextCursor?: string | null,
+    search?: string
+): Promise<ICloudinaryImagesResponse> {
+    const params = new URLSearchParams({ folder });
+
+    if (nextCursor) {
+        params.append("nextCursor", nextCursor);
+    }
+
+    if (search?.trim()) {
+        params.append("search", search.trim());
+    }
+
+    const response = await fetch(
+        `${baseUrl}/cloudinary/images?${params.toString()}`,
+        {
+            method: "GET",
+            headers: getAuthHeaders(),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            data.error ||
+            "Impossible de récupérer la bibliothèque Cloudinary."
+        );
+    }
+
+    return data;
+}
+
+export async function attachCloudinaryPicture(
+    productId: number,
+    cloudinaryPublicId: string,
+    alt: string,
+    isMain: boolean
+): Promise<IPicture> {
+    const response = await fetch(
+        `${baseUrl}/products/${productId}/pictures/cloudinary`,
+        {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                cloudinaryPublicId,
+                alt,
+                isMain,
+            }),
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result.message ||
+            result.error ||
+            "Impossible d'associer cette image au produit."
+        );
+    }
+
+    return result;
 }
 
 export async function updatePicture(
