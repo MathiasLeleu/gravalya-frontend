@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import {getCategories, createCategory, updateCategory, deleteCategory} from "../../api";
+import {getCategories, createCategory, updateCategory, deleteCategory, getCloudinaryImages} from "../../api";
 
-import type { ICategory } from "../../@types";
+import type { ICategory, ICloudinaryImage } from "../../@types";
 
 import { getImageUrl } from "../../utils/imageUrl";
 
@@ -35,8 +35,100 @@ export default function AdminCategories() {
     const [editImageFile, setEditImageFile] = useState<File | null>(null);
     const [editBannerFile, setEditBannerFile] = useState<File | null>(null);
 
+    // Cloudinary selections
+    const [imageCloudinaryPublicId, setImageCloudinaryPublicId] = useState("");
+    const [bannerCloudinaryPublicId, setBannerCloudinaryPublicId] = useState("");
+
+    const [editImageCloudinaryPublicId, setEditImageCloudinaryPublicId] = useState("");
+    const [editBannerCloudinaryPublicId, setEditBannerCloudinaryPublicId] = useState("");
+
+    // Cloudinary library
+    type CloudinaryLibraryTarget =
+        | "create-image"
+        | "create-banner"
+        | "edit-image"
+        | "edit-banner";
+
+    const [cloudinaryLibraryTarget, setCloudinaryLibraryTarget] =
+        useState<CloudinaryLibraryTarget | null>(null);
+
+    const [cloudinaryImages, setCloudinaryImages] = useState<ICloudinaryImage[]>([]);
+    const [cloudinaryLoading, setCloudinaryLoading] = useState(false);
+    const [cloudinaryError, setCloudinaryError] = useState("");
+    const [cloudinarySearch, setCloudinarySearch] = useState("");
+    const [cloudinaryNextCursor, setCloudinaryNextCursor] = useState<string | null>(null);
+
     const [updating, setUpdating] = useState(false);
     const [updateError, setUpdateError] = useState("");
+
+    const loadCloudinaryImages = async (
+        cursor?: string | null,
+        searchTerm = cloudinarySearch,
+        append = false
+    ) => {
+        try {
+            setCloudinaryLoading(true);
+            setCloudinaryError("");
+
+            const result = await getCloudinaryImages(
+                "categories",
+                cursor,
+                searchTerm
+            );
+
+            setCloudinaryImages((currentImages) =>
+                append
+                    ? [...currentImages, ...result.images]
+                    : result.images
+            );
+
+            setCloudinaryNextCursor(result.nextCursor ?? null);
+
+        } catch (error) {
+            setCloudinaryError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de récupérer la bibliothèque Cloudinary."
+            );
+        } finally {
+            setCloudinaryLoading(false);
+        }
+    };
+
+    const openCloudinaryLibrary = async (target: CloudinaryLibraryTarget) => {
+        setCloudinaryLibraryTarget(target);
+        setCloudinarySearch("");
+        setCloudinaryImages([]);
+        setCloudinaryNextCursor(null);
+
+        await loadCloudinaryImages(null, "");
+    };
+
+    const selectCloudinaryImage = (image: ICloudinaryImage) => {
+        switch (cloudinaryLibraryTarget) {
+            case "create-image":
+                setImageCloudinaryPublicId(image.publicId);
+                setImageFile(null);
+                break;
+
+            case "create-banner":
+                setBannerCloudinaryPublicId(image.publicId);
+                setBannerFile(null);
+                break;
+
+            case "edit-image":
+                setEditImageCloudinaryPublicId(image.publicId);
+                setEditImageFile(null);
+                break;
+
+            case "edit-banner":
+                setEditBannerCloudinaryPublicId(image.publicId);
+                setEditBannerFile(null);
+                break;
+        }
+
+        setCloudinaryLibraryTarget(null);
+    };
 
     useEffect(() => {
         async function loadCategories() {
@@ -69,10 +161,12 @@ export default function AdminCategories() {
     );
 
     const handleCreateCategory = async () => {
-
         setCreateError("");
 
-        if (!imageFile || !bannerFile) {
+        if (
+            (!imageFile && !imageCloudinaryPublicId) ||
+            (!bannerFile && !bannerCloudinaryPublicId)
+        ) {
             setCreateError(
                 "L'image et la bannière de la catégorie sont requises."
             );
@@ -86,8 +180,10 @@ export default function AdminCategories() {
                 name,
                 slug,
                 description,
-                image: imageFile,
-                banner: bannerFile,
+                image: imageFile ?? undefined,
+                banner: bannerFile ?? undefined,
+                imageCloudinaryPublicId: imageCloudinaryPublicId || undefined,
+                bannerCloudinaryPublicId: bannerCloudinaryPublicId || undefined,
             });
 
             setCategories((currentCategories) => [
@@ -100,6 +196,8 @@ export default function AdminCategories() {
             setDescription("");
             setImageFile(null);
             setBannerFile(null);
+            setImageCloudinaryPublicId("");
+            setBannerCloudinaryPublicId("");
 
             setShowCreateForm(false);
 
@@ -124,12 +222,13 @@ export default function AdminCategories() {
 
         setEditImageFile(null);
         setEditBannerFile(null);
+        setEditImageCloudinaryPublicId("");
+        setEditBannerCloudinaryPublicId("");
 
         setUpdateError("");
     };
 
     const handleUpdateCategory = async () => {
-
         if (!editingCategory) {
             return;
         }
@@ -147,6 +246,10 @@ export default function AdminCategories() {
                     description: editDescription,
                     image: editImageFile ?? undefined,
                     banner: editBannerFile ?? undefined,
+                    imageCloudinaryPublicId:
+                        editImageCloudinaryPublicId || undefined,
+                    bannerCloudinaryPublicId:
+                        editBannerCloudinaryPublicId || undefined,
                 }
             );
 
@@ -165,6 +268,8 @@ export default function AdminCategories() {
             setEditDescription("");
             setEditImageFile(null);
             setEditBannerFile(null);
+            setEditImageCloudinaryPublicId("");
+            setEditBannerCloudinaryPublicId("");
 
         } catch (error) {
             setUpdateError(
@@ -301,9 +406,20 @@ export default function AdminCategories() {
                             onChange={(event) => {
                                 const file = event.target.files?.[0] ?? null;
                                 setImageFile(file);
+
+                                if (file) {
+                                    setImageCloudinaryPublicId("");
+                                }
                             }}
                             required
                         />
+
+                        <button
+                            type="button"
+                            onClick={() => openCloudinaryLibrary("create-image")}
+                        >
+                            Choisir dans la bibliothèque
+                        </button>
                     </div>
 
                     <div className="admin-category-form-field">
@@ -318,9 +434,20 @@ export default function AdminCategories() {
                             onChange={(event) => {
                                 const file = event.target.files?.[0] ?? null;
                                 setBannerFile(file);
+
+                                if (file) {
+                                    setBannerCloudinaryPublicId("");
+                                }
                             }}
                             required
                         />
+
+                        <button
+                            type="button"
+                            onClick={() => openCloudinaryLibrary("create-banner")}
+                        >
+                            Choisir dans la bibliothèque
+                        </button>
                     </div>
 
                     <div className="admin-category-form-actions">
@@ -406,8 +533,19 @@ export default function AdminCategories() {
                             onChange={(event) => {
                                 const file = event.target.files?.[0] ?? null;
                                 setEditImageFile(file);
+
+                                if (file) {
+                                    setEditImageCloudinaryPublicId("");
+                                }
                             }}
                         />
+
+                        <button
+                            type="button"
+                            onClick={() => openCloudinaryLibrary("edit-image")}
+                        >
+                            Choisir dans la bibliothèque
+                        </button>
                     </div>
 
                     <div className="admin-category-form-field">
@@ -422,8 +560,19 @@ export default function AdminCategories() {
                             onChange={(event) => {
                                 const file = event.target.files?.[0] ?? null;
                                 setEditBannerFile(file);
+
+                                if (file) {
+                                    setEditBannerCloudinaryPublicId("");
+                                }
                             }}
                         />
+
+                        <button
+                            type="button"
+                            onClick={() => openCloudinaryLibrary("edit-banner")}
+                        >
+                            Choisir dans la bibliothèque
+                        </button>
                     </div>
 
                     <div className="admin-category-form-actions">
@@ -448,6 +597,108 @@ export default function AdminCategories() {
 
                     </div>
 
+                </div>
+            )}
+
+            {cloudinaryLibraryTarget && (
+                <div className="admin-cloudinary-overlay">
+                    <div className="admin-cloudinary-modal">
+
+                        <div className="admin-cloudinary-header">
+                            <h2>
+                                Bibliothèque Cloudinary
+                            </h2>
+
+                            <button
+                                type="button"
+                                onClick={() => setCloudinaryLibraryTarget(null)}
+                            >
+                                Fermer
+                            </button>
+                        </div>
+
+                        <div className="admin-cloudinary-search">
+                            <input
+                                type="search"
+                                placeholder="Rechercher une image..."
+                                value={cloudinarySearch}
+                                onChange={(event) =>
+                                    setCloudinarySearch(event.target.value)
+                                }
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                        loadCloudinaryImages(null, cloudinarySearch);
+                                    }
+                                }}
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    loadCloudinaryImages(null, cloudinarySearch)
+                                }
+                                disabled={cloudinaryLoading}
+                            >
+                                Rechercher
+                            </button>
+                        </div>
+
+                        {cloudinaryError && (
+                            <p className="admin-category-form-error">
+                                {cloudinaryError}
+                            </p>
+                        )}
+
+                        {cloudinaryLoading && cloudinaryImages.length === 0 && (
+                            <p>Chargement des images...</p>
+                        )}
+
+                        {!cloudinaryLoading && cloudinaryImages.length === 0 && !cloudinaryError && (
+                            <p>Aucune image trouvée.</p>
+                        )}
+
+                        <div className="admin-cloudinary-grid">
+                            {cloudinaryImages.map((image) => (
+                                <button
+                                    type="button"
+                                    className="admin-cloudinary-image"
+                                    key={image.publicId}
+                                    onClick={() => selectCloudinaryImage(image)}
+                                    title="Sélectionner cette image"
+                                >
+                                    <img
+                                        src={image.url}
+                                        alt={image.publicId}
+                                    />
+
+                                    <span>
+                                        Sélectionner
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {cloudinaryNextCursor && (
+                            <div className="admin-cloudinary-pagination">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        loadCloudinaryImages(
+                                            cloudinaryNextCursor,
+                                            cloudinarySearch,
+                                            true
+                                        )
+                                    }
+                                    disabled={cloudinaryLoading}
+                                >
+                                    {cloudinaryLoading
+                                        ? "Chargement..."
+                                        : "Charger plus d'images"}
+                                </button>
+                            </div>
+                        )}
+
+                    </div>
                 </div>
             )}
 

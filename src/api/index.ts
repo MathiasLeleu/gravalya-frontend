@@ -199,16 +199,38 @@ export async function createCategory(data: {
   name: string;
   slug: string;
   description: string;
-  image: File;
-  banner: File;
+  image?: File;
+  banner?: File;
+  imageCloudinaryPublicId?: string;
+  bannerCloudinaryPublicId?: string;
 }) {
   const formData = new FormData();
 
   formData.append("name", data.name);
   formData.append("slug", data.slug);
   formData.append("description", data.description);
-  formData.append("image", data.image);
-  formData.append("banner", data.banner);
+
+  if (data.image) {
+    formData.append("image", data.image);
+  }
+
+  if (data.banner) {
+    formData.append("banner", data.banner);
+  }
+
+  if (data.imageCloudinaryPublicId) {
+    formData.append(
+      "imageCloudinaryPublicId",
+      data.imageCloudinaryPublicId
+    );
+  }
+
+  if (data.bannerCloudinaryPublicId) {
+    formData.append(
+      "bannerCloudinaryPublicId",
+      data.bannerCloudinaryPublicId
+    );
+  }
 
   const response = await fetch(`${baseUrl}/categories`, {
     method: "POST",
@@ -237,6 +259,8 @@ export async function updateCategory(
     description?: string;
     image?: File;
     banner?: File;
+    imageCloudinaryPublicId?: string;
+    bannerCloudinaryPublicId?: string;
   }
 ) {
   const formData = new FormData();
@@ -259,6 +283,20 @@ export async function updateCategory(
 
   if (data.banner) {
     formData.append("banner", data.banner);
+  }
+
+  if (data.imageCloudinaryPublicId) {
+    formData.append(
+      "imageCloudinaryPublicId",
+      data.imageCloudinaryPublicId
+    );
+  }
+
+  if (data.bannerCloudinaryPublicId) {
+    formData.append(
+      "bannerCloudinaryPublicId",
+      data.bannerCloudinaryPublicId
+    );
   }
 
   const response = await fetch(

@@ -310,6 +310,152 @@
 }
 
 /* ========================================
+   CLOUDINARY LIBRARY
+======================================== */
+
+.admin-cloudinary-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.admin-cloudinary-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    width: 100%;
+    max-width: 1000px;
+    max-height: 85vh;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    background-color: #fff;
+
+    overflow-y: auto;
+}
+
+.admin-cloudinary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.admin-cloudinary-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.admin-cloudinary-header button,
+.admin-cloudinary-search button,
+.admin-cloudinary-pagination button {
+    padding: 10px 16px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: var(--main-color);
+
+    font-family: inherit;
+    font-size: 0.95rem;
+
+    cursor: pointer;
+
+    transition: opacity 0.2s ease;
+}
+
+.admin-cloudinary-header button:hover,
+.admin-cloudinary-search button:hover,
+.admin-cloudinary-pagination button:hover {
+    opacity: 0.75;
+}
+
+.admin-cloudinary-search {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-cloudinary-search input {
+    flex: 1;
+    min-width: 0;
+
+    padding: 12px 15px;
+
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.admin-cloudinary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.admin-cloudinary-image {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    min-width: 0;
+    padding: 8px;
+
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    background-color: #f8f8f8;
+
+    cursor: pointer;
+
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-cloudinary-image:hover {
+    border-color: var(--main-color);
+    transform: translateY(-2px);
+}
+
+.admin-cloudinary-image img {
+    width: 100%;
+    height: 140px;
+
+    border-radius: 5px;
+
+    object-fit: contain;
+    background-color: #eee;
+}
+
+.admin-cloudinary-image span {
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.admin-cloudinary-pagination {
+    display: flex;
+    justify-content: center;
+}
+
+.admin-cloudinary-search button:disabled,
+.admin-cloudinary-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========================================
    RESPONSIVE
 ======================================== */
 
@@ -368,6 +514,32 @@
     .admin-delete-button,
     .admin-activate-button {
         flex: 1;
+    }
+
+        .admin-cloudinary-overlay {
+        padding: 10px;
+    }
+
+    .admin-cloudinary-modal {
+        max-height: 90vh;
+        padding: 15px;
+    }
+
+    .admin-cloudinary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .admin-cloudinary-image img {
+        height: 110px;
+    }
+
+    .admin-cloudinary-search {
+        flex-direction: column;
+    }
+
+    .admin-cloudinary-search button {
+        width: 100%;
     }
 
 }
