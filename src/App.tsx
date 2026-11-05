@@ -1,6 +1,8 @@
 import './App.css'
 import './index.css'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { AUTH_SESSION_EXPIRED_EVENT } from './api'
 
 import RequireAuth from './components/ProtectedRoute/RequireAuth'
 import RequireAdmin from './components/ProtectedRoute/RequireAdmin'
@@ -24,6 +26,29 @@ import Privacy from './pages/Privacy/Privacy'
 import LegalNotice from './pages/LegalNotice/LegalNotice'
 
 function App() {
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const handleSessionExpired = () => {
+            navigate('/connexion', {
+                replace: true,
+            });
+        };
+
+        window.addEventListener(
+            AUTH_SESSION_EXPIRED_EVENT,
+            handleSessionExpired
+        )
+
+        return () => {
+            window.removeEventListener(
+                AUTH_SESSION_EXPIRED_EVENT,
+                handleSessionExpired
+            )
+        }
+    }, [navigate])
+
     return (
         <>
             <div className="app">

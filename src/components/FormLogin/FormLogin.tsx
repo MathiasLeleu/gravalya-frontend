@@ -1,8 +1,11 @@
-import { type SubmitEvent, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../api";
 import { useAuthStore } from "../../store";
 
 export default function FormLogin() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -11,6 +14,19 @@ export default function FormLogin() {
   const [isLoading, setIsLoading] = useState(false);
 
   const login = useAuthStore((state) => state.login);
+  const sessionExpired = useAuthStore(
+    (state) => state.sessionExpired
+  );
+  const clearSessionExpired = useAuthStore(
+    (state) => state.clearSessionExpired
+  );
+
+  useEffect(() => {
+    if (sessionExpired) {
+      setError("Session expirée. Veuillez vous reconnecter.");
+      clearSessionExpired();
+    }
+  }, [sessionExpired, clearSessionExpired]);
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +53,8 @@ export default function FormLogin() {
 
       setEmail("");
       setPassword("");
+
+      navigate("/");
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);

@@ -15,6 +15,31 @@ function getAuthHeaders() {
   };
 }
 
+export const AUTH_SESSION_EXPIRED_EVENT = "auth:session-expired";
+
+async function authFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> {
+  const token = useAuthStore.getState().token;
+
+  const response = await fetch(input, init);
+
+  if (
+    response.status === 401 &&
+    token &&
+    useAuthStore.getState().token === token
+  ) {
+    useAuthStore.getState().expireSession();
+
+    window.dispatchEvent(
+      new Event(AUTH_SESSION_EXPIRED_EVENT)
+    );
+  }
+
+  return response;
+}
+
 export async function registerUser(
   payload: IRegisterPayload
 ): Promise<IRegisterResponse> {
@@ -60,7 +85,7 @@ export async function loginUser(
 }
 
 export async function getMe(): Promise<IMeResponse> {
-  const response = await fetch(`${baseUrl}/me`, {
+  const response = await authFetch(`${baseUrl}/me`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -77,7 +102,7 @@ export async function getMe(): Promise<IMeResponse> {
 }
 
 export async function getUsers(): Promise<IUser[]> {
-  const response = await fetch(`${baseUrl}/users`, {
+  const response = await authFetch(`${baseUrl}/users`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -94,7 +119,7 @@ export async function getUsers(): Promise<IUser[]> {
 }
 
 export async function getUserById(id: number): Promise<IUserDetails> {
-  const response = await fetch(`${baseUrl}/users/${id}`, {
+  const response = await authFetch(`${baseUrl}/users/${id}`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -112,7 +137,7 @@ export async function getUserById(id: number): Promise<IUserDetails> {
 
 
 export async function deleteMyAccount(userId: number) {
-  const response = await fetch(`${baseUrl}/users/${userId}`, {
+  const response = await authFetch(`${baseUrl}/users/${userId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
@@ -131,7 +156,7 @@ export async function deleteMyAccount(userId: number) {
 }
 
 export async function deleteUser(userId: number) {
-  const response = await fetch(`${baseUrl}/users/${userId}`, {
+  const response = await authFetch(`${baseUrl}/users/${userId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
@@ -232,7 +257,7 @@ export async function createCategory(data: {
     );
   }
 
-  const response = await fetch(`${baseUrl}/categories`, {
+  const response = await authFetch(`${baseUrl}/categories`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${useAuthStore.getState().token}`,
@@ -299,7 +324,7 @@ export async function updateCategory(
     );
   }
 
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/categories/${categoryId}`,
     {
       method: "PATCH",
@@ -322,7 +347,7 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(categoryId: number) {
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/categories/${categoryId}`,
     {
       method: "DELETE",
@@ -353,7 +378,7 @@ export async function getProducts(): Promise<IProduct[]> {
 }
 
 export async function getAdminProducts(): Promise<IProduct[]> {
-  const response = await fetch(`${baseUrl}/admin/products`, {
+  const response = await authFetch(`${baseUrl}/admin/products`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -383,7 +408,7 @@ export async function getProductById(id: number): Promise<IProduct> {
 export async function createProduct(
   data: ICreateProductPayload
 ): Promise<IProduct> {
-  const response = await fetch(`${baseUrl}/products`, {
+  const response = await authFetch(`${baseUrl}/products`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -417,7 +442,7 @@ export async function updateProduct(
     customizationOptions?: IProductCustomizationOptions;
   }
 ): Promise<IProduct> {
-  const response = await fetch(`${baseUrl}/products/${productId}`, {
+  const response = await authFetch(`${baseUrl}/products/${productId}`, {
     method: "PATCH",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -435,7 +460,7 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(productId: number) {
-  const response = await fetch(`${baseUrl}/products/${productId}`, {
+  const response = await authFetch(`${baseUrl}/products/${productId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
@@ -484,7 +509,7 @@ export async function getCloudinaryImages(
         params.append("search", search.trim());
     }
 
-    const response = await fetch(
+    const response = await authFetch(
         `${baseUrl}/cloudinary/images?${params.toString()}`,
         {
             method: "GET",
@@ -511,7 +536,7 @@ export async function attachCloudinaryPicture(
     alt: string,
     isMain: boolean
 ): Promise<IPicture> {
-    const response = await fetch(
+    const response = await authFetch(
         `${baseUrl}/products/${productId}/pictures/cloudinary`,
         {
             method: "POST",
@@ -546,7 +571,7 @@ export async function updatePicture(
     isMain?: boolean;
   }
 ) {
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/products/${productId}/pictures/${pictureId}`,
     {
       method: "PATCH",
@@ -578,7 +603,7 @@ export async function uploadProductPicture(
   formData.append("alt", alt);
   formData.append("isMain", String(isMain));
 
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/products/${productId}/pictures/upload`,
     {
       method: "POST",
@@ -604,7 +629,7 @@ export async function deletePicture(
   productId: number,
   pictureId: number
 ) {
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/products/${productId}/pictures/${pictureId}`,
     {
       method: "DELETE",
@@ -627,7 +652,7 @@ export async function createOrder(
   payload: ICreateOrderPayload,
   idempotencyKey: string
 ) {
-  const response = await fetch(`${baseUrl}/orders`, {
+  const response = await authFetch(`${baseUrl}/orders`, {
     method: "POST",
     headers: {
       ...getAuthHeaders(),
@@ -651,7 +676,7 @@ export async function createCheckoutSession(
   orderId: number,
   idempotencyKey: string
 ): Promise<{ url: string }> {
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/orders/${orderId}/checkout`,
     {
       method: "POST",
@@ -782,7 +807,7 @@ export async function getShippingOptions(
 }
 
 export async function getMyOrders() {
-  const response = await fetch(`${baseUrl}/orders/me`, {
+  const response = await authFetch(`${baseUrl}/orders/me`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -799,7 +824,7 @@ export async function getMyOrders() {
 }
 
 export async function getAllOrders() {
-  const response = await fetch(`${baseUrl}/orders`, {
+  const response = await authFetch(`${baseUrl}/orders`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -816,7 +841,7 @@ export async function getAllOrders() {
 }
 
 export async function refreshSendcloudShipment(orderId: number) {
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/admin/orders/${orderId}/sendcloud/refresh`,
     {
       method: "POST",
@@ -836,7 +861,7 @@ export async function refreshSendcloudShipment(orderId: number) {
 }
 
 export async function retrySendcloudShipment(orderId: number) {
-  const response = await fetch(
+  const response = await authFetch(
     `${baseUrl}/admin/orders/${orderId}/sendcloud/retry`,
     {
       method: "POST",
@@ -882,7 +907,7 @@ export async function updateOrder(
     };
   }
 ) {
-  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+  const response = await authFetch(`${baseUrl}/orders/${orderId}`, {
     method: "PATCH",
     headers: {
       ...getAuthHeaders(),
@@ -912,7 +937,7 @@ export async function updateOrder(
 }
 
 export async function cancelOrder(orderId: number) {
-  const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+  const response = await authFetch(`${baseUrl}/orders/${orderId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });

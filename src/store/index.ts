@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
@@ -16,6 +15,10 @@ interface ICartItem {
 interface AuthState {
   token: string | null;
   user: ILoginResponse["user"] | null;
+
+  sessionExpired: boolean;
+  expireSession: () => void;
+  clearSessionExpired: () => void;
 
   login: (data: ILoginResponse) => void;
   logout: () => void;
@@ -80,16 +83,32 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
 
+      sessionExpired: false,
+
+      expireSession: () =>
+        set({
+          token: null,
+          user: null,
+          sessionExpired: true,
+        }),
+
+      clearSessionExpired: () =>
+        set({
+          sessionExpired: false,
+        }),
+
       login: (data) =>
         set({
           token: data.token,
           user: data.user,
+          sessionExpired: false,
         }),
 
       logout: () =>
         set({
           token: null,
           user: null,
+          sessionExpired: false,
         }),
 
       cart: [],
@@ -198,6 +217,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "gravelya-auth",
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        cart: state.cart,
+      }),
     }
   )
 );
