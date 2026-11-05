@@ -187,3 +187,92 @@ body {
     }
 
 }
+
+
+/* ========================================
+   NOTIFICATION
+======================================== */
+
+.app-toast {
+    position: fixed;
+    top: 180px;
+    right: 25px;
+    z-index: 1100;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+
+    width: calc(100% - 40px);
+    max-width: 400px;
+    padding: 20px;
+
+    background-color: #f4ebe4;
+    color: #493b35;
+
+    border-left: 5px solid #6b9474;
+    border-radius: 8px;
+
+    box-shadow: 0 4px 15px rgba(73, 59, 53, 0.18);
+
+    animation: app-toast-appear 0.3s ease-out;
+}
+
+.app-toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.app-toast-content strong {
+    font-family: var(--second-font-text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.app-toast-content p {
+    font-family: var(--second-font-text);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.app-toast-close {
+    flex-shrink: 0;
+
+    color: #493b35;
+    font-size: 1.5rem;
+    line-height: 1;
+    
+    transition: opacity 0.2s ease;
+}
+
+.app-toast-close:hover {
+    opacity: 0.6;
+}
+
+@keyframes app-toast-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   NOTIFICATION RESPONSIVE
+======================================== */
+
+@media (max-width: 600px) {
+    .app-toast {
+        top: 170px;
+        right: 10px;
+        width: calc(100% - 20px);
+        max-width: none;
+        padding: 15px;
+    }
+}

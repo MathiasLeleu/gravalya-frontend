@@ -10,7 +10,6 @@ export default function FormLogin() {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const login = useAuthStore((state) => state.login);
@@ -32,7 +31,6 @@ export default function FormLogin() {
     event.preventDefault();
 
     setError("");
-    setSuccess("");
 
     if (!email || !password) {
       setError("L'adresse email et le mot de passe sont requis.");
@@ -49,7 +47,7 @@ export default function FormLogin() {
 
       login(data);
 
-      setSuccess("Connexion réussie.");
+      window.dispatchEvent(new Event("auth:login-success"));
 
       setEmail("");
       setPassword("");
@@ -91,8 +89,6 @@ export default function FormLogin() {
       </div>
 
       {error && <p className="auth-error">{error}</p>}
-
-      {success && <p className="auth-success">{success}</p>}
 
       <button type="submit" disabled={isLoading}>
         {isLoading ? "Connexion..." : "Se connecter"}
