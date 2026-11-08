@@ -536,7 +536,7 @@ export default function MyOrders() {
                                     Voir le détail
                                 </button>
 
-                                {order.status === "EN_ATTENTE" && (
+                                {(order.status === "EN_ATTENTE" || order.status === "PREPARATION") && (
                                     <button
                                         type="button"
                                         className="myorders-cancel-button"

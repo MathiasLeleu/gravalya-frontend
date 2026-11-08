@@ -885,6 +885,7 @@ export async function updateOrder(
   data: {
     statut?: 
     | "EN_ATTENTE"
+    | "PREPARATION"
     | "CONFIRMEE"
     | "EXPEDIEE"
     | "LIVREE"

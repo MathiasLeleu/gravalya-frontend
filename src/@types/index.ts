@@ -59,7 +59,7 @@ export interface IUserOrderLine {
 
 export interface IUserOrder {
     id: number;
-    statut: "EN_ATTENTE" | "CONFIRMEE" | "EXPEDIEE" | "LIVREE" | "ANNULEE";
+    statut: "EN_ATTENTE" | "PREPARATION" | "CONFIRMEE" | "EXPEDIEE" | "LIVREE" | "ANNULEE";
     orderNumber: string;
     customerEmail: string;
     amount: number;
