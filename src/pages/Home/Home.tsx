@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import SearchSortBar, { filterAndSort, type SortValue } from "../../components/SearchSortBar/SearchSortBar"
+import SearchSortBar from "../../components/SearchSortBar/SearchSortBar";
+import { filterAndSort, type SortValue } from "../../components/SearchSortBar/SearchSortUtils.ts";
 import "./home.css"
 
 import { getImageUrl } from "../../utils/imageUrl";

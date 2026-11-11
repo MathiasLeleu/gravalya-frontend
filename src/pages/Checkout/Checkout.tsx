@@ -48,6 +48,8 @@ export default function Checkout() {
   const [shippingMethods, setShippingMethods] = useState<IShippingMethod[]>([]);
   const [shippingRates, setShippingRates] = useState<IShippingRate[]>([]);
   const [shippingOptions, setShippingOptions] = useState<IShippingOption[]>([]);
+  const [loadedShippingOptionsKey, setLoadedShippingOptionsKey] =
+    useState<string | null>(null);
   const [isRelayModalOpen, setIsRelayModalOpen] = useState(false);
   const [relayPoints, setRelayPoints] = useState<IRelayPoint[]>([]);
   const [selectedRelayPoint, setSelectedRelayPoint] =
@@ -159,6 +161,11 @@ export default function Checkout() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
+
+    if (name === "postalCode" || name === "city") {
+      setShippingOptions([]);
+      setIsLoadingShippingOptions(false);
+    }
 
     setFormData((current: typeof formData) => ({
       ...current,
@@ -300,16 +307,25 @@ export default function Checkout() {
       cartTotalWeight <= Number(rate.maxWeight)
   );
 
+  const canLoadShippingOptions =
+    Boolean(formData.postalCode.trim()) &&
+    Boolean(formData.city.trim()) &&
+    cartTotalWeight > 0;
+
+    const shippingOptionsKey = [
+      formData.postalCode.trim(),
+      formData.city.trim().toLowerCase(),
+      cartTotalWeight,
+    ].join("|");
+
+    const hasCurrentShippingOptions =
+      canLoadShippingOptions &&
+      loadedShippingOptionsKey === shippingOptionsKey;
   
   useEffect(() => {
     let cancelled = false;
 
-    if (
-      !formData.postalCode.trim() ||
-      !formData.city.trim() ||
-      cartTotalWeight <= 0
-    ) {
-      setShippingOptions([]);
+    if (!canLoadShippingOptions) {
       return;
     }
 
@@ -318,15 +334,11 @@ export default function Checkout() {
     );
 
     if (sendcloudMethods.length === 0) {
-      setShippingOptions([]);
       return;
     }
 
-    // Évite de conserver les tarifs de l'ancienne adresse.
-    setShippingOptions([]);
-
-    setIsLoadingShippingOptions(true);
     const timeoutId = window.setTimeout(async () => {
+      setIsLoadingShippingOptions(true);
 
       const loadedOptions: IShippingOption[] = [];
 
@@ -355,6 +367,7 @@ export default function Checkout() {
 
         if (!cancelled) {
           setShippingOptions(loadedOptions);
+          setLoadedShippingOptionsKey(shippingOptionsKey);
         }
       } finally {
         if (!cancelled) {
@@ -372,6 +385,8 @@ export default function Checkout() {
     formData.postalCode,
     formData.city,
     cartTotalWeight,
+    shippingOptionsKey,
+    canLoadShippingOptions,
   ]);
 
   const selectedShippingMethod = shippingMethods.find(
@@ -381,18 +396,20 @@ export default function Checkout() {
   const isRelayDelivery =
     selectedShippingMethod?.deliveryType === "Point relais";
 
-  const selectedShippingOption = shippingOptions.find((option) => {
-    if (!selectedShippingMethod) {
-      return false;
-    }
+  const selectedShippingOption = hasCurrentShippingOptions
+    ? shippingOptions.find((option) => {
+        if (!selectedShippingMethod) {
+          return false;
+        }
 
-    const serviceKey =
-      `${selectedShippingMethod.name}-${selectedShippingMethod.deliveryType}`;
+        const serviceKey =
+          `${selectedShippingMethod.name}-${selectedShippingMethod.deliveryType}`;
 
-    const serviceCode = shippingServiceCodes[serviceKey];
+        const serviceCode = shippingServiceCodes[serviceKey];
 
-    return option.code === serviceCode;
-  });
+        return option.code === serviceCode;
+      })
+    : undefined;
 
   const shippingCost =
     selectedShippingMethod?.name === "Lettre Suivie"
@@ -696,7 +713,7 @@ export default function Checkout() {
               Mode de livraison
             </h2>
 
-            {isLoadingShippingOptions && (
+            {isLoadingShippingOptions && canLoadShippingOptions && (
               <p className="checkout-shipping-loading" role="status">
                 Recherche des tarifs de livraison en cours…
               </p>
@@ -735,8 +752,11 @@ export default function Checkout() {
                   const serviceCode =
                     shippingServiceCodes[serviceKey];
 
-                  return shippingOptions.some(
-                    (option) => option.code === serviceCode
+                  return (
+                    hasCurrentShippingOptions &&
+                    shippingOptions.some(
+                      (option) => option.code === serviceCode
+                    )
                   );
                 });
 
@@ -816,12 +836,11 @@ export default function Checkout() {
                                     serviceKey
                                   ];
 
-                                const option =
-                                  shippingOptions.find(
-                                    (option) =>
-                                      option.code ===
-                                      serviceCode
-                                  );
+                                const option = hasCurrentShippingOptions
+                                  ? shippingOptions.find(
+                                      (option) => option.code === serviceCode
+                                    )
+                                  : undefined;
 
                                 const quote =
                                   option?.quotes?.[0];

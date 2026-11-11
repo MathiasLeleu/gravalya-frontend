@@ -1,4 +1,4 @@
-import { type SubmitEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../api";
 import { useAuthStore } from "../../store";
@@ -20,17 +20,16 @@ export default function FormLogin() {
     (state) => state.clearSessionExpired
   );
 
-  useEffect(() => {
-    if (sessionExpired) {
-      setError("Session expirée. Veuillez vous reconnecter.");
-      clearSessionExpired();
-    }
-  }, [sessionExpired, clearSessionExpired]);
+  const displayedError = sessionExpired
+    ? "Session expirée. Veuillez vous reconnecter."
+    : error;
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
+
+    clearSessionExpired();
 
     if (!email || !password) {
       setError("L'adresse email et le mot de passe sont requis.");
@@ -88,7 +87,9 @@ export default function FormLogin() {
         />
       </div>
 
-      {error && <p className="auth-error">{error}</p>}
+      {displayedError && (
+        <p className="auth-error">{displayedError}</p>
+      )}
 
       <button type="submit" disabled={isLoading}>
         {isLoading ? "Connexion..." : "Se connecter"}

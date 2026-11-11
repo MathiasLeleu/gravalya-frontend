@@ -56,12 +56,10 @@ export default function OrderConfirmation() {
         );
 
     useEffect(() => {
-        if (!sessionId) {
-            setConfirmationState("error");
-            return;
-        }
+        if (!sessionId) return;
 
         let active = true;
+
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         let attempts = 0;
         const maxAttempts = 15;

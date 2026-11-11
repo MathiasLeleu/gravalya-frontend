@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./profile.css";
 
+import type { IUserOrder } from "../../@types/index.ts";
+
 import { getMyOrders, deleteMyAccount } from "../../api";
 import { useAuthStore } from "../../store";
-
 
 /* ========================================
    TYPES
@@ -41,7 +42,6 @@ type Order = {
     items: OrderItem[];
 };
 
-
 /* ========================================
    FONCTIONS
 ======================================== */
@@ -56,7 +56,6 @@ function getSubtotal(items: OrderItem[]) {
         0
     );
 }
-
 
 /* ========================================
    PAGE PROFIL
@@ -127,85 +126,62 @@ function Profile() {
        CHARGEMENT DES DONNÉES
     ======================================== */
 
-    useEffect(() => {
-        const loadProfile = async () => {
-            try {
-                setIsLoading(true);
-                setError("");
+useEffect(() => {
+    const loadProfile = async () => {
+        try {
+            setIsLoading(true);
+            setError("");
 
-                if (authUser) {
-                    setUser(authUser);
-                }
-
-                const ordersData = await getMyOrders();
-
-                const formattedOrders: Order[] = ordersData.map(
-                    (order: any) => {
-
-                        const subtotal = Number(order.amount);
-                        const shippingCost = Number(order.shippingCost);
-
-                        return {
-                            id: order.id,
-                            orderNumber: order.orderNumber,
-                            date: new Date(
-                                order.created_at
-                            ).toLocaleDateString("fr-FR"),
-                            status: order.statut,
-                            total: subtotal + shippingCost,
-                            shippingCost,
-
-                            shippingFirstName:
-                                order.shippingFirstName,
-
-                            shippingLastName:
-                                order.shippingLastName,
-
-                            shippingAddress:
-                                order.shippingAddress,
-
-                            shippingAddress2:
-                                order.shippingAddress2,
-
-                            shippingPostalCode:
-                                order.shippingPostalCode,
-
-                            shippingCity:
-                                order.shippingCity,
-
-                            shippingCountry:
-                                order.shippingCountry,
-
-                            shippingPhone:
-                                order.shippingPhone,
-
-                            items: order.orderLines.map(
-                                (line: any) => ({
-                                    name: line.product.name,
-                                    quantity: line.quantity,
-                                    unitPrice:
-                                        Number(line.unitPrice),
-                                })
-                            ),
-                        };
-                    }
-                );
-
-                setOrders(formattedOrders);
-
-            } catch (error) {
-                console.error(error);
-                setError(
-                    "Impossible de récupérer vos informations."
-                );
-            } finally {
-                setIsLoading(false);
+            if (authUser) {
+                setUser(authUser);
             }
-        };
 
-        loadProfile();
-    }, [authUser]);
+            const ordersData = await getMyOrders();
 
+            const formattedOrders: Order[] = ordersData.map(
+                (order: IUserOrder) => {
+                    const subtotal = Number(order.amount);
+                    const shippingCost = Number(order.shippingCost);
+
+                    return {
+                        id: order.id,
+                        orderNumber: order.orderNumber,
+                        date: new Date(order.created_at).toLocaleDateString(
+                            "fr-FR"
+                        ),
+                        status: order.statut,
+                        total: subtotal + shippingCost,
+                        shippingCost,
+
+                        shippingFirstName: order.shippingFirstName,
+                        shippingLastName: order.shippingLastName,
+                        shippingAddress: order.shippingAddress,
+                        shippingAddress2: order.shippingAddress2,
+                        shippingPostalCode: order.shippingPostalCode,
+                        shippingCity: order.shippingCity,
+                        shippingCountry: order.shippingCountry,
+                        shippingPhone: order.shippingPhone,
+
+                        items: order.orderLines.map((line) => ({
+                            name: line.product.name,
+                            quantity: line.quantity,
+                            unitPrice: Number(line.unitPrice),
+                        })),
+                    };
+                }
+            );
+
+            setOrders(formattedOrders);
+        } catch (error) {
+            console.error(error);
+            setError("Impossible de récupérer vos informations.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    loadProfile();
+}, [authUser]);
 
     /* ========================================
        OUVERTURE MODALE COMMANDE
@@ -218,7 +194,6 @@ function Profile() {
         orderDialogRef.current?.showModal();
     };
 
-
     /* ========================================
        FERMETURE MODALE COMMANDE
     ======================================== */
@@ -226,7 +201,6 @@ function Profile() {
     const closeOrderDialog = () => {
         orderDialogRef.current?.close();
     };
-
 
     /* ========================================
        OUVERTURE MODALE PROFIL
@@ -239,7 +213,6 @@ function Profile() {
         firstNameInputRef.current?.focus();
     };
 
-
     /* ========================================
        FERMETURE MODALE PROFIL
     ======================================== */
@@ -247,7 +220,6 @@ function Profile() {
     const closeEditDialog = () => {
         editDialogRef.current?.close();
     };
-
 
     /* ========================================
        COMMANDE SÉLECTIONNÉE
@@ -257,13 +229,11 @@ function Profile() {
         (order) => order.id === selectedOrder
     );
 
-
     /* ========================================
        ADRESSE DE LIVRAISON
     ======================================== */
 
     const latestOrder = orders[0];
-
 
     /* ========================================
        CHARGEMENT
@@ -288,7 +258,6 @@ function Profile() {
             </main>
         );
     }
-
 
     /* ========================================
        ERREUR
@@ -334,7 +303,6 @@ function Profile() {
 
             </header>
 
-
             {/* ========================================
                 INFORMATIONS DU PROFIL
             ======================================== */}
@@ -344,7 +312,6 @@ function Profile() {
                 <h2 className="sub-title">
                     Mes informations
                 </h2>
-
 
                 {/* INFORMATIONS PERSONNELLES */}
 
@@ -366,7 +333,6 @@ function Profile() {
                     </p>
 
                 </div>
-
 
                 {/* ADRESSE DE LIVRAISON */}
 
@@ -424,7 +390,6 @@ function Profile() {
 
                 </div>
 
-
                 {/* MODIFICATION DU PROFIL */}
 
                 <div className="profile-delete-warning">
@@ -465,7 +430,6 @@ function Profile() {
 
             </section>
 
-
             {/* ========================================
                 MES COMMANDES
             ======================================== */}
@@ -498,7 +462,6 @@ function Profile() {
 
                             </header>
 
-
                             <div className="profile-order-info">
 
                                 <p>
@@ -512,7 +475,6 @@ function Profile() {
                                 </p>
 
                             </div>
-
 
                             <button
                                 type="button"
@@ -530,7 +492,6 @@ function Profile() {
 
                 </div>
 
-
                 {/* VOIR TOUTES LES COMMANDES */}
 
                 <Link
@@ -541,7 +502,6 @@ function Profile() {
                 </Link>
 
             </section>
-
 
             {/* ========================================
                 MODALE MODIFICATION DU PROFIL
@@ -587,7 +547,6 @@ function Profile() {
                         </h2>
 
                     </header>
-
 
                     {/* INFORMATIONS PERSONNELLES */}
 

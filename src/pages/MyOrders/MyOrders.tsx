@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./myorders.css";
 
 import { getMyOrders, updateOrder, cancelOrder, getRelayPoints } from "../../api";
-import type { IRelayPoint } from "../../@types/index.ts";
+import type { IUserOrder, IRelayPoint } from "../../@types/index.ts";
 
 
 /* ========================================
@@ -105,7 +105,7 @@ export default function MyOrders() {
             try {
                 const data = await getMyOrders();
 
-                const formattedOrders: Order[] = data.map((order: any) => {
+                const formattedOrders: Order[] = data.map((order: IUserOrder) => {
                     const subtotal = Number(order.amount);
                     const shippingCost = Number(order.shippingCost);
 
@@ -123,6 +123,7 @@ export default function MyOrders() {
 
                         shippingFirstName: order.shippingFirstName,
                         shippingLastName: order.shippingLastName,
+                        shippingPhone: order.shippingPhone,
                         shippingAddress: order.shippingAddress,
                         shippingAddress2: order.shippingAddress2,
                         shippingPostalCode: order.shippingPostalCode,
@@ -131,6 +132,7 @@ export default function MyOrders() {
 
                         orderRelayPoint: order.orderRelayPoint
                             ? {
+                                relayPointId: order.orderRelayPoint.relayPointId,
                                 relayPointName: order.orderRelayPoint.relayPointName,
                                 relayPointAddress: order.orderRelayPoint.relayPointAddress,
                                 relayPointPostalCode: order.orderRelayPoint.relayPointPostalCode,
@@ -139,7 +141,7 @@ export default function MyOrders() {
                             }
                             : null,
 
-                        items: order.orderLines.map((line: any) => ({
+                        items: order.orderLines.map((line) => ({
                             name: line.product.name,
                             quantity: line.quantity,
                             unitPrice: Number(line.unitPrice),
@@ -165,7 +167,7 @@ export default function MyOrders() {
 
             const data = await getMyOrders();
 
-            const formattedOrders: Order[] = data.map((order: any) => {
+            const formattedOrders: Order[] = data.map((order: IUserOrder) => {
                 const subtotal = Number(order.amount);
                 const shippingCost = Number(order.shippingCost);
 
@@ -182,6 +184,7 @@ export default function MyOrders() {
                     shippingMethodId: order.shippingMethodId,
                     shippingFirstName: order.shippingFirstName,
                     shippingLastName: order.shippingLastName,
+                    shippingPhone: order.shippingPhone,
                     shippingAddress: order.shippingAddress,
                     shippingAddress2: order.shippingAddress2,
                     shippingPostalCode: order.shippingPostalCode,
@@ -189,6 +192,7 @@ export default function MyOrders() {
                     shippingCountry: order.shippingCountry,
                     orderRelayPoint: order.orderRelayPoint
                         ? {
+                            relayPointId: order.orderRelayPoint.relayPointId,
                             relayPointName: order.orderRelayPoint.relayPointName,
                             relayPointAddress: order.orderRelayPoint.relayPointAddress,
                             relayPointPostalCode: order.orderRelayPoint.relayPointPostalCode,
@@ -196,7 +200,7 @@ export default function MyOrders() {
                             relayPointCountry: order.orderRelayPoint.relayPointCountry,
                         }
                         : null,
-                    items: order.orderLines.map((line: any) => ({
+                    items: order.orderLines.map((line) => ({
                         name: line.product.name,
                         quantity: line.quantity,
                         unitPrice: Number(line.unitPrice),

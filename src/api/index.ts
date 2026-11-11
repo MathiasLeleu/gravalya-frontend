@@ -1,5 +1,5 @@
 import type { ILoginPayload, ILoginResponse, IRegisterPayload, IRegisterResponse, IMeResponse, IUser, IUserDetails,
-  ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture, IShippingOption,
+  IUserOrder, ICategory, IProduct, ICreateOrderPayload, IShippingMethod, IShippingRate, IRelayPoint, IPicture, IShippingOption,
   ICreateProductPayload, IProductCustomizationOptions, ICloudinaryImagesResponse } from "../@types";
 
 import { useAuthStore } from "../store";
@@ -806,17 +806,18 @@ export async function getShippingOptions(
     return data.data;
 }
 
-export async function getMyOrders() {
+export async function getMyOrders(): Promise<IUserOrder[]> {
   const response = await authFetch(`${baseUrl}/orders/me`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
 
-  const data = await response.json();
+  const data: IUserOrder[] = await response.json();
 
   if (!response.ok) {
     throw new Error(
-      data.message || "Impossible de récupérer vos commandes."
+      (data as unknown as { message?: string }).message ||
+      "Impossible de récupérer vos commandes."
     );
   }
 

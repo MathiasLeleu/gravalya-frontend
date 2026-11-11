@@ -55,6 +55,18 @@ export interface IUserOrderLine {
     unitPrice: number;
     unitWeight: number;
     customization?: IProductCustomization;
+    product: {
+        name: string;
+    };
+}
+
+export interface IUserOrderRelayPoint {
+    relayPointId: number;
+    relayPointName: string;
+    relayPointAddress: string;
+    relayPointPostalCode: string;
+    relayPointCity: string;
+    relayPointCountry: string;
 }
 
 export interface IUserOrder {
@@ -76,7 +88,9 @@ export interface IUserOrder {
     shippingPostalCode: string;
     shippingCity: string;
     shippingPhone: string;
+    created_at: string;
     orderLines: IUserOrderLine[];
+    orderRelayPoint: IUserOrderRelayPoint | null;
 }
 
 export interface IUserDetails extends IUser {
